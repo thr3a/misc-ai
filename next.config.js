@@ -9,9 +9,9 @@ const nextConfig = {
   },
   poweredByHeader: false,
   // github pagesの場合
-  output: 'export',
+  // output: 'export',
   // k8sの場合
-  // output: 'standalone'
+  output: 'standalone'
 };
 
 module.exports = nextConfig
