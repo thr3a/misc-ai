@@ -39,4 +39,4 @@ const debugApi = async (): Promise<void> => {
 
 (async () => {
   await debugApi();
-})();
+})().catch(() => {});

@@ -81,7 +81,6 @@ export default function Page (): JSX.Element {
             variant={'outline'}
             color="blue"
             mt={'1px'}
-            // onClick={(async () => { await handleSubmit(); }())}
             onClick={handleSubmit}
             loading={form.values.loading}
           >
