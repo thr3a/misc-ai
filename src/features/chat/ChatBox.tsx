@@ -1,6 +1,6 @@
 'use client';
 
-import { Paper, Stack, Box, Group, Text, ScrollArea } from '@mantine/core';
+import { Paper, Stack, Box, Group, Text, ScrollArea, Space } from '@mantine/core';
 
 export type MessageProps = {
   body: string
@@ -22,7 +22,8 @@ const Message = (props: { body: string }): JSX.Element => {
 
 export function ChatBox ({ messages, height }: ChatBoxProps): JSX.Element {
   return (
-    <ScrollArea p={'xs'} type={'scroll'} h={height}>
+    <ScrollArea pt={0} pb={0} pr={'xs'} pl={'xs'} type={'scroll'} h={height}>
+      <Space h={'md'}></Space>
       <Stack gap={'md'}>
         { messages.map(({ body, role }: MessageProps, index) => {
           return (
@@ -36,6 +37,7 @@ export function ChatBox ({ messages, height }: ChatBoxProps): JSX.Element {
           );
         })}
       </Stack>
+      <Space h={'md'}></Space>
     </ScrollArea>
   );
 };

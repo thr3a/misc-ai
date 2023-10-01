@@ -26,7 +26,7 @@ export default function Page (): JSX.Element {
   }, []);
   const form = useForm({
     initialValues: {
-      messages: [],
+      messages: Array(20).fill([{ body: 'こんにちは。', role: 'ai' }]).flat(),
       message: '',
       loading: false
     }
@@ -38,12 +38,11 @@ export default function Page (): JSX.Element {
     const params: RequestProps = {
       csrfToken,
       message: form.values.message,
-      systemMessage: 'あなたは優秀なアシスタントです。',
+      systemMessage: 'あなたには優秀なアシスタントとして振る舞ってほしい。',
       history: form.values.messages
     };
     form.setValues({ loading: true, message: '' });
     form.insertListItem('messages', { body: form.values.message, role: 'human' });
-    console.log(params);
     const reqResponse = await fetch('/api/chat/', {
       method: 'POST',
       headers: {
@@ -53,7 +52,6 @@ export default function Page (): JSX.Element {
     });
     if (reqResponse.ok) {
       const json = await reqResponse.json();
-      console.log(json);
       form.insertListItem('messages', { body: json.message, role: 'ai' });
     } else {
       form.insertListItem('messages', { body: 'エラーが発生しました。', role: 'ai' });
@@ -63,14 +61,14 @@ export default function Page (): JSX.Element {
 
   return (
     <FormProvider form={form}>
-      <Box maw={'400px'} style={{ border: '1px solid #eee' }} ml={0}>
-        <ChatBox messages={form.getInputProps('messages').value} height='80vh'></ChatBox>
+      <Box maw={'400px'} style={{ border: '1px solid #eee' }} ml={0} mah={'600px'}>
+        <ChatBox messages={form.getInputProps('messages').value} height='60vh'></ChatBox>
         <Flex>
           <Textarea
             placeholder="入力してください"
             autosize
             minRows={1}
-            style={{ flexGrow: 1, display: 'block' }}
+            style={{ flex: 1, display: 'block' }}
             {...form.getInputProps('message')}
             onKeyDown={getHotkeyHandler([
               ['mod+Enter', handleSubmit]
@@ -80,7 +78,7 @@ export default function Page (): JSX.Element {
             size={'lg'}
             variant={'outline'}
             color="blue"
-            mt={'1px'}
+            mt={'4px'}
             onClick={handleSubmit}
             loading={form.values.loading}
           >
