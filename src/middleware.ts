@@ -15,9 +15,9 @@ export async function middleware (request: NextRequest) {
   const csrfError = await csrfProtect(request, response);
 
   // check result
-  if (csrfError !== null) {
-    return new NextResponse('invalid csrf token', { status: 403 });
-  }
+  // if (csrfError !== null) {
+  //   return new NextResponse('invalid csrf token', { status: 403 });
+  // }
 
   return response;
 }

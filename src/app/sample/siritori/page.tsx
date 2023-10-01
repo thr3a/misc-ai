@@ -5,6 +5,8 @@ import { ChatBox } from '@/features/chat/ChatBox';
 import { Box, Flex, Textarea, ActionIcon } from '@mantine/core';
 import { IconSend } from '@tabler/icons-react';
 import { getHotkeyHandler } from '@mantine/hooks';
+import { type RequestProps } from '@/app/api/chat/route';
+import { useState, useEffect } from 'react';
 
 type FormValues = {
   messages: MessageProps[]
@@ -15,6 +17,13 @@ type FormValues = {
 const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
 
 export default function Page (): JSX.Element {
+  const [csrfToken, setCsrfToken] = useState<string>('loading...');
+  useEffect(() => {
+    const el = document.querySelector('meta[name="x-csrf-token"]');
+    if (el !== null) {
+      setCsrfToken(el.getAttribute('content') ?? 'missing');
+    }
+  }, []);
   const form = useForm({
     initialValues: {
       messages: [],
@@ -23,14 +32,33 @@ export default function Page (): JSX.Element {
     }
   });
 
-  const handleSubmit = (): void => {
+  const handleSubmit = async (): Promise<void> => {
     if (form.values.message === '') return;
     if (form.values.loading) return;
-    form.setFieldValue('loading', true);
+    const params: RequestProps = {
+      csrfToken,
+      message: form.values.message,
+      systemMessage: 'あなたは優秀なアシスタントです。',
+      history: form.values.messages
+    };
+    form.setValues({ loading: true, message: '' });
     form.insertListItem('messages', { body: form.values.message, role: 'human' });
-    form.insertListItem('messages', { body: 'form.values.message', role: 'bot' });
-    form.setFieldValue('message', '');
-    form.setFieldValue('loading', false);
+    console.log(params);
+    const reqResponse = await fetch('/api/chat/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(params)
+    });
+    if (reqResponse.ok) {
+      const json = await reqResponse.json();
+      console.log(json);
+      form.insertListItem('messages', { body: json.message, role: 'ai' });
+    } else {
+      form.insertListItem('messages', { body: 'エラーが発生しました。', role: 'ai' });
+    }
+    form.setValues({ loading: false });
   };
 
   return (
@@ -53,6 +81,7 @@ export default function Page (): JSX.Element {
             variant={'outline'}
             color="blue"
             mt={'1px'}
+            // onClick={(async () => { await handleSubmit(); }())}
             onClick={handleSubmit}
             loading={form.values.loading}
           >

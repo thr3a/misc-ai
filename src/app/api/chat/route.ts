@@ -10,12 +10,15 @@ import { AIMessage, HumanMessage, SystemMessage } from 'langchain/schema';
 // TODO: スキーマから型定義
 // https://qiita.com/kjkj_ongr/items/0eff5173b6e4fce7fbe8#%E3%82%B9%E3%82%AD%E3%83%BC%E3%83%9E%E3%81%8B%E3%82%89%E5%9E%8B%E5%AE%9A%E7%BE%A9%E3%81%99%E3%82%8B
 const requestSchema = z.object({
-  word: z.string(),
+  message: z.string(),
   history: z.array(z.object({
     body: z.string(),
     role: z.enum(['human', 'ai'])
-  }))
+  })),
+  systemMessage: z.string(),
+  csrfToken: z.string().optional()
 });
+export type RequestProps = z.infer<typeof requestSchema>;
 
 const model = new ChatOpenAI({
   openAIApiKey: process.env.OPENAI_APIKEY,
@@ -83,7 +86,7 @@ export async function POST (req: NextRequest): Promise<NextResponse> {
     memory,
     verbose: false // verboseをtrueにすると処理内容などが出力される
   });
-  const chainResult = await chain.call({ input: result.data.word });
+  const chainResult = await chain.call({ input: result.data.message });
   return NextResponse.json({
     status: 'ok',
     message: chainResult.response,
