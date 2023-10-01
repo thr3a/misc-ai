@@ -26,7 +26,8 @@ export default function Page (): JSX.Element {
   }, []);
   const form = useForm({
     initialValues: {
-      messages: Array(20).fill([{ body: 'こんにちは。', role: 'ai' }]).flat(),
+      // messages: Array(20).fill([{ body: 'こんにちは。', role: 'ai' }]).flat(),
+      messages: [],
       message: '',
       loading: false
     }
