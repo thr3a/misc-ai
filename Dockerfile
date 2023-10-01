@@ -21,8 +21,9 @@ COPY . .
 
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
-ENV OPENAI_APIKEY dummy
+ENV OPENAI_APIKEY sk-xxxxx
 
+RUN echo OPENAI_APIKEY=sk-xxxxx > .env.local
 RUN npm run build
 
 # Production image, copy all the files and run next
@@ -31,7 +32,6 @@ WORKDIR /app
 
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
-ENV OPENAI_APIKEY dummy
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
