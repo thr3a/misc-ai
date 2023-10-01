@@ -1,14 +1,11 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { ChatPromptTemplate, MessagesPlaceholder } from 'langchain/prompts';
 import { ConversationChain } from 'langchain/chains';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { BufferMemory, BufferWindowMemory, ChatMessageHistory } from 'langchain/memory';
+import { BufferWindowMemory, ChatMessageHistory } from 'langchain/memory';
 import { type MessageProps } from '@/features/chat/ChatBox';
-import { AIMessage, HumanMessage, SystemMessage } from 'langchain/schema';
+import { SystemMessage } from 'langchain/schema';
 
-// TODO: スキーマから型定義
-// https://qiita.com/kjkj_ongr/items/0eff5173b6e4fce7fbe8#%E3%82%B9%E3%82%AD%E3%83%BC%E3%83%9E%E3%81%8B%E3%82%89%E5%9E%8B%E5%AE%9A%E7%BE%A9%E3%81%99%E3%82%8B
 const requestSchema = z.object({
   message: z.string(),
   history: z.array(z.object({
@@ -21,11 +18,10 @@ const requestSchema = z.object({
 export type RequestProps = z.infer<typeof requestSchema>;
 
 const model = new ChatOpenAI({
-  // openAIApiKey: process.env.OPENAI_APIKEY,
+  openAIApiKey: process.env.OPENAI_APIKEY ?? 'missing',
   modelName: 'gpt-3.5-turbo',
   temperature: 1
 });
-const rule = 'あなたは優秀なアシスタントです。';
 // const rule = `
 // あなたは優秀なアシスタントです。私とゲームをしてください。
 
@@ -75,7 +71,7 @@ export async function POST (req: NextRequest): Promise<NextResponse> {
     }, { status: 400 });
   }
 
-  const history = await createChatMessageHistory(result.data.history, rule);
+  const history = await createChatMessageHistory(result.data.history, result.data.systemMessage);
   const memory = new BufferWindowMemory({
     chatHistory: history,
     k: 10, // 過去x回分の対話を使用する
