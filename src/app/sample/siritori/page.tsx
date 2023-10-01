@@ -27,11 +27,40 @@ export default function Page (): JSX.Element {
   const form = useForm({
     initialValues: {
       // messages: Array(20).fill([{ body: 'こんにちは。', role: 'ai' }]).flat(),
-      messages: [],
+      // messages: [],
+      messages: [{ body: 'では始めましょう。「りんご」 次は「ご」から始まる単語を考えてください。', role: 'ai' }],
       message: '',
       loading: false
     }
   });
+
+  const systemMessage = `
+  しりとりとは、単語をつなげていくゲームです。しりとりのルールは以下の通りです。
+  - 最初の参加者は、任意の単語を言います。
+  - 次の参加者は、前の参加者が言った単語の最後の文字から始まる単語を言います。
+  - 以降、同じようにして単語をつなげていきます。
+  - すでに使われた単語や最後が「ん」で終わる単語を言った場合は、その参加者は負けです。
+  - 負けた参加者が出るまで続けます。
+  Humanとしりとりをして勝ち続けてください。ではゲームを始めましょう。
+  `;
+
+  // const systemMessage = `
+  // Humanとゲームをしてください。
+
+  // ### ゲームのルール
+  // - ゲームの参加者はHumanとAIの2人のみです。あなたはAIです。
+  // - あなたは最後にHumanから与えられたワードの「発音の最後の文字」から始まるワードを考えて出力してください。
+  // ただし以下の条件を満たすワードを出力する必要があります。
+  //   - 「発音の最後の文字」が「ん」で終わらないこと
+  //   - 辞書に存在するワードであること
+  //   - ゲーム内で既に出力されたワードでないこと
+  //   - 相手の最後のワードの「発音の最後の文字」と同じ文字から始まるワードであること
+  // - Humanも同様にAIの最後のワードの「発音の最後の文字」から始まるワードを考えて出力していきます。
+  // - 条件を満たさないワードを出力した場合、そのプレイヤーの負けとなります。
+  // - どちらかが負けた時点でゲームは終了です。
+
+  // あなたはこの条件を満たしたワードを出力し続けてHumanに勝たなければいけません。ではゲームを始めましょう。
+  // `;
 
   const handleSubmit = async (): Promise<void> => {
     if (form.values.message === '') return;
@@ -39,8 +68,11 @@ export default function Page (): JSX.Element {
     const params: RequestProps = {
       csrfToken,
       message: form.values.message,
-      systemMessage: 'あなたには優秀なアシスタントとして振る舞ってほしい。',
-      history: form.values.messages
+      systemMessage,
+      history: form.values.messages,
+      modelParams: {
+        temperature: 0.1
+      }
     };
     form.setValues({ loading: true, message: '' });
     form.insertListItem('messages', { body: form.values.message, role: 'human' });

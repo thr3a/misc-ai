@@ -13,30 +13,13 @@ const requestSchema = z.object({
     role: z.enum(['human', 'ai'])
   })),
   systemMessage: z.string(),
-  csrfToken: z.string().optional()
+  csrfToken: z.string().optional(),
+  modelParams: z.object({
+    name: z.string().optional(),
+    temperature: z.number().optional()
+  }).optional()
 });
 export type RequestProps = z.infer<typeof requestSchema>;
-
-const model = new ChatOpenAI({
-  openAIApiKey: process.env.OPENAI_APIKEY ?? 'missing',
-  modelName: 'gpt-3.5-turbo',
-  temperature: 1
-});
-// const rule = `
-// あなたは優秀なアシスタントです。私とゲームをしてください。
-
-// ### ゲームのルール
-// - ゲームの参加者は私とあなたの2人のみです。
-// - 私が入力した最後のワードの発音の最後の文字から始まるあなたは8文字以内のワードを考えて出力してください。
-// - 以下をワードを入力したプレイヤーは負けです
-//   - 最後のワードの発音の最後の文字が「ん」で終わるワードを入力したプレイヤー
-//   - 存在しないワードを入力したプレイヤー
-//   - 既に出力されたワードを入力したプレイヤー
-// - これを交互に繰り替えてプレイしていきます。
-// - どちらかが負けた時点でゲームは終了です。
-
-// では、ゲームを始めましょう。
-// `;
 
 export const createChatMessageHistory = async (messages: MessageProps[], ruleMessage: string): Promise<ChatMessageHistory> => {
   const history = new ChatMessageHistory();
@@ -76,6 +59,11 @@ export async function POST (req: NextRequest): Promise<NextResponse> {
     chatHistory: history,
     k: 10, // 過去x回分の対話を使用する
     returnMessages: false // .loadMemoryVariables({})の挙動が変わる
+  });
+  const model = new ChatOpenAI({
+    openAIApiKey: process.env.OPENAI_APIKEY ?? 'missing',
+    modelName: result.data.modelParams?.name ?? 'gpt-3.5-turbo',
+    temperature: result.data.modelParams?.temperature ?? 0.6
   });
   const chain = new ConversationChain({
     llm: model,
