@@ -5,6 +5,7 @@ on:
 
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository }}:${{ github.run_number }}
+  OPENAI_APIKEY: dummy
 
 jobs:
   build:

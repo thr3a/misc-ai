@@ -21,7 +21,7 @@ const requestSchema = z.object({
 export type RequestProps = z.infer<typeof requestSchema>;
 
 const model = new ChatOpenAI({
-  // openAIApiKey: process.env.OPENAI_APIKEY,
+  openAIApiKey: process.env.OPENAI_APIKEY,
   modelName: 'gpt-3.5-turbo',
   temperature: 1
 });
