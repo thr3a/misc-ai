@@ -1,11 +1,10 @@
 'use client';
 
-import { Paper, Stack, Alert, Box, Group, Text, Textarea, ActionIcon, ScrollArea, Flex } from '@mantine/core';
-import { IconSend } from '@tabler/icons-react';
+import { Paper, Stack, Box, Group, Text, ScrollArea } from '@mantine/core';
 
 export type MessageProps = {
   body: string
-  role: 'user' | 'bot'
+  role: 'human' | 'ai'
 };
 
 type ChatBoxProps = {
@@ -29,7 +28,7 @@ export function ChatBox ({ messages, height }: ChatBoxProps): JSX.Element {
           return (
             <Box key={index}>
               <Group
-                justify={role === 'bot' ? 'flex-start' : 'flex-end'}
+                justify={role === 'ai' ? 'flex-start' : 'flex-end'}
               >
                 <Message body={body}></Message>
               </Group>

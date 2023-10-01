@@ -27,8 +27,7 @@ export default function Page (): JSX.Element {
     if (form.values.message === '') return;
     if (form.values.loading) return;
     form.setFieldValue('loading', true);
-    console.log(form.values);
-    form.insertListItem('messages', { body: form.values.message, role: 'user' });
+    form.insertListItem('messages', { body: form.values.message, role: 'human' });
     form.insertListItem('messages', { body: 'form.values.message', role: 'bot' });
     form.setFieldValue('message', '');
     form.setFieldValue('loading', false);
