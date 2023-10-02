@@ -12,9 +12,9 @@
     "plop": "plop"
   },
   "dependencies": {
-    "@mantine/core": "^7.1.0",
-    "@mantine/form": "^7.1.0",
-    "@mantine/hooks": "^7.1.0",
+    "@mantine/core": "^7.1.1",
+    "@mantine/form": "^7.1.1",
+    "@mantine/hooks": "^7.1.1",
     "@tabler/icons-react": "^2.38.0",
     "@tanstack/react-query": "5.0.0-beta.35",
     "@types/node": "20.8.0",
@@ -24,7 +24,7 @@
     "eslint": "8.50.0",
     "eslint-config-next": "13.5.3",
     "eslint-config-standard-with-typescript": "^39.1.0",
-    "langchain": "^0.0.156",
+    "langchain": "^0.0.157",
     "next": "13.5.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",
