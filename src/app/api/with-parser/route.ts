@@ -54,7 +54,7 @@ export async function POST (req: NextRequest): Promise<NextResponse> {
     default:
       return NextResponse.json({
         status: 'ng',
-        errorMessage: 'data.type is invalid'
+        errorMessage: 'Unknown data.type'
       }, { status: 400 });
   }
   const outputParser = StructuredOutputParser.fromZodSchema(schema);
@@ -69,11 +69,14 @@ export async function POST (req: NextRequest): Promise<NextResponse> {
     }
   });
 
+  console.log(prompt);
+
   const answerFormattingChain = new LLMChain({
     llm,
     prompt,
     outputKey: 'records', // For readability - otherwise the chain output will default to a property named "text"
-    outputParser: outputFixingParser
+    outputParser: outputFixingParser,
+    verbose: true
   });
 
   const chainResult = await answerFormattingChain.call({

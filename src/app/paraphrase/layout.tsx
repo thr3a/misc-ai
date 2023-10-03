@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: '言い換えAI',
-  description: '単語/文章をシチュエーションに合わせてAIが変換!'
+  description: '単語/文章をシチュエーションに合わせてAIが変換します'
 };
 
 export default function PageLayout ({ children }: { children: React.ReactNode }): JSX.Element {

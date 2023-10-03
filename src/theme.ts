@@ -66,6 +66,13 @@ export const theme = createTheme({
           height: 30
         }
       })
+    },
+    Select: {
+      styles: (theme: MantineTheme) => ({
+        label: {
+          fontWeight: 'bold'
+        }
+      })
     }
   }
 });
