@@ -1,14 +1,15 @@
 'use client';
 import { createFormContext } from '@mantine/form';
 import { Box, TextInput, Group, Button, Paper } from '@mantine/core';
-import { type RequestProps } from '@/app/api/simple/route';
+import { type RequestProps } from '@/app/api/with-parser/route';
 import { useState, useEffect } from 'react';
 import { PromptTemplate } from 'langchain/prompts';
+import { countryOutputParser } from '@/app/api/with-parser/schema';
 
 type FormValues = {
   message: string
   loading: boolean
-  result: string
+  result: any[]
 };
 
 const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
@@ -25,7 +26,7 @@ export default function Page (): JSX.Element {
     initialValues: {
       message: 'こんにちは',
       loading: false,
-      result: ''
+      result: []
     }
   });
 
@@ -35,20 +36,21 @@ export default function Page (): JSX.Element {
 
     form.setValues({ loading: true });
 
-    const prompt = PromptTemplate.fromTemplate(`
-      ### Task:
-      与えられた日本語をより丁寧な表現に変換してください。
-      ### Input: {text}
-      ### Output:
-    `);
-    const formattedPrompt = await prompt.format({
-      text: form.values.message
-    });
+    // const prompt = PromptTemplate.fromTemplate(`
+    //   ### Task:
+    //   与えられた日本語をより丁寧な表現に変換してください。
+    //   ### Input: {text}
+    //   ### Output:
+    // `);
+    // const formattedPrompt = await prompt.format({
+    //   text: form.values.message
+    // });
     const params: RequestProps = {
       csrfToken,
-      prompt: formattedPrompt
+      prompt: '国を５つ列挙してください。',
+      type: 'country'
     };
-    const reqResponse = await fetch('/api/simple/', {
+    const reqResponse = await fetch('/api/with-parser/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -57,9 +59,9 @@ export default function Page (): JSX.Element {
     });
     if (reqResponse.ok) {
       const json = await reqResponse.json();
-      form.setValues({ result: json.message, loading: false });
+      form.setValues({ result: json.result, loading: false });
     } else {
-      form.setValues({ result: 'エラーが発生しました', loading: false });
+      form.setValues({ result: ['エラーが発生しました'], loading: false });
     }
   };
 
@@ -74,7 +76,11 @@ export default function Page (): JSX.Element {
           <Button onClick={handleSubmit} loading={form.values.loading}>送信</Button>
         </Group>
         <Paper>
-          { form.values.result }
+          { form.values.result.map((item, index) => (
+            <Box key={index}>
+              { item.fields.Name }
+            </Box>
+          )) }
         </Paper>
       </Box>
     </FormProvider>
