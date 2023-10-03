@@ -4,12 +4,14 @@ import { Box, TextInput, Group, Button, Paper } from '@mantine/core';
 import { type RequestProps } from '@/app/api/with-parser/route';
 import { useState, useEffect } from 'react';
 import { PromptTemplate } from 'langchain/prompts';
-import { countryOutputParser } from '@/app/api/with-parser/schema';
+import { type paraphraseSchema } from '@/app/api/with-parser/schema';
+import { type z } from 'zod';
+import { notifications } from '@mantine/notifications';
 
 type FormValues = {
   message: string
   loading: boolean
-  result: any[]
+  result: z.infer<typeof paraphraseSchema>
 };
 
 const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
@@ -34,7 +36,7 @@ export default function Page (): JSX.Element {
     if (form.values.message === '') return;
     if (form.values.loading) return;
 
-    form.setValues({ loading: true });
+    form.setValues({ result: [], loading: true });
 
     const prompt = PromptTemplate.fromTemplate(`
       ### Task:
@@ -58,10 +60,16 @@ export default function Page (): JSX.Element {
       body: JSON.stringify(params)
     });
     if (reqResponse.ok) {
-      const json = await reqResponse.json();
-      form.setValues({ result: json.result, loading: false });
+      const { result } = await reqResponse.json();
+      form.setValues({ result, loading: false });
     } else {
-      form.setValues({ result: ['エラーが発生しました'], loading: false });
+      notifications.show({
+        title: 'エラーが発生しました。',
+        message: '再度試してみてください',
+        withCloseButton: false,
+        color: 'red'
+      });
+      form.setValues({ loading: false });
     }
   };
 

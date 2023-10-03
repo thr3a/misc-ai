@@ -1,4 +1,5 @@
 'use client';
+import './style.css';
 import { createFormContext } from '@mantine/form';
 import { type MessageProps } from '@/features/chat/ChatBox';
 import { ChatBox } from '@/features/chat/ChatBox';
@@ -13,7 +14,6 @@ type FormValues = {
   message: string
   loading: boolean
 };
-
 const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
 
 export default function Page (): JSX.Element {
@@ -111,7 +111,7 @@ export default function Page (): JSX.Element {
             size={'lg'}
             variant={'outline'}
             color="blue"
-            mt={'4px'}
+            mt={'3px'}
             onClick={handleSubmit}
             loading={form.values.loading}
           >

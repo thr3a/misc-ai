@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { PromptTemplate } from 'langchain/prompts';
 import { LLMChain } from 'langchain/chains';
-import { OutputFixingParser } from 'langchain/output_parsers';
+import { OutputFixingParser, StructuredOutputParser } from 'langchain/output_parsers';
 import * as ZSchema from './schema';
 
 const requestSchema = z.object({
@@ -43,13 +43,13 @@ export async function POST (req: NextRequest): Promise<NextResponse> {
     temperature: result.data.modelParams?.temperature ?? 0
   });
 
-  let outputFixingParser: OutputFixingParser<any[]>;
+  let schema;
   switch (result.data.type) {
     case 'country':
-      outputFixingParser = OutputFixingParser.fromLLM(llm, ZSchema.countryOutputParser);
+      schema = ZSchema.countrySchema;
       break;
     case 'paraphrase':
-      outputFixingParser = OutputFixingParser.fromLLM(llm, ZSchema.paraphraseOutputParser);
+      schema = ZSchema.paraphraseSchema;
       break;
     default:
       return NextResponse.json({
@@ -57,6 +57,8 @@ export async function POST (req: NextRequest): Promise<NextResponse> {
         errorMessage: 'data.type is invalid'
       }, { status: 400 });
   }
+  const outputParser = StructuredOutputParser.fromZodSchema(schema);
+  const outputFixingParser = OutputFixingParser.fromLLM(llm, outputParser);
 
   // Don't forget to include formatting instructions in the prompt!
   const prompt = new PromptTemplate({
