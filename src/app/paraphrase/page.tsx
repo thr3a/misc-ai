@@ -36,19 +36,19 @@ export default function Page (): JSX.Element {
 
     form.setValues({ loading: true });
 
-    // const prompt = PromptTemplate.fromTemplate(`
-    //   ### Task:
-    //   与えられた日本語をより丁寧な表現に変換してください。
-    //   ### Input: {text}
-    //   ### Output:
-    // `);
-    // const formattedPrompt = await prompt.format({
-    //   text: form.values.message
-    // });
+    const prompt = PromptTemplate.fromTemplate(`
+      ### Task:
+      与えられた日本語をより丁寧な日本語の表現に言い換えて候補を5つ列挙してください。
+      ### Input: {text}
+      ### Output:
+    `);
+    const formattedPrompt = await prompt.format({
+      text: form.values.message
+    });
     const params: RequestProps = {
       csrfToken,
-      prompt: '国を５つ列挙してください。',
-      type: 'country'
+      prompt: formattedPrompt,
+      type: 'paraphrase'
     };
     const reqResponse = await fetch('/api/with-parser/', {
       method: 'POST',
@@ -78,7 +78,7 @@ export default function Page (): JSX.Element {
         <Paper>
           { form.values.result.map((item, index) => (
             <Box key={index}>
-              { item.fields.Name }
+              { item.fields.Text }
             </Box>
           )) }
         </Paper>

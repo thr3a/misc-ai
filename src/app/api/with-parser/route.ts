@@ -43,20 +43,24 @@ export async function POST (req: NextRequest): Promise<NextResponse> {
     temperature: result.data.modelParams?.temperature ?? 0
   });
 
-  let outputFixingParser;
-  if (result.data.type === 'country') {
-    outputFixingParser = OutputFixingParser.fromLLM(llm, ZSchema.countryOutputParser);
-  }
-  if (outputFixingParser === undefined) {
-    return NextResponse.json({
-      status: 'ng',
-      errorMessage: 'data.type is invalid'
-    }, { status: 400 });
+  let outputFixingParser: OutputFixingParser<any[]>;
+  switch (result.data.type) {
+    case 'country':
+      outputFixingParser = OutputFixingParser.fromLLM(llm, ZSchema.countryOutputParser);
+      break;
+    case 'paraphrase':
+      outputFixingParser = OutputFixingParser.fromLLM(llm, ZSchema.paraphraseOutputParser);
+      break;
+    default:
+      return NextResponse.json({
+        status: 'ng',
+        errorMessage: 'data.type is invalid'
+      }, { status: 400 });
   }
 
   // Don't forget to include formatting instructions in the prompt!
   const prompt = new PromptTemplate({
-    template: 'Answer the user\'s question in Japanese as best you can:\n{format_instructions}\n{query}',
+    template: 'Answer the user\'s question as best you can:\n{format_instructions}\n{query}',
     inputVariables: ['query'],
     partialVariables: {
       format_instructions: outputFixingParser.getFormatInstructions()
@@ -71,10 +75,8 @@ export async function POST (req: NextRequest): Promise<NextResponse> {
   });
 
   const chainResult = await answerFormattingChain.call({
-    query: 'List 5 countries.'
+    query: result.data.prompt
   });
-
-  console.log(JSON.stringify(chainResult.records, null, 2));
 
   return NextResponse.json({
     status: 'ok',

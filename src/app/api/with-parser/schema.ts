@@ -14,3 +14,15 @@ export const countryOutputParser = StructuredOutputParser.fromZodSchema(
     // .describe('Airtable レコードの配列で、各レコードは国を表します。')
     // .describe('An array of Airtable records, each representing a country')
 );
+
+export const paraphraseOutputParser = StructuredOutputParser.fromZodSchema(
+  z
+    .array(
+      z.object({
+        fields: z.object({
+          Text: z.string().describe('言い換えた単語/文章')
+        })
+      })
+    )
+    .describe('An array of Airtable records')
+);

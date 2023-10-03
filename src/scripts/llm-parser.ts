@@ -17,7 +17,7 @@ const outputParser = StructuredOutputParser.fromZodSchema(
         })
       })
     )
-    // .describe('An array of Airtable records, each representing a country')
+    .describe('An array of Airtable records, each representing a country')
 );
 
 const chatModel = new ChatOpenAI({
@@ -45,7 +45,7 @@ const answerFormattingChain = new LLMChain({
 });
 
 const result = await answerFormattingChain.call({
-  query: '国名を３つ列挙してください。'
+  query: '国名を３つ日本語で列挙してください。'
 });
 
 console.log(result.records);
