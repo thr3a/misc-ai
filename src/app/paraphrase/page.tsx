@@ -9,9 +9,10 @@ import { type z } from 'zod';
 import { notifications } from '@mantine/notifications';
 
 const contexts: Array<{ value: string, label: string, prompt: string }> = [
-  { value: 'chat', label: 'LINEチャット', prompt: 'unformalなチャット' },
-  { value: 'business_mail', label: 'ビジネスメール', prompt: 'ビジネスメール' },
-  { value: 'unformal', label: '日常会話', prompt: '友達との日常会話' }
+  { value: 'null', label: '指定なし', prompt: '' },
+  { value: 'chat', label: 'LINEチャット', prompt: 'informal chat' },
+  { value: 'business_mail', label: 'ビジネスメール', prompt: 'Business mail' },
+  { value: 'unformal', label: '日常会話', prompt: 'informal talk' }
 ];
 
 type FormValues = {
@@ -39,24 +40,39 @@ export default function Page (): JSX.Element {
         // { fields: { Text: 'こんにちは' } },
         // { fields: { Text: 'こんにちは' } }
       ],
-      context: 'chat'
+      context: 'null'
     }
   });
 
+  const formatPrompt = (): PromptTemplate => {
+    if (form.values.context === 'null') {
+      return PromptTemplate.fromTemplate(`
+### Role:
+あなたには多様な日本語が収録された類語辞典として振る舞ってほしい。
+### Task:
+Inputの内容をもっと的確な言い回しの類語、関連語、連想されるワードを指定されたフォーマットに従って5つ候補を列挙してください。
+候補は重複したり単調になってはいけません。
+### Input: {text}
+### Output:`);
+    } else {
+      return PromptTemplate.fromTemplate(`
+### Role:
+あなたには多様な日本語が収録された類語辞典として振る舞ってほしい。
+### Task:
+Inputの内容をContextに適した的確な言い回しの類語、関連語、連想されるワードに変換し、指定されたフォーマットに従って5つ候補を列挙してください。
+候補は重複したり単調になってはいけません。
+### Context: {context}
+### Input: {text}
+### Output:`);
+    }
+  };
   const handleSubmit = async (): Promise<void> => {
     if (form.values.message === '') return;
     if (form.values.loading) return;
 
     form.setValues({ result: [], loading: true });
 
-    const prompt = PromptTemplate.fromTemplate(`
-      ### Task:
-      あなたには最高品質の類語辞典として振る舞ってほしい。
-      Input sentenceをContextに合った文章に変換し、指定されたフォーマットに従って候補を5つ列挙してください。
-      ### Input sentence: {text}
-      ### Context: {context}
-      ### Output:
-    `);
+    const prompt = formatPrompt();
     const formattedPrompt = await prompt.format({
       text: form.values.message,
       context: contexts.find(x => x.value === form.values.context)?.prompt
@@ -95,7 +111,7 @@ export default function Page (): JSX.Element {
     <FormProvider form={form}>
       <Box maw={400} mx="auto" component="form">
         <TextInput
-          label="言い換えたいワード"
+          label="言い換えたいワード・文章"
           {...form.getInputProps('message')}
         />
         <Select

@@ -13,7 +13,7 @@ export const countrySchema = z.array(
 export const paraphraseSchema = z.array(
   z.object({
     fields: z.object({
-      Text: z.string().describe('converted sentences')
+      Text: z.string().describe('Converted sentences')
     })
   })
-).describe('array of converted sentences');
+).describe('Array of converted sentences');
