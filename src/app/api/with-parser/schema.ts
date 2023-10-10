@@ -17,3 +17,11 @@ export const paraphraseSchema = z.array(
     })
   })
 ).describe('Array of converted sentences');
+
+export const ggrenSchema = z.array(
+  z.object({
+    fields: z.object({
+      Keyword: z.string().describe('Search keywords')
+    })
+  })
+).describe('Array of keywords');

@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { PromptTemplate } from 'langchain/prompts';
 import { LLMChain } from 'langchain/chains';
 import { OutputFixingParser, StructuredOutputParser } from 'langchain/output_parsers';
 import * as ZSchema from './schema';
+import { OpenAI } from 'langchain/llms/openai';
 
 const requestSchema = z.object({
   prompt: z.string(),
@@ -37,10 +37,10 @@ export async function POST (req: NextRequest): Promise<NextResponse> {
     }, { status: 400 });
   }
 
-  const llm = new ChatOpenAI({
-    openAIApiKey: process.env.OPENAI_APIKEY ?? 'missing',
+  const llm = new OpenAI({
     modelName: result.data.modelParams?.name ?? 'gpt-3.5-turbo',
-    temperature: result.data.modelParams?.temperature ?? 0
+    temperature: result.data.modelParams?.temperature ?? 0,
+    openAIApiKey: process.env.OPENAI_APIKEY ?? 'missing'
   });
 
   let schema;
@@ -50,6 +50,9 @@ export async function POST (req: NextRequest): Promise<NextResponse> {
       break;
     case 'paraphrase':
       schema = ZSchema.paraphraseSchema;
+      break;
+    case 'ggren':
+      schema = ZSchema.ggrenSchema;
       break;
     default:
       return NextResponse.json({
