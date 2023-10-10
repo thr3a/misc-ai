@@ -1,6 +1,6 @@
 'use client';
 import { createFormContext } from '@mantine/form';
-import { Box, TextInput, Group, Button, Paper, CopyButton, Anchor, Textarea } from '@mantine/core';
+import { Box, Group, Button, Paper, Textarea } from '@mantine/core';
 import { type RequestProps } from '@/app/api/with-parser/route';
 import { useState, useEffect } from 'react';
 import { PromptTemplate } from 'langchain/prompts';
@@ -37,8 +37,8 @@ export default function Page (): JSX.Element {
   }, []);
   const form = useForm({
     initialValues: {
-      // message: '',
-      message: 'css remとpxの違い',
+      message: '',
+      // message: 'css remとpxの違い',
       loading: false,
       result: [
         // { fields: { Keyword: 'zod schema json' } },
