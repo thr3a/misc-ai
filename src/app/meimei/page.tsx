@@ -30,7 +30,8 @@ export default function Page (): JSX.Element {
     initialValues: {
       loading: false,
       type: 'variable',
-      purpose: '素数かどうか判定する関数',
+      purpose: '',
+      // purpose: '素数かどうか判定する関数',
       candidates: ['isPrime', 'checkPrime', 'primeChecker', 'validatePrime'],
       namingConvention: 'camel case'
     },
