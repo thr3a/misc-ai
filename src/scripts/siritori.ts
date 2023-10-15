@@ -1,18 +1,11 @@
 const debugApi = async (): Promise<void> => {
-  const url = 'http://localhost:3000/api/siritori/';
+  const url = 'http://localhost:3000/api/mhiss/';
   const params = {
-    word: 'やっほー',
+    systemMessage: '私の雑談相手になってください。',
+    message: '私について知っている事をすべて教えてください。',
     history: [
       {
-        body: 'こんにちは',
-        role: 'human'
-      },
-      {
-        body: 'こんにちは！',
-        role: 'ai'
-      },
-      {
-        body: '私は田中です。',
+        body: '私は25歳の田中です。',
         role: 'human'
       },
       {
