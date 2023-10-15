@@ -1,11 +1,12 @@
 'use client';
 import { createFormContext, isNotEmpty } from '@mantine/form';
-import { Box, Group, Button, Radio, Grid, TextInput, Stack, Title, CopyButton } from '@mantine/core';
+import { Box, Group, Button, Radio, TextInput, Stack, Title, CopyButton } from '@mantine/core';
 import { type RequestProps } from '@/app/api/list-parser/route';
 import { useState, useEffect } from 'react';
 import { PromptTemplate } from 'langchain/prompts';
 import { notifications } from '@mantine/notifications';
 import { supportedNamingConventions } from './utils';
+import { IconClipboardCopy, IconCheck } from '@tabler/icons-react';
 
 type FormValues = {
   type: 'variable' | 'function' | 'branch'
@@ -106,24 +107,28 @@ ${form.values.purpose}`);
           <Title order={2}>生成結果</Title>
         </Group>
 
-        {form.values.candidates.map((candidate, index) => (
-          <Grid key={index}>
-            <Grid.Col span={6}>
-              <TextInput
-                value={candidate.trim()} size="md" readOnly
-              />
-            </Grid.Col>
-            <Grid.Col span={4}>
-              <CopyButton value={candidate.trim()}>
-                {({ copied, copy }) => (
-                  <Button color={copied ? 'teal' : 'blue'} onClick={copy} size="xs" variant="light">
-                    {copied ? 'コピーしました！' : 'クリップボードにコピー'}
-                  </Button>
-                )}
-              </CopyButton>
-            </Grid.Col>
-          </Grid>
-        ))}
+        <Stack gap="sm">
+          {form.values.candidates.map((candidate, index) => (
+            <TextInput
+              readOnly
+              key={index}
+              value={candidate.trim()}
+              rightSectionPointerEvents="all"
+              rightSection={
+                <CopyButton value={candidate.trim()}>
+                  {({ copied, copy }) => (
+                    <Button
+                      color={copied ? 'teal' : 'blue'}
+                      onClick={copy}
+                    >
+                      {copied ? <IconCheck size={18} /> : <IconClipboardCopy size={18} />}
+                    </Button>
+                  )}
+                </CopyButton>
+              }
+            />
+          ))}
+        </Stack>
       </Box>
     </FormProvider>
   );

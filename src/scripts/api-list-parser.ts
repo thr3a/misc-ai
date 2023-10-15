@@ -1,4 +1,4 @@
-const debugApi = async (): Promise<void> => {
+const listParse = async (): Promise<void> => {
   const url = 'http://localhost:3000/api/list-parser/';
   const params = {
     prompt: 'アイスクリームの味を5つ列挙してください。'
@@ -16,5 +16,5 @@ const debugApi = async (): Promise<void> => {
 };
 
 (async () => {
-  await debugApi();
+  await listParse();
 })().catch(() => {});
