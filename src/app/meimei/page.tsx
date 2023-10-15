@@ -1,31 +1,21 @@
 'use client';
-import { createFormContext } from '@mantine/form';
-import { Box, Group, Button, Paper, Textarea } from '@mantine/core';
-import { type RequestProps } from '@/app/api/with-parser/route';
+import { createFormContext, isNotEmpty } from '@mantine/form';
+import { Box, Group, Button, Radio, Grid, TextInput, Stack, Title, CopyButton } from '@mantine/core';
+import { type RequestProps } from '@/app/api/list-parser/route';
 import { useState, useEffect } from 'react';
 import { PromptTemplate } from 'langchain/prompts';
-import { type ggrenSchema } from '@/app/api/with-parser/schema';
-import { type z } from 'zod';
 import { notifications } from '@mantine/notifications';
-import { IconExternalLink } from '@tabler/icons-react';
+import { supportedNamingConventions } from './utils';
 
 type FormValues = {
-  message: string
+  type: 'variable' | 'function' | 'branch'
+  purpose: string
+  candidates: string[]
+  namingConvention: 'camel case' | 'pascal case' | 'snake case' | 'kebab case'
   loading: boolean
-  result: z.infer<typeof ggrenSchema>
 };
 
 const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
-
-const SearchButton = ({ keyword }: { keyword: string }): JSX.Element => {
-  return <Button
-    component="a"
-    target="_blank"
-    rel="noopener noreferrer"
-    leftSection={<IconExternalLink size={14} />}
-    href={`https://www.google.com/search?q=${keyword}`}
-  >{keyword}</Button>;
-};
 
 export default function Page (): JSX.Element {
   const [csrfToken, setCsrfToken] = useState<string>('loading...');
@@ -37,40 +27,39 @@ export default function Page (): JSX.Element {
   }, []);
   const form = useForm({
     initialValues: {
-      message: '',
-      // message: 'css remとpxの違い',
       loading: false,
-      result: [
-        // { fields: { Keyword: 'zod schema json' } },
-        // { fields: { Keyword: 'zod schema JSON validation xxxxxxxxxx' } }
-      ]
+      type: 'variable',
+      purpose: '素数かどうか判定する関数',
+      candidates: ['isPrime', 'checkPrime', 'primeChecker', 'validatePrime'],
+      namingConvention: 'camel case'
+    },
+    validate: {
+      purpose: isNotEmpty('概要は必須項目です')
     }
   });
 
   const handleSubmit = async (): Promise<void> => {
-    if (form.values.message === '') return;
+    if (form.values.purpose === '') return;
     if (form.values.loading) return;
 
-    form.setValues({ result: [], loading: true });
+    form.setValues({ candidates: [], loading: true });
 
     const prompt = PromptTemplate.fromTemplate(`
-### Task:
-Please list the five most suitable search keywords in English when searching Google to solve the problem written in Input.
-### Input: {message}
-### Output:`);
-    const formattedPrompt = await prompt.format({
-      message: form.values.message
-    });
+# Task
+Please suggest 6 appropriate ${form.values.type} names in ${form.values.namingConvention} format that are suitable for the overview.
+# Overview
+${form.values.purpose}`);
+    const formattedPrompt = await prompt.format({ prompt });
     console.log(formattedPrompt);
     const params: RequestProps = {
       csrfToken,
       prompt: formattedPrompt,
-      type: 'ggren',
       modelParams: {
-        name: 'gpt-4'
+        name: 'gpt-4',
+        temperature: 0
       }
     };
-    const reqResponse = await fetch('/api/with-parser/', {
+    const reqResponse = await fetch('/api/list-parser/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -79,7 +68,7 @@ Please list the five most suitable search keywords in English when searching Goo
     });
     if (reqResponse.ok) {
       const { result } = await reqResponse.json();
-      form.setValues({ result, loading: false });
+      form.setValues({ candidates: result, loading: false });
     } else {
       notifications.show({
         title: 'エラーが発生しました。',
@@ -93,25 +82,48 @@ Please list the five most suitable search keywords in English when searching Goo
 
   return (
     <FormProvider form={form}>
-      <Box maw={400} mx="auto" component="form">
-        <Textarea
-          label="調べたい内容"
-          {...form.getInputProps('message')}
-          placeholder='css remとpxの違い'
-          autosize
-          minRows={2}
-          maxRows={4}
-        />
-        <Group justify="flex-end">
-          <Button onClick={handleSubmit} loading={form.values.loading}>翻訳</Button>
+      <Box maw={600} mx="auto" component="form">
+        <Radio.Group label="名前の種類" {...form.getInputProps('type')}>
+          <Group mt="xs">
+            <Radio value='variable' label='変数名' />
+            <Radio value='function' label='関数名' />
+            <Radio value='branch' label='ブランチ名' />
+          </Group>
+        </Radio.Group>
+        <TextInput label='処理の概要を記述してください' withAsterisk {...form.getInputProps('purpose')} placeholder='素数かどうか判定する関数'/>
+        <Radio.Group label="命名規則" {...form.getInputProps('namingConvention')}>
+          <Stack mt="xs">
+            {supportedNamingConventions.map((nc, index) => (
+              <Radio key={index} value={nc.name} label={nc.label} />
+            ))}
+          </Stack>
+        </Radio.Group>
+
+        <Group justify="center">
+          <Button onClick={handleSubmit} loading={form.values.loading}>作成!</Button>
         </Group>
-        <Paper>
-          { form.values.result.map((item, index) => (
-            <Box key={index} mt={'md'}>
-              <SearchButton keyword={item.fields.Keyword} />
-            </Box>
-          )) }
-        </Paper>
+        <Group mt="sm" mb="sm">
+          <Title order={2}>生成結果</Title>
+        </Group>
+
+        {form.values.candidates.map((candidate, index) => (
+          <Grid key={index}>
+            <Grid.Col span={6}>
+              <TextInput
+                value={candidate.trim()} size="md" readOnly
+              />
+            </Grid.Col>
+            <Grid.Col span={4}>
+              <CopyButton value={candidate.trim()}>
+                {({ copied, copy }) => (
+                  <Button color={copied ? 'teal' : 'blue'} onClick={copy} size="xs" variant="light">
+                    {copied ? 'コピーしました！' : 'クリップボードにコピー'}
+                  </Button>
+                )}
+              </CopyButton>
+            </Grid.Col>
+          </Grid>
+        ))}
       </Box>
     </FormProvider>
   );

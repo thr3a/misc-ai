@@ -2,8 +2,8 @@ import { Title } from '@mantine/core';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: '英語でググり隊',
-  description: '英語のGoogle検索キーワードに翻訳します'
+  title: '命名先生',
+  description: 'AI先生が自動で変数名や関数名を命名してくれます。'
 };
 
 export default function PageLayout ({ children }: { children: React.ReactNode }): JSX.Element {
