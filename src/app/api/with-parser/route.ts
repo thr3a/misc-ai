@@ -65,7 +65,7 @@ export async function POST (req: NextRequest): Promise<NextResponse> {
 
   // Don't forget to include formatting instructions in the prompt!
   const prompt = new PromptTemplate({
-    template: 'Answer the user\'s question as best you can:\n{format_instructions}\n{query}',
+    template: 'Answer the users question as best as possible.:\n{format_instructions}\n{query}',
     inputVariables: ['query'],
     partialVariables: {
       format_instructions: outputFixingParser.getFormatInstructions()
