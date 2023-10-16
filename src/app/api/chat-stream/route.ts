@@ -5,6 +5,7 @@ import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { BufferWindowMemory, ChatMessageHistory } from 'langchain/memory';
 import { type MessageProps } from '@/features/chat/ChatBox';
 import { SystemMessage } from 'langchain/schema';
+import { StreamingTextResponse, LangChainStream } from 'ai';
 
 const requestSchema = z.object({
   message: z.string(),
@@ -34,7 +35,7 @@ export const createChatMessageHistory = async (messages: MessageProps[], ruleMes
   return history;
 };
 
-export async function POST (req: NextRequest): Promise<NextResponse> {
+export async function POST (req: NextRequest): Promise<StreamingTextResponse> {
   let body;
   try {
     body = await req.json();
@@ -53,13 +54,8 @@ export async function POST (req: NextRequest): Promise<NextResponse> {
       errors
     }, { status: 400 });
   }
-  // const memory = new BufferMemory({
-  //   chatHistory: new UpstashRedisChatMessageHistory({
-  //     sessionId: new Date().toLocaleDateString(),
-  //     client: Redis.fromEnv(),
-  //   }),
-  // });
 
+  const { stream, handlers } = LangChainStream();
   const history = await createChatMessageHistory(result.data.history, result.data.systemMessage);
   const memory = new BufferWindowMemory({
     chatHistory: history,
@@ -69,17 +65,14 @@ export async function POST (req: NextRequest): Promise<NextResponse> {
   const model = new ChatOpenAI({
     openAIApiKey: process.env.OPENAI_APIKEY ?? 'missing',
     modelName: result.data.modelParams?.name ?? 'gpt-3.5-turbo',
-    temperature: result.data.modelParams?.temperature ?? 0.6
+    temperature: result.data.modelParams?.temperature ?? 0.6,
+    streaming: true
   });
   const chain = new ConversationChain({
     llm: model,
     memory,
-    verbose: false // verboseをtrueにすると処理内容などが出力される
+    verbose: true // verboseをtrueにすると処理内容などが出力される
   });
-  const chainResult = await chain.call({ input: result.data.message });
-  return NextResponse.json({
-    status: 'ok',
-    message: chainResult.response,
-    m: await memory.loadMemoryVariables({})
-  });
+  chain.call({ input: result.data.message, callbacks: [handlers] }).catch((e) => {});
+  return new StreamingTextResponse(stream);
 }
