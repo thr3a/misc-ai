@@ -3,16 +3,16 @@ const topic = 'vim vs emacs';
 
 const promptA = `
 あなたには計算機として行動してください。
-相手から入力された整数に1を足して返してください。
+入力された整数に1を足して出力してください。例えば500と入力されたら501を出力してください。
 `;
 
 const promptB = `
 あなたには計算機として行動してください。
-相手から入力された整数に1を足して返してください。
+入力された整数に1を足して出力してください。例えば500と入力されたら501を出力してください。
 `;
 
 const history: Array<{ body: string, player: 'a' | 'b' }> = [];
-let player: 'a' | 'b' = 'a';
+let player: 'a' | 'b' = 'b';
 
 (async () => {
   let count = 1;
@@ -24,31 +24,36 @@ let player: 'a' | 'b' = 'a';
       message: '',
       history: [],
       modelParams: {
-        temperature: 1,
-        max_tokens: 256
+        temperature: 0,
+        max_tokens: 256,
+        name: 'gpt-3.5-turbo'
       }
     };
     params.systemMessage = player === 'a' ? promptA : promptB;
     if (history.length === 0) {
-      params.message = '1';
+      const initMessage = '1';
+      params.message = initMessage;
+      history.push({ body: initMessage, player: (player === 'a' ? 'b' : 'a') });
     } else {
       params.message = history[history.length - 1].body;
       history.slice(0, history.length - 1).forEach((h) => {
+        // 1回目はplayer=a
         if (player === 'a') {
           if (h.player === 'a') {
-            params.history.push({ body: h.body, role: 'ai' });
-          } else {
             params.history.push({ body: h.body, role: 'human' });
+          } else {
+            params.history.push({ body: h.body, role: 'ai' });
           }
         } else {
           if (h.player === 'a') {
-            params.history.push({ body: h.body, role: 'human' });
-          } else {
             params.history.push({ body: h.body, role: 'ai' });
+          } else {
+            params.history.push({ body: h.body, role: 'human' });
           }
         }
       });
     }
+    console.log(params.history.map((h) => `${h.role}: ${h.body}`));
     const res = await fetch(url, {
       method: 'POST',
       headers: {
@@ -75,9 +80,9 @@ let player: 'a' | 'b' = 'a';
     } else {
       player = 'a';
     }
-    console.log('');
+    if (count === 3) break;
     count++;
-    if (count > 10) break;
+    console.log();
   }
 })().catch(() => {});
 

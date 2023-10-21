@@ -60,7 +60,7 @@ export async function POST (req: NextRequest): Promise<StreamingTextResponse> {
   const history = await createChatMessageHistory(result.data.history, result.data.systemMessage);
   const memory = new BufferWindowMemory({
     chatHistory: history,
-    k: 4, // 過去x回分の対話を使用する
+    k: 5, // 過去x回分の対話を使用する
     returnMessages: false // .loadMemoryVariables({})の挙動が変わる
   });
   const model = new ChatOpenAI({
