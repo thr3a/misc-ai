@@ -89,7 +89,7 @@ export default function Page (): JSX.Element {
         }
       };
       await fetchAPI(params);
-      if (count === 3) {
+      if (count === 10) {
         form.setValues({ loading: false });
         break;
       };
@@ -117,7 +117,7 @@ export default function Page (): JSX.Element {
           ))}
         </Stack>
         {form.values.latestMessage !== '' &&
-          <Paper shadow="xs" p='sm' withBorder mt={'md'}>
+          <Paper shadow="xs" p='sm' withBorder mt={'md'} mb='xl'>
             <Text size='xs'>
               {form.values.latestMessage}
             </Text>
