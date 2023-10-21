@@ -34,7 +34,7 @@ export default function Page (): JSX.Element {
 
   async function fetchAPI (params: RequestProps): Promise<string> {
     let result = '';
-    const res = await fetch('http://localhost:3000/api/chat-stream/', {
+    const res = await fetch('/api/chat-stream/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
