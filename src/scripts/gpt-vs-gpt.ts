@@ -1,4 +1,4 @@
-const debug3 = async (): Promise<void> => {
+const debug4 = async (): Promise<void> => {
   const url = 'http://localhost:3000/api/chat-stream/';
   const params = {
     systemMessage: '私の雑談相手になってください。',
@@ -18,22 +18,32 @@ const debug3 = async (): Promise<void> => {
       }
     ]
   };
+  const body = JSON.stringify(params);
   const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(params)
+    body
   });
-  if (res.body === null) throw new Error('res.body is null');
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    process.stdout.write(decoder.decode(value, {stream: true}));
+  const stream = res.body;
+  const reader = stream?.getReader();
+  const decoder = new TextDecoder('utf-8');
+  try {
+    while (true) {
+      const { done, value }: any = await reader?.read();
+      if (done === true) {
+        break;
+      }
+      const decodedValue = decoder.decode(value, { stream: true });
+      console.log(decodedValue);
+    }
+  } catch (error) {
+    console.error(error);
+  } finally {
+    reader?.releaseLock();
   }
 };
 (async () => {
-  await debug3();
-})();
+  await debug4();
+})().catch(() => {});
