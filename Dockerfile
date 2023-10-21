@@ -1,4 +1,5 @@
-FROM node:20-slim AS base
+# ref: https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile
+FROM node:20-bullseye-slim AS base
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -46,5 +47,6 @@ USER nextjs
 EXPOSE 3000
 
 ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
 
 CMD ["npm", "run", "node-server"]
