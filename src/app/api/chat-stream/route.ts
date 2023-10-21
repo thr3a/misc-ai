@@ -17,7 +17,8 @@ const requestSchema = z.object({
   csrfToken: z.string().optional(),
   modelParams: z.object({
     name: z.string().optional(),
-    temperature: z.number().optional()
+    temperature: z.number().optional(),
+    max_tokens: z.number().optional()
   }).optional()
 });
 export type RequestProps = z.infer<typeof requestSchema>;
@@ -59,13 +60,14 @@ export async function POST (req: NextRequest): Promise<StreamingTextResponse> {
   const history = await createChatMessageHistory(result.data.history, result.data.systemMessage);
   const memory = new BufferWindowMemory({
     chatHistory: history,
-    k: 10, // 過去x回分の対話を使用する
+    k: 4, // 過去x回分の対話を使用する
     returnMessages: false // .loadMemoryVariables({})の挙動が変わる
   });
   const model = new ChatOpenAI({
     openAIApiKey: process.env.OPENAI_APIKEY ?? 'missing',
     modelName: result.data.modelParams?.name ?? 'gpt-3.5-turbo',
     temperature: result.data.modelParams?.temperature ?? 0.6,
+    maxTokens: result.data.modelParams?.max_tokens ?? undefined,
     streaming: true
   });
   const chain = new ConversationChain({

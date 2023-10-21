@@ -1,3 +1,5 @@
+const messages = [];
+
 const debug3 = async (): Promise<void> => {
   const url = 'http://localhost:3000/api/chat-stream/';
   const params = {
@@ -31,9 +33,11 @@ const debug3 = async (): Promise<void> => {
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
-    process.stdout.write(decoder.decode(value, {stream: true}));
+    process.stdout.write(decoder.decode(value, { stream: true }));
   }
 };
 (async () => {
   await debug3();
 })();
+
+export {};
