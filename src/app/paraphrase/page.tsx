@@ -9,10 +9,9 @@ import { type z } from 'zod';
 import { notifications } from '@mantine/notifications';
 
 const contexts: Array<{ value: string, label: string, prompt: string }> = [
-  { value: 'null', label: '指定なし', prompt: '' },
-  { value: 'chat', label: 'LINEチャット', prompt: 'informal chat' },
-  { value: 'business_mail', label: 'ビジネスメール', prompt: 'Business mail' },
-  { value: 'unformal', label: '日常会話', prompt: 'informal talk' }
+  { value: 'casual', label: 'カジュアル', prompt: 'casual,friendly,in chat' },
+  { value: 'business_mail', label: 'ビジネスメール', prompt: 'Business email, formal' },
+  { value: 'osaka', label: '関西弁', prompt: '関西弁,kansai dialect,Kansai-ben' }
 ];
 
 type FormValues = {
@@ -40,31 +39,22 @@ export default function Page (): JSX.Element {
         // { fields: { Text: 'こんにちは' } },
         // { fields: { Text: 'こんにちは' } }
       ],
-      context: 'null'
+      context: 'casual'
     }
   });
 
   const formatPrompt = (): PromptTemplate => {
-    if (form.values.context === 'null') {
-      return PromptTemplate.fromTemplate(`
-### Role:
-あなたには多様な日本語が収録された類語辞典として振る舞ってほしい。
-### Task:
-Inputの内容をもっと的確な言い回しの類語、関連語、連想されるワードを指定されたフォーマットに従って5つ候補を列挙してください。
-候補は重複したり単調になってはいけません。
-### Input: {text}
-### Output:`);
-    } else {
-      return PromptTemplate.fromTemplate(`
-### Role:
-あなたには多様な日本語が収録された類語辞典として振る舞ってほしい。
-### Task:
-Inputの内容をContextに適した的確な言い回しの類語、関連語、連想されるワードに変換し、指定されたフォーマットに従って5つ候補を列挙してください。
-候補は重複したり単調になってはいけません。
-### Context: {context}
-### Input: {text}
-### Output:`);
-    }
+    return PromptTemplate.fromTemplate(`
+#Task
+I want you to act as a thesaurus containing a variety of Japanese words.
+Convert the indicated word into an accurate synonym, related word, or associated word using Style, and list 5 candidates according to the specified format.
+Candidates should not be overlapping or monotonous.
+#Language
+Japanese
+#Input
+{text}
+#Style
+{context}`);
   };
   const handleSubmit = async (): Promise<void> => {
     if (form.values.message === '') return;
@@ -115,7 +105,7 @@ Inputの内容をContextに適した的確な言い回しの類語、関連語�
           {...form.getInputProps('message')}
         />
         <Select
-          label="シチュエーション"
+          label="スタイル"
           data={contexts}
           checkIconPosition="right"
           {...form.getInputProps('context')}
