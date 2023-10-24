@@ -69,7 +69,7 @@ export default function Page (): JSX.Element {
       message: initPrompt(form.values.topic),
       systemMessage: '',
       modelParams: {
-        name: 'gpt-4',
+        // name: 'gpt-4',
         temperature: 1
       }
     };
@@ -82,7 +82,7 @@ export default function Page (): JSX.Element {
         message: form.values.messages[form.values.messages.length - 1],
         history: [],
         modelParams: {
-          name: 'gpt-4',
+          // name: 'gpt-4',
           temperature: 1,
           max_tokens: 1024
         }
