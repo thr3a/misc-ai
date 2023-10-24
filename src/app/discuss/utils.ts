@@ -1,18 +1,18 @@
 const common = `
-# Encouraged Contributions
-- Ideas that are logically compelling
-- Solutions that are innovative and creative
-# Discouraged Contributions
-- Opinions with ambiguous conclusions
-- Opinions that boil down to matters of personal preference
-- Opinion that respects ethics
+# Encouraged Ideas
+- Logical and convincing ideas
+- Innovative and creative ideas
+# Prohibited Ideas
+- Ideas with ambiguous conclusions
+- The idea of concluding on each individual's preferences
+- An ethical mindset
 `;
 
 export function initPrompt (topic: string): string {
   return `
 # Task
-あなたはブレインストーミングの参加者です。
-$TOPIC についてあなたの意見を結論から100字で述べてください。
+Act as a brainstorming participant.
+Output your ideas about $TOPIC in 100 characters of Japanese, starting with the conclusion.
 ${common}
 # TOPIC
 ${topic}
