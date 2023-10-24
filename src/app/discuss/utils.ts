@@ -16,17 +16,17 @@ Output your ideas about $TOPIC in 100 characters of Japanese, starting with the 
 ${common}
 # TOPIC
 ${topic}
-#
 `;
 }
 
 export function loopPrompt (topic: string): string {
   return `
 # Task
-You are discussing $TOPIC with me. You are in opposition.
-Please be sure to refute my opinion in 100 characters in Japanese.
+Discussing $TOPIC with me. Act like you are a perverse person.
+Please be sure to refute my idea in 100 characters in Japanese.
 ${common}
 # TOPIC
 ${topic}
+# Your opposing views
 `;
 }
