@@ -132,6 +132,8 @@ export default function Page (): JSX.Element {
         }
       </Box>
       <Space h={'xl'} />
+      <Space h={'xl'} />
+      <Space h={'xl'} />
     </FormProvider>
   );
 }
