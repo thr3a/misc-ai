@@ -1,6 +1,6 @@
 'use client';
 import { createFormContext } from '@mantine/form';
-import { Box, Group, Button, TextInput, Title, Paper, Text, Stack } from '@mantine/core';
+import { Box, Group, Button, Title, Paper, Text, Stack, Space, Textarea } from '@mantine/core';
 import { type RequestProps } from '@/app/api/chat-stream/route';
 import { useState, useEffect } from 'react';
 import { initPrompt, loopPrompt } from '@/app/discuss/utils';
@@ -69,7 +69,7 @@ export default function Page (): JSX.Element {
       message: initPrompt(form.values.topic),
       systemMessage: '',
       modelParams: {
-        // name: 'gpt-4',
+        name: 'gpt-4',
         temperature: 1
       }
     };
@@ -82,10 +82,9 @@ export default function Page (): JSX.Element {
         message: form.values.messages[form.values.messages.length - 1],
         history: [],
         modelParams: {
+          name: 'gpt-4',
           temperature: 1,
-          max_tokens: 1024,
-          name: 'gpt-3.5-turbo'
-          // name: 'gpt-4'
+          max_tokens: 1024
         }
       };
       await fetchAPI(params);
@@ -100,9 +99,17 @@ export default function Page (): JSX.Element {
   return (
     <FormProvider form={form}>
       <Box maw={800} mx="auto" component="form">
-        <TextInput label='議題' withAsterisk {...form.getInputProps('topic')}/>
+        <Textarea
+          label='議題'
+          withAsterisk
+          placeholder='最強のアイスクリームの味'
+          autosize
+          minRows={2}
+          maxRows={4}
+          {...form.getInputProps('topic')}
+        ></Textarea>
         <Group justify="center">
-          <Button onClick={handleSubmit} loading={form.values.loading} color={'orange'}>議論開始</Button>
+          <Button onClick={handleSubmit} loading={form.values.loading} color={'orange'}>議論開始！</Button>
         </Group>
         <Group mt="sm" mb="sm">
           <Title order={2}>生成結果</Title>
@@ -117,13 +124,14 @@ export default function Page (): JSX.Element {
           ))}
         </Stack>
         {form.values.latestMessage !== '' &&
-          <Paper shadow="xs" p='sm' withBorder mt={'md'} mb='xl'>
+          <Paper shadow="xs" p='sm' withBorder mt={'md'}>
             <Text size='xs'>
               {form.values.latestMessage}
             </Text>
           </Paper>
         }
       </Box>
+      <Space h={'xl'} />
     </FormProvider>
   );
 }

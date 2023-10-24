@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'AI言論コロシアム',
-  description: 'ChatGPTにレスバ代行'
+  description: 'ChatGPT vs ChatGPT'
 };
 
 export default function PageLayout ({ children }: { children: React.ReactNode }): JSX.Element {
