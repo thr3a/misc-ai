@@ -84,7 +84,7 @@ export default function Page (): JSX.Element {
         history: [],
         modelParams: {
           // name: 'gpt-4',
-          temperature: 0.5,
+          temperature: 1,
           max_tokens: 1024
         }
       };

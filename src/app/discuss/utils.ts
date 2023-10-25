@@ -25,7 +25,7 @@ export function loopPrompt (topic: string): string {
 # Task
 Discussing $TOPIC with me.
 Your goal is to make the discussion more meaningful by finding flaws in my ideas and suggesting new ideas that are different from mine.
-Please find flaws in my idea and refute them in 100 characters in Japanese.
+Please find flaws in my idea and suggest new idea in 100 characters in Japanese.
 ${common}
 # Topic
 ${topic}
