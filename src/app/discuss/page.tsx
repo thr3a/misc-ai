@@ -77,13 +77,14 @@ export default function Page (): JSX.Element {
     // 初回ここまで
     let count = 1;
     while (true) {
+      const latestMessage = form.values.messages[form.values.messages.length - 1];
       const params: RequestProps = {
         systemMessage: loopPrompt(form.values.topic),
-        message: form.values.messages[form.values.messages.length - 1],
+        message: `Human:${latestMessage} \nAI:\n私の提案は`,
         history: [],
         modelParams: {
           // name: 'gpt-4',
-          temperature: 1,
+          temperature: 0.5,
           max_tokens: 1024
         }
       };
@@ -98,6 +99,7 @@ export default function Page (): JSX.Element {
 
   return (
     <FormProvider form={form}>
+      { csrfToken }
       <Box maw={800} mx="auto" component="form">
         <Textarea
           label='議題'
