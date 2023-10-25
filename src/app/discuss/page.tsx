@@ -99,7 +99,6 @@ export default function Page (): JSX.Element {
 
   return (
     <FormProvider form={form}>
-      { csrfToken }
       <Box maw={800} mx="auto" component="form">
         <Textarea
           label='議題'
