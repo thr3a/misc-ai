@@ -18,7 +18,8 @@ const requestSchema = z.object({
   modelParams: z.object({
     name: z.string().optional(),
     temperature: z.number().optional(),
-    max_tokens: z.number().optional()
+    max_tokens: z.number().optional(),
+    stop: z.array(z.string()).optional()
   }).optional()
 });
 export type RequestProps = z.infer<typeof requestSchema>;
@@ -68,6 +69,7 @@ export async function POST (req: NextRequest): Promise<StreamingTextResponse> {
     modelName: result.data.modelParams?.name ?? 'gpt-3.5-turbo',
     temperature: result.data.modelParams?.temperature ?? 0.6,
     maxTokens: result.data.modelParams?.max_tokens ?? undefined,
+    stop: result.data.modelParams?.stop ?? undefined,
     streaming: true
   });
   const chain = new ConversationChain({

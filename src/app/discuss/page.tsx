@@ -25,7 +25,7 @@ export default function Page (): JSX.Element {
 
   const form = useForm({
     initialValues: {
-      topic: '最強のアイスクリームの味',
+      topic: '',
       latestMessage: '',
       messages: [],
       loading: false
@@ -80,12 +80,13 @@ export default function Page (): JSX.Element {
       const latestMessage = form.values.messages[form.values.messages.length - 1];
       const params: RequestProps = {
         systemMessage: loopPrompt(form.values.topic),
-        message: `Human:${latestMessage} \nAI:\n私の提案は`,
+        message: `Human:${latestMessage} \nAI:`,
         history: [],
         modelParams: {
           // name: 'gpt-4',
           temperature: 1,
-          max_tokens: 1024
+          max_tokens: 1024,
+          stop: ['Human:']
         }
       };
       await fetchAPI(params);
@@ -103,7 +104,7 @@ export default function Page (): JSX.Element {
         <Textarea
           label='議題'
           withAsterisk
-          placeholder='最強のアイスクリームの味'
+          placeholder='一番可愛いサンリオキャラクターは誰か？'
           autosize
           minRows={2}
           maxRows={4}

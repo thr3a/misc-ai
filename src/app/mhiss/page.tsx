@@ -75,7 +75,7 @@ Let's start role-playing in Japanese with me playing the role of the daughter.
       systemMessage,
       history: form.values.messages,
       modelParams: {
-        name: 'gpt-4',
+        // name: 'gpt-4',
         temperature: 1
       }
     };
