@@ -16,6 +16,7 @@ type FormValues = {
   message: string
   loading: boolean
   latestAiMessage: string
+  model: 'gpt-3.5-turbo' | 'gpt-4'
 };
 const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
 
@@ -41,7 +42,8 @@ export default function Page (): JSX.Element {
       messages: [],
       message: '今日は帰りが遅くなるね',
       loading: false,
-      latestAiMessage: ''
+      latestAiMessage: '',
+      model: 'gpt-4'
     }
   });
 
@@ -50,6 +52,8 @@ export default function Page (): JSX.Element {
   }, [form.values]);
 
   const handleSubmit = async (): Promise<void> => {
+    console.log(form.values.model);
+
     if (form.values.message === '') return;
     if (form.values.loading) return;
     const params: RequestProps = {
@@ -58,7 +62,7 @@ export default function Page (): JSX.Element {
       systemMessage,
       history: form.values.messages,
       modelParams: {
-        // name: 'gpt-4',
+        name: form.values.model,
         temperature: 1
       },
       aiPrefix: 'お母さん',
@@ -86,7 +90,7 @@ export default function Page (): JSX.Element {
     }
     reader.releaseLock();
     form.insertListItem('messages', { body: result, role: 'ai' });
-    form.setValues({ latestAiMessage: '', loading: false });
+    form.setValues({ latestAiMessage: '', loading: false, model: 'gpt-3.5-turbo' });
   };
 
   return (
