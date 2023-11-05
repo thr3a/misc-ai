@@ -6,7 +6,7 @@ import { ChatBox } from '@/features/chat/ChatBox';
 import { Box, Flex, Textarea, ActionIcon, Center } from '@mantine/core';
 import { IconSend } from '@tabler/icons-react';
 import { getHotkeyHandler } from '@mantine/hooks';
-import { type RequestProps } from '@/app/api/chat/route';
+import { type RequestProps } from '@/app/api/chat-stream/route';
 import { useState, useEffect } from 'react';
 import { TwitterButton } from '@/features/shareButton/Button';
 import { systemMessage } from './utils';
@@ -15,6 +15,7 @@ type FormValues = {
   messages: MessageProps[]
   message: string
   loading: boolean
+  latestAiMessage: string
 };
 const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
 
@@ -39,9 +40,14 @@ export default function Page (): JSX.Element {
       // messages: DummyMessages(20),
       messages: [],
       message: '今日は帰りが遅くなるね',
-      loading: false
+      loading: false,
+      latestAiMessage: ''
     }
   });
+
+  useEffect(() => {
+    form.setValues({ messages: form.values.messages });
+  }, [form.values]);
 
   const handleSubmit = async (): Promise<void> => {
     if (form.values.message === '') return;
@@ -58,26 +64,37 @@ export default function Page (): JSX.Element {
     };
     form.setValues({ loading: true, message: '' });
     form.insertListItem('messages', { body: form.values.message, role: 'human' });
-    const reqResponse = await fetch('/api/chat/', {
+    const res = await fetch('/api/chat-stream/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(params)
     });
-    if (reqResponse.ok) {
-      const json = await reqResponse.json();
-      form.insertListItem('messages', { body: json.message, role: 'ai' });
-    } else {
-      form.insertListItem('messages', { body: 'エラーが発生しました。', role: 'ai' });
+    if (res.body === null) throw new Error('res.body is null');
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let result = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const decodedValue = decoder.decode(value, { stream: true });
+      result += decodedValue;
+      form.setValues({ latestAiMessage: result });
     }
-    form.setValues({ loading: false });
+    reader.releaseLock();
+    form.insertListItem('messages', { body: result, role: 'ai' });
+    form.setValues({ latestAiMessage: '', loading: false });
   };
 
   return (
     <FormProvider form={form}>
       <Box ml={0} mr={0} maw={'100vw'}>
-        <ChatBox messages={form.getInputProps('messages').value} height='74vh'></ChatBox>
+        <ChatBox
+          messages={form.getInputProps('messages').value}
+          height='74vh'
+          latestAiMessage={form.getInputProps('latestAiMessage').value}>
+        </ChatBox>
         <Flex>
           <Textarea
             placeholder="入力してください"

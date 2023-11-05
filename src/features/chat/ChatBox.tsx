@@ -10,6 +10,7 @@ export type MessageProps = {
 type ChatBoxProps = {
   messages: MessageProps[]
   height: string
+  latestAiMessage: string
 };
 
 const Message = (props: { body: string, role: 'human' | 'ai' }): JSX.Element => {
@@ -28,11 +29,15 @@ const Message = (props: { body: string, role: 'human' | 'ai' }): JSX.Element => 
   );
 };
 
-export function ChatBox ({ messages, height }: ChatBoxProps): JSX.Element {
+export function ChatBox (props: ChatBoxProps): JSX.Element {
+  const messages = structuredClone(props.messages);
+  if (props.latestAiMessage !== '') {
+    messages.push({ body: props.latestAiMessage, role: 'ai' });
+  }
   return (
-    <ScrollArea pt={0} pb={0} pr={'xs'} pl={'xs'} type={'scroll'} h={height} bg={'#7494c0'}>
-      <Space h={'md'}></Space>
-      <Stack gap={'md'}>
+    <ScrollArea pt={0} pb={0} pr={'xs'} pl={'xs'} type={'scroll'} h={props.height} bg={'#7494c0'}>
+      <Space h={'xs'}></Space>
+      <Stack gap={'xs'}>
         { messages.map(({ body, role }: MessageProps, index) => {
           return (
             <Box key={index}>
