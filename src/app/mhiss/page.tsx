@@ -3,11 +3,12 @@ import './style.css';
 import { createFormContext } from '@mantine/form';
 import { type MessageProps } from '@/features/chat/ChatBox';
 import { ChatBox } from '@/features/chat/ChatBox';
-import { Box, Flex, Textarea, ActionIcon } from '@mantine/core';
+import { Box, Flex, Textarea, ActionIcon, Center } from '@mantine/core';
 import { IconSend } from '@tabler/icons-react';
 import { getHotkeyHandler } from '@mantine/hooks';
 import { type RequestProps } from '@/app/api/chat/route';
 import { useState, useEffect } from 'react';
+import { TwitterButton } from '@/features/shareButton/Button';
 
 type FormValues = {
   messages: MessageProps[]
@@ -15,6 +16,14 @@ type FormValues = {
   loading: boolean
 };
 const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
+
+const DummyMessages = (num: number): MessageProps[] => {
+  const array: MessageProps[] = [];
+  for (let index = 0; index < num; index++) {
+    array.push({ body: 'こんにちは。', role: Math.random() >= 0.5 ? 'ai' : 'human' });
+  }
+  return array;
+};
 
 export default function Page (): JSX.Element {
   const [csrfToken, setCsrfToken] = useState<string>('loading...');
@@ -26,15 +35,15 @@ export default function Page (): JSX.Element {
   }, []);
   const form = useForm({
     initialValues: {
-      // messages: Array(20).fill([{ body: 'こんにちは。', role: 'ai' }]).flat(),
+      // messages: DummyMessages(20),
       messages: [],
-      // messages: [{ body: 'では始めましょう。「りんご」 次は「ご」から始まる単語を考えてください。', role: 'ai' }],
       message: '今日は帰りが遅くなるね',
       loading: false
     }
   });
 
   const systemMessage = `
+# Task
 I want you to act like my mother. We're going to role-play with me, your daughter.
 # Your character
 - You make leaps of logic and switch points.
@@ -99,8 +108,8 @@ Let's start role-playing in Japanese with me playing the role of the daughter.
 
   return (
     <FormProvider form={form}>
-      <Box maw={'400px'} style={{ border: '1px solid #eee' }} ml={0} mah={'600px'}>
-        <ChatBox messages={form.getInputProps('messages').value} height='60vh'></ChatBox>
+      <Box ml={0} mr={0} maw={'100vw'}>
+        <ChatBox messages={form.getInputProps('messages').value} height='74vh'></ChatBox>
         <Flex>
           <Textarea
             placeholder="入力してください"
@@ -123,6 +132,9 @@ Let's start role-playing in Japanese with me playing the role of the daughter.
             <IconSend></IconSend>
           </ActionIcon>
         </Flex>
+        <Center>
+          <TwitterButton url={'location.href'} description='お母さんヒス構文メーカー'></TwitterButton>
+        </Center>
       </Box>
     </FormProvider>
   );

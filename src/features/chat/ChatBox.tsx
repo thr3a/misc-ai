@@ -12,9 +12,17 @@ type ChatBoxProps = {
   height: string
 };
 
-const Message = (props: { body: string }): JSX.Element => {
+const Message = (props: { body: string, role: 'human' | 'ai' }): JSX.Element => {
   return (
-    <Paper shadow="xs" radius="md" pt='6px' pb='6px' p='xs' bg={'blue.1'} c={'dark.6'}>
+    <Paper
+      shadow="xs"
+      radius="md"
+      pt='6px'
+      pb='6px'
+      p='xs'
+      bg={props.role === 'ai' ? 'white' : '#8de055'}
+      c={'dark.6'}
+    >
       <Text fz={'10px'} style={{ whiteSpace: 'pre-wrap' }}>{props.body}</Text>
     </Paper>
   );
@@ -22,7 +30,7 @@ const Message = (props: { body: string }): JSX.Element => {
 
 export function ChatBox ({ messages, height }: ChatBoxProps): JSX.Element {
   return (
-    <ScrollArea pt={0} pb={0} pr={'xs'} pl={'xs'} type={'scroll'} h={height}>
+    <ScrollArea pt={0} pb={0} pr={'xs'} pl={'xs'} type={'scroll'} h={height} bg={'#7494c0'}>
       <Space h={'md'}></Space>
       <Stack gap={'md'}>
         { messages.map(({ body, role }: MessageProps, index) => {
@@ -31,7 +39,7 @@ export function ChatBox ({ messages, height }: ChatBoxProps): JSX.Element {
               <Group
                 justify={role === 'ai' ? 'flex-start' : 'flex-end'}
               >
-                <Message body={body}></Message>
+                <Message body={body} role={role}></Message>
               </Group>
             </Box>
           );
