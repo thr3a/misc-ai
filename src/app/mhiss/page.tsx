@@ -10,7 +10,6 @@ import { type RequestProps } from '@/app/api/chat-stream/route';
 import { useState, useEffect } from 'react';
 import { TwitterButton } from '@/features/shareButton/Button';
 import { systemMessage } from './utils';
-import { usePathname } from 'next/navigation';
 
 type FormValues = {
   messages: MessageProps[]
