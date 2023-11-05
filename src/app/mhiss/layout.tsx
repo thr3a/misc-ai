@@ -1,18 +1,18 @@
-import { Title, Anchor } from '@mantine/core';
+import { Title, Anchor, Text } from '@mantine/core';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'お母さんヒス構文メーカー',
-  description: 'ヒス家庭を疑似体験'
+  description: 'ヒス構文もAIで生成なんだ じゃあお母さんはいらないってこと？'
 };
 
 export default function PageLayout ({ children }: { children: React.ReactNode }): JSX.Element {
   return (
     <>
       <Anchor href="/mhiss">
-        <Title mt={'md'} order={2}>{metadata.title as string}</Title>
+        <Title mt={'sm'} order={2}>{metadata.title as string}</Title>
       </Anchor>
-      <Title order={6} mb={'sm'} c={'dimmed'}>{metadata.description as string}</Title>
+      <Text mb={'sm'} fz={'12px'} c={'dimmed'} fw={'bold'}>{metadata.description as string}</Text>
       {children}
     </>
   );

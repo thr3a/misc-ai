@@ -58,6 +58,8 @@ export async function POST (req: NextRequest): Promise<StreamingTextResponse> {
   }
 
   const { stream, handlers } = LangChainStream();
+  // TODO: ログちゃんとする
+  console.log(result.data.message);
   const history = await createChatMessageHistory(result.data.history, result.data.systemMessage);
   const memory = new BufferWindowMemory({
     chatHistory: history,

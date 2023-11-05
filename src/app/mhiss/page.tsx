@@ -91,7 +91,7 @@ export default function Page (): JSX.Element {
     <FormProvider form={form}>
       <Box ml={0} mr={0} maw={'100vw'}>
         <ChatBox messages={form.values.messages} height='60vh' latestAiMessage={form.values.latestAiMessage} />
-        <Flex>
+        <Flex align="center">
           <Textarea
             placeholder="入力してください"
             autosize
@@ -104,9 +104,7 @@ export default function Page (): JSX.Element {
           />
           <ActionIcon
             size={'lg'}
-            variant={'outline'}
             color="blue"
-            mt={'3px'}
             onClick={handleSubmit}
             loading={form.values.loading}
           >
