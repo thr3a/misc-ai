@@ -13,7 +13,7 @@ type ChatBoxProps = {
   latestAiMessage: string
 };
 
-const Message = (props: { body: string, role: 'human' | 'ai' }): JSX.Element => {
+const Message = (props: { body: string, role: 'human' | 'ai' }) => {
   return (
     <Paper
       shadow="xs"
@@ -29,16 +29,16 @@ const Message = (props: { body: string, role: 'human' | 'ai' }): JSX.Element => 
   );
 };
 
-export function ChatBox (props: ChatBoxProps): JSX.Element {
-  const messages = structuredClone(props.messages);
-  if (props.latestAiMessage !== '') {
-    messages.push({ body: props.latestAiMessage, role: 'ai' });
+export const ChatBox = ({ messages, height, latestAiMessage }: ChatBoxProps): JSX.Element => {
+  const clonedMessages = structuredClone(messages);
+  if (latestAiMessage !== '') {
+    clonedMessages.push({ body: latestAiMessage, role: 'ai' });
   }
   return (
-    <ScrollArea pt={0} pb={0} pr={'xs'} pl={'xs'} type={'scroll'} h={props.height} bg={'#7494c0'}>
+    <ScrollArea pt={0} pb={0} pr={'xs'} pl={'xs'} type={'scroll'} h={height} bg={'#7494c0'}>
       <Space h={'xs'}></Space>
       <Stack gap={'xs'}>
-        { messages.map(({ body, role }: MessageProps, index) => {
+        { clonedMessages.map(({ body, role }: MessageProps, index) => {
           return (
             <Box key={index}>
               <Group

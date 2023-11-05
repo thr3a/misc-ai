@@ -90,11 +90,7 @@ export default function Page (): JSX.Element {
   return (
     <FormProvider form={form}>
       <Box ml={0} mr={0} maw={'100vw'}>
-        <ChatBox
-          messages={form.getInputProps('messages').value}
-          height='74vh'
-          latestAiMessage={form.getInputProps('latestAiMessage').value}>
-        </ChatBox>
+        <ChatBox messages={form.values.messages} height='60vh' latestAiMessage={form.values.latestAiMessage} />
         <Flex>
           <Textarea
             placeholder="入力してください"
