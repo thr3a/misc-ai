@@ -58,7 +58,7 @@ export default function Page (): JSX.Element {
       systemMessage,
       history: form.values.messages,
       modelParams: {
-        name: 'gpt-4',
+        // name: 'gpt-4',
         temperature: 1
       }
     };
