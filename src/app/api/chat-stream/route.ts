@@ -13,6 +13,8 @@ const requestSchema = z.object({
     body: z.string(),
     role: z.enum(['human', 'ai'])
   })),
+  aiPrefix: z.string().optional().default('ai'),
+  humanPrefix: z.string().optional().default('human'),
   systemMessage: z.string(),
   csrfToken: z.string().optional(),
   modelParams: z.object({
@@ -22,7 +24,7 @@ const requestSchema = z.object({
     stop: z.array(z.string()).optional()
   }).optional()
 });
-export type RequestProps = z.infer<typeof requestSchema>;
+export type RequestProps = z.input<typeof requestSchema>;
 
 export const createChatMessageHistory = async (messages: MessageProps[], ruleMessage: string): Promise<ChatMessageHistory> => {
   const history = new ChatMessageHistory();
@@ -58,13 +60,13 @@ export async function POST (req: NextRequest): Promise<StreamingTextResponse> {
   }
 
   const { stream, handlers } = LangChainStream();
-  // TODO: ログちゃんとする
-  console.log(result.data.message);
   const history = await createChatMessageHistory(result.data.history, result.data.systemMessage);
   const memory = new BufferWindowMemory({
     chatHistory: history,
     k: 5, // 過去x回分の対話を使用する
-    returnMessages: false // .loadMemoryVariables({})の挙動が変わる
+    returnMessages: false, // .loadMemoryVariables({})の挙動が変わる
+    aiPrefix: result.data.aiPrefix,
+    humanPrefix: result.data.humanPrefix
   });
   const model = new ChatOpenAI({
     openAIApiKey: process.env.OPENAI_APIKEY ?? 'missing',

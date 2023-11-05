@@ -60,7 +60,9 @@ export default function Page (): JSX.Element {
       modelParams: {
         // name: 'gpt-4',
         temperature: 1
-      }
+      },
+      aiPrefix: 'お母さん',
+      humanPrefix: '娘'
     };
     form.setValues({ loading: true, message: '' });
     form.insertListItem('messages', { body: form.values.message, role: 'human' });
