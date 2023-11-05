@@ -36,6 +36,7 @@ export const createChatMessageHistory = async (messages: MessageProps[], ruleMes
       await history.addAIChatMessage(message.body);
     }
   }));
+  await history.addAIChatMessage('');
   return history;
 };
 
