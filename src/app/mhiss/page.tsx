@@ -10,6 +10,7 @@ import { type RequestProps } from '@/app/api/chat-stream/route';
 import { useState, useEffect } from 'react';
 import { TwitterButton } from '@/features/shareButton/Button';
 import { systemMessage } from './utils';
+import { usePathname } from 'next/navigation';
 
 type FormValues = {
   messages: MessageProps[]
@@ -114,7 +115,7 @@ export default function Page (): JSX.Element {
           </ActionIcon>
         </Flex>
         <Center>
-          <TwitterButton url={'location.href'} description='お母さんヒス構文メーカー'></TwitterButton>
+          <TwitterButton url={'https://ai.turai.work/mhiss/'} description='お母さんヒス構文メーカー'></TwitterButton>
         </Center>
       </Box>
     </FormProvider>
