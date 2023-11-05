@@ -47,10 +47,6 @@ export default function Page (): JSX.Element {
     }
   });
 
-  useEffect(() => {
-    form.setValues({ messages: form.values.messages });
-  }, [form.values]);
-
   const handleSubmit = async (): Promise<void> => {
     console.log(form.values.model);
 
