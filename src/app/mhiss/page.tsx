@@ -43,8 +43,8 @@ export default function Page (): JSX.Element {
       message: '今日は帰りが遅くなるね',
       loading: false,
       latestAiMessage: '',
-      model: 'gpt-4'
-      // model: 'gpt-3.5-turbo'
+      // model: 'gpt-4'
+      model: 'gpt-3.5-turbo'
     }
   });
 
