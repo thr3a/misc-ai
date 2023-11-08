@@ -11,10 +11,10 @@
     "node-server": "node server.js"
   },
   "dependencies": {
-    "@mantine/core": "^7.1.7",
-    "@mantine/form": "^7.1.7",
-    "@mantine/hooks": "^7.1.7",
-    "@mantine/notifications": "^7.1.7",
+    "@mantine/core": "^7.2.1",
+    "@mantine/form": "^7.2.1",
+    "@mantine/hooks": "^7.2.1",
+    "@mantine/notifications": "^7.2.1",
     "@tabler/icons-react": "^2.40.0",
     "@tanstack/react-query": "^5.4.3",
     "@types/node": "20.8.7",
@@ -25,7 +25,7 @@
     "eslint": "8.52.0",
     "eslint-config-next": "13.5.6",
     "eslint-config-standard-with-typescript": "^39.1.1",
-    "langchain": "^0.0.176",
+    "langchain": "^0.0.183",
     "next": "13.5.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",
