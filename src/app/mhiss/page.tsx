@@ -3,7 +3,7 @@ import './style.css';
 import { createFormContext } from '@mantine/form';
 import { type MessageProps } from '@/features/chat/ChatBox';
 import { ChatBox } from '@/features/chat/ChatBox';
-import { Box, Flex, Textarea, ActionIcon, Center } from '@mantine/core';
+import { Box, Flex, Textarea, ActionIcon, Center, Title } from '@mantine/core';
 import { IconSend } from '@tabler/icons-react';
 import { getHotkeyHandler } from '@mantine/hooks';
 import { type RequestProps } from '@/app/api/chat-stream/route';
@@ -92,33 +92,37 @@ export default function Page (): JSX.Element {
   };
 
   return (
-    <FormProvider form={form}>
-      <Box ml={0} mr={0} maw={'100vw'}>
-        <ChatBox messages={form.values.messages} height='60vh' latestAiMessage={form.values.latestAiMessage} />
-        <Flex align="center">
-          <Textarea
-            placeholder="入力してください"
-            autosize
-            minRows={1}
-            style={{ flex: 1, display: 'block' }}
-            {...form.getInputProps('message')}
-            onKeyDown={getHotkeyHandler([
-              ['mod+Enter', handleSubmit]
-            ])}
-          />
-          <ActionIcon
-            size={'lg'}
-            color="blue"
-            onClick={handleSubmit}
-            loading={form.values.loading}
-          >
-            <IconSend></IconSend>
-          </ActionIcon>
-        </Flex>
-        <Center>
-          <TwitterButton url={'https://ai.turai.work/mhiss/'} description='お母さんヒス構文メーカー'></TwitterButton>
-        </Center>
-      </Box>
-    </FormProvider>
+    <Title>調整中！</Title>
   );
+
+  // return (
+  //   <FormProvider form={form}>
+  //     <Box ml={0} mr={0} maw={'100vw'}>
+  //       <ChatBox messages={form.values.messages} height='60vh' latestAiMessage={form.values.latestAiMessage} />
+  //       <Flex align="center">
+  //         <Textarea
+  //           placeholder="入力してください"
+  //           autosize
+  //           minRows={1}
+  //           style={{ flex: 1, display: 'block' }}
+  //           {...form.getInputProps('message')}
+  //           onKeyDown={getHotkeyHandler([
+  //             ['mod+Enter', handleSubmit]
+  //           ])}
+  //         />
+  //         <ActionIcon
+  //           size={'lg'}
+  //           color="blue"
+  //           onClick={handleSubmit}
+  //           loading={form.values.loading}
+  //         >
+  //           <IconSend></IconSend>
+  //         </ActionIcon>
+  //       </Flex>
+  //       <Center>
+  //         <TwitterButton url={'https://ai.turai.work/mhiss/'} description='お母さんヒス構文メーカー'></TwitterButton>
+  //       </Center>
+  //     </Box>
+  //   </FormProvider>
+  // );
 }
