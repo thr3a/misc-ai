@@ -83,6 +83,7 @@ export default function Page (): JSX.Element {
       if (done) break;
       const decodedValue = decoder.decode(value, { stream: true });
       result += decodedValue;
+      result = result.replace(/^お母さん:/, '');
       form.setValues({ latestAiMessage: result });
     }
     reader.releaseLock();
