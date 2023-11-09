@@ -2,7 +2,7 @@ import { Title, Anchor, Text } from '@mantine/core';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'お母さんヒス構文メーカー',
+  title: 'お母さんヒス構文メーカー改',
   description: 'ヒス構文もAIで生成なんだ じゃあお母さんはいらないってこと？'
 };
 

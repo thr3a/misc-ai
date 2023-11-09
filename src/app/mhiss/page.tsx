@@ -5,11 +5,12 @@ import { type MessageProps } from '@/features/chat/ChatBox';
 import { ChatBox } from '@/features/chat/ChatBox';
 import { Box, Flex, Textarea, ActionIcon, Center, Title } from '@mantine/core';
 import { IconSend } from '@tabler/icons-react';
-import { getHotkeyHandler } from '@mantine/hooks';
+import { getHotkeyHandler, useLocalStorage } from '@mantine/hooks';
 import { type RequestProps } from '@/app/api/chat-stream/route';
 import { useState, useEffect } from 'react';
 import { TwitterButton } from '@/features/shareButton/Button';
 import { systemMessage } from './utils';
+import dayjs from 'dayjs';
 
 type FormValues = {
   messages: MessageProps[]
@@ -47,12 +48,20 @@ export default function Page (): JSX.Element {
       model: 'gpt-3.5-turbo'
     }
   });
+  const storageKey = dayjs().add(1, 'day').format('YYYYMMDD');
+  const [count, setCount] = useLocalStorage<number>({
+    key: storageKey,
+    defaultValue: 0
+  });
 
   const handleSubmit = async (): Promise<void> => {
-    console.log(form.values.model);
-
     if (form.values.message === '') return;
     if (form.values.loading) return;
+    count !== undefined && setCount(count + 1);
+    if (count > 5) {
+      form.setValues({ latestAiMessage: '1日のチャット上限数を超えました', loading: false });
+      return;
+    }
     const params: RequestProps = {
       csrfToken,
       message: form.values.message,
@@ -91,38 +100,38 @@ export default function Page (): JSX.Element {
     form.setValues({ latestAiMessage: '', loading: false, model: 'gpt-3.5-turbo' });
   };
 
-  return (
-    <Title>メンテナンス中！</Title>
-  );
-
   // return (
-  //   <FormProvider form={form}>
-  //     <Box ml={0} mr={0} maw={'100vw'}>
-  //       <ChatBox messages={form.values.messages} height='60vh' latestAiMessage={form.values.latestAiMessage} />
-  //       <Flex align="center">
-  //         <Textarea
-  //           placeholder="入力してください"
-  //           autosize
-  //           minRows={1}
-  //           style={{ flex: 1, display: 'block' }}
-  //           {...form.getInputProps('message')}
-  //           onKeyDown={getHotkeyHandler([
-  //             ['mod+Enter', handleSubmit]
-  //           ])}
-  //         />
-  //         <ActionIcon
-  //           size={'lg'}
-  //           color="blue"
-  //           onClick={handleSubmit}
-  //           loading={form.values.loading}
-  //         >
-  //           <IconSend></IconSend>
-  //         </ActionIcon>
-  //       </Flex>
-  //       <Center>
-  //         <TwitterButton url={'https://ai.turai.work/mhiss/'} description='お母さんヒス構文メーカー'></TwitterButton>
-  //       </Center>
-  //     </Box>
-  //   </FormProvider>
+  //   <Title>メンテナンス中！</Title>
   // );
+
+  return (
+    <FormProvider form={form}>
+      <Box ml={0} mr={0} maw={'100vw'}>
+        <ChatBox messages={form.values.messages} height='60vh' latestAiMessage={form.values.latestAiMessage} />
+        <Flex align="center">
+          <Textarea
+            placeholder="入力してください"
+            autosize
+            minRows={1}
+            style={{ flex: 1, display: 'block' }}
+            {...form.getInputProps('message')}
+            onKeyDown={getHotkeyHandler([
+              ['mod+Enter', handleSubmit]
+            ])}
+          />
+          <ActionIcon
+            size={'lg'}
+            color="blue"
+            onClick={handleSubmit}
+            loading={form.values.loading}
+          >
+            <IconSend></IconSend>
+          </ActionIcon>
+        </Flex>
+        <Center>
+          <TwitterButton url={'https://ai.turai.work/mhiss/'} description='お母さんヒス構文メーカー'></TwitterButton>
+        </Center>
+      </Box>
+    </FormProvider>
+  );
 }

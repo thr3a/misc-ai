@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { ConversationChain } from 'langchain/chains';
+import { LLMChain } from 'langchain/chains';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { BufferWindowMemory, ChatMessageHistory } from 'langchain/memory';
 import { type MessageProps } from '@/features/chat/ChatBox';
-import { SystemMessage } from 'langchain/schema';
 import { StreamingTextResponse, LangChainStream } from 'ai';
+import { PromptTemplate } from 'langchain/prompts';
 
 const requestSchema = z.object({
   message: z.string(),
@@ -26,9 +26,8 @@ const requestSchema = z.object({
 });
 export type RequestProps = z.input<typeof requestSchema>;
 
-export const createChatMessageHistory = async (messages: MessageProps[], ruleMessage: string): Promise<ChatMessageHistory> => {
+export const createChatMessageHistory = async (messages: MessageProps[]): Promise<ChatMessageHistory> => {
   const history = new ChatMessageHistory();
-  await history.addMessage(new SystemMessage(ruleMessage));
   await Promise.all(messages.map(async (message) => {
     if (message.role === 'human') {
       await history.addUserMessage(message.body);
@@ -36,7 +35,6 @@ export const createChatMessageHistory = async (messages: MessageProps[], ruleMes
       await history.addAIChatMessage(message.body);
     }
   }));
-  await history.addAIChatMessage('');
   return history;
 };
 
@@ -61,8 +59,14 @@ export async function POST (req: NextRequest): Promise<StreamingTextResponse> {
   }
 
   const { stream, handlers } = LangChainStream();
-  const history = await createChatMessageHistory(result.data.history, result.data.systemMessage);
+  const history = await createChatMessageHistory(result.data.history);
+  const prompt = PromptTemplate.fromTemplate(`${result.data.systemMessage}
+  {chat_history}
+  ${result.data.humanPrefix}: {input}
+  ${result.data.aiPrefix}: `);
+
   const memory = new BufferWindowMemory({
+    memoryKey: 'chat_history',
     chatHistory: history,
     k: 5, // 過去x回分の対話を使用する
     returnMessages: false, // .loadMemoryVariables({})の挙動が変わる
@@ -77,9 +81,10 @@ export async function POST (req: NextRequest): Promise<StreamingTextResponse> {
     stop: result.data.modelParams?.stop ?? undefined,
     streaming: true
   });
-  const chain = new ConversationChain({
+  const chain = new LLMChain({
     llm: model,
     memory,
+    prompt,
     verbose: true // verboseをtrueにすると処理内容などが出力される
   });
   chain.call({ input: result.data.message, callbacks: [handlers] }).catch((e) => {});

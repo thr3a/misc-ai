@@ -1,9 +1,7 @@
-const messages = [];
-
-const debug3 = async (): Promise<void> => {
+const debug = async (): Promise<void> => {
   const url = 'http://localhost:3000/api/chat-stream/';
   const params = {
-    systemMessage: '私の雑談相手になってください。',
+    systemMessage: '以下は私とあなたとの会話です。',
     message: '私について知っている事をすべて教えてください。',
     history: [
       {
@@ -37,7 +35,7 @@ const debug3 = async (): Promise<void> => {
   }
 };
 (async () => {
-  await debug3();
+  await debug();
 })();
 
 export {};
