@@ -9,7 +9,7 @@ type Props = {
 
 // brand-x
 
-export const TwitterButton = ({ url, description, label = 'シェア' }: Props): JSX.Element => {
+export const TwitterButton = ({ url, description, label = 'ツイート!' }: Props): JSX.Element => {
   const encoded = encodeURI(description + ' ' + url);
   const openURL = 'https://twitter.com/intent/tweet?text=' + encoded;
   return (

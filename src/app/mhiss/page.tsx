@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react';
 import { TwitterButton } from '@/features/shareButton/Button';
 import { systemMessage } from './utils';
 import dayjs from 'dayjs';
+import { Description } from './Description';
 
 type FormValues = {
   messages: MessageProps[]
@@ -128,9 +129,10 @@ export default function Page (): JSX.Element {
             <IconSend></IconSend>
           </ActionIcon>
         </Flex>
-        <Center>
+        <Center mt={'md'} mb={'md'}>
           <TwitterButton url={'https://ai.turai.work/mhiss/'} description='お母さんヒス構文メーカー'></TwitterButton>
         </Center>
+        <Description></Description>
       </Box>
     </FormProvider>
   );
