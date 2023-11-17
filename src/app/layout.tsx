@@ -1,7 +1,7 @@
 import Script from 'next/script';
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
-import { MantineProvider, ColorSchemeScript, Container } from '@mantine/core';
+import { MantineProvider, Container } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import type { Metadata } from 'next';
 import { theme } from '@/theme';
@@ -24,7 +24,6 @@ export default function RootLayout ({ children }: { children: React.ReactNode })
     <html lang="ja">
       <head>
         <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no" />
-        <ColorSchemeScript />
         <Script id="google-tag-manager" strategy="afterInteractive">
           {`
         (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -36,7 +35,7 @@ export default function RootLayout ({ children }: { children: React.ReactNode })
         </Script>
       </head>
       <body>
-        <MantineProvider theme={theme}>
+        <MantineProvider theme={theme} forceColorScheme="light">
           <Notifications position={'top-right'} />
           <Providers>
             <Container id='container'>
