@@ -1,6 +1,6 @@
 'use client';
 
-import { Paper, Text, Title } from '@mantine/core';
+import { Paper, Text, Title, Space } from '@mantine/core';
 
 export const Description = (): JSX.Element => {
   return (
@@ -15,6 +15,15 @@ export const Description = (): JSX.Element => {
       <Text>
           お母さんヒス構文は感情を表現するために使われることがありますが、相手に対して威圧的な印象を与えることもあるので、注意が必要です。
           建設的なコミュニケーションを心がけましょう。
+      </Text>
+      <Space h="md" />
+      <Title order={2}>お母さんヒス構文メーカーについて</Title>
+      <Text>
+        お母さんヒス構文メーカーは、ヒス家庭を疑似体験できる目的で作成されたアプリです。AIのヒスお母さんとチャットすることができます。
+      </Text>
+      <Text>
+        お母さんヒス構文メーカーは、おもしろいだけでなく、お母さんヒス構文のパターンを学ぶことで、実際に遭遇したときに対処する力を養うことができます。
+        ただし、お母さんヒス構文メーカーはあくまでジョークのツールであり、実際にお母さんに使うと大変なことになりますので、ご注意ください。
       </Text>
     </Paper>
   );
