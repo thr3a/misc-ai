@@ -79,7 +79,8 @@ export async function POST (req: NextRequest): Promise<StreamingTextResponse> {
     temperature: result.data.modelParams?.temperature ?? 0.6,
     maxTokens: result.data.modelParams?.max_tokens ?? undefined,
     stop: result.data.modelParams?.stop ?? undefined,
-    streaming: true
+    streaming: true,
+    verbose: true
   });
   const chain = new LLMChain({
     llm: model,
