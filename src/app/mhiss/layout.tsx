@@ -3,7 +3,10 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'お母さんヒス構文メーカー改',
-  description: 'ヒス構文もAIで生成なんだ じゃあお母さんはいらないってこと？'
+  description: 'ヒス構文もAIで生成なんだ じゃあお母さんはいらないってこと？',
+  viewport: {
+    width: '375'
+  }
 };
 
 export default function PageLayout ({ children }: { children: React.ReactNode }): JSX.Element {
