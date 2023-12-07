@@ -3,7 +3,7 @@ import './style.css';
 import { createFormContext } from '@mantine/form';
 import { type MessageProps } from '@/features/chat/ChatBox';
 import { ChatBox } from '@/features/chat/ChatBox';
-import { Box, Flex, Textarea, ActionIcon, Center, Title } from '@mantine/core';
+import { Box, Flex, Textarea, ActionIcon, Center } from '@mantine/core';
 import { IconSend } from '@tabler/icons-react';
 import { getHotkeyHandler, useLocalStorage } from '@mantine/hooks';
 import { type RequestProps } from '@/app/api/chat-stream/route';
@@ -100,10 +100,6 @@ export default function Page (): JSX.Element {
     form.insertListItem('messages', { body: result, role: 'ai' });
     form.setValues({ latestAiMessage: '', loading: false, model: 'gpt-3.5-turbo' });
   };
-
-  // return (
-  //   <Title>メンテナンス中！</Title>
-  // );
 
   return (
     <FormProvider form={form}>
