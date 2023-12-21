@@ -109,11 +109,11 @@ export async function POST (req: NextRequest): Promise<StreamingTextResponse> {
       {
         category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
         threshold: HarmBlockThreshold.BLOCK_NONE
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_UNSPECIFIED,
-        threshold: HarmBlockThreshold.BLOCK_NONE
       }
+      // {
+      //   category: HarmCategory.HARM_CATEGORY_UNSPECIFIED,
+      //   threshold: HarmBlockThreshold.BLOCK_NONE
+      // }
     ],
     temperature: result.data.modelParams?.temperature ?? 0.6,
     verbose: true
