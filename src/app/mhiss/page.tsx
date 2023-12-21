@@ -98,7 +98,7 @@ export default function Page (): JSX.Element {
     }
     reader.releaseLock();
     form.insertListItem('messages', { body: result, role: 'ai' });
-    form.setValues({ latestAiMessage: '', loading: false, model: 'gpt-3.5-turbo' });
+    form.setValues({ latestAiMessage: '', loading: false });
   };
 
   return (

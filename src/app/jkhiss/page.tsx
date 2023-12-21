@@ -93,12 +93,12 @@ export default function Page (): JSX.Element {
       if (done) break;
       const decodedValue = decoder.decode(value, { stream: true });
       result += decodedValue;
-      result = result.replace(/^女子高校生:/, '');
+      result = result.replace(/女子高校生:/, '');
       form.setValues({ latestAiMessage: result });
     }
     reader.releaseLock();
     form.insertListItem('messages', { body: result, role: 'ai' });
-    form.setValues({ latestAiMessage: '', loading: false, model: 'gpt-3.5-turbo' });
+    form.setValues({ latestAiMessage: '', loading: false });
   };
 
   return (
