@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'JKヒス構文メーカー',
-  description: 'ヒス構文もAIで生成なんだ じゃあ私は用済みってこと？',
+  description: 'ヒス構文もAIで生成なんだ じゃあ私は◯ねってこと？',
   viewport: {
     width: '375'
   }
