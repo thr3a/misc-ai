@@ -11,6 +11,7 @@
     "node-server": "node server.js"
   },
   "dependencies": {
+    "@langchain/google-genai": "^0.0.5",
     "@mantine/core": "^7.3.1",
     "@mantine/form": "^7.3.1",
     "@mantine/hooks": "^7.3.1",
@@ -26,7 +27,7 @@
     "eslint": "8.52.0",
     "eslint-config-next": "13.5.6",
     "eslint-config-standard-with-typescript": "^39.1.1",
-    "langchain": "^0.0.203",
+    "langchain": "^0.0.210",
     "next": "13.5.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",

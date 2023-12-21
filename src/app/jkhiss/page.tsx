@@ -60,7 +60,7 @@ export default function Page (): JSX.Element {
     if (form.values.loading) return;
     count !== undefined && setCount(count + 1);
     if (count > 5) {
-      form.setValues({ latestAiMessage: '1日のチャット上限数を超えました', loading: false });
+      form.setValues({ latestAiMessage: '1日のチャット上限数を超えました。明日またチャットしてね', loading: false });
       return;
     }
     const params: RequestProps = {
