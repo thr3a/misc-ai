@@ -1,4 +1,4 @@
-import { type RequestProps } from '@/app/api/chat-stream/route';
+import type { RequestProps } from '@/app/api/chat-stream/route';
 
 const topic = '最強のアイスクリームの味';
 const initPrompt = `
@@ -17,7 +17,7 @@ const prompt = `
 TOPIC: ${topic}
 `;
 
-async function getMessage (params: RequestProps): Promise<string> {
+async function getMessage(params: RequestProps): Promise<string> {
   let resultMessage = '';
   const res = await fetch('http://localhost:3000/api/chat-stream/', {
     method: 'POST',
@@ -72,5 +72,3 @@ let latestMessage = '';
     count++;
   }
 })().catch(() => {});
-
-export {};

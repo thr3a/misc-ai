@@ -1,24 +1,24 @@
 'use client';
-import './style.css';
-import { createFormContext } from '@mantine/form';
-import { type MessageProps } from '@/features/chat/ChatBox';
+import type { RequestProps } from '@/app/api/chat-stream/route';
+import type { MessageProps } from '@/features/chat/ChatBox';
 import { ChatBox } from '@/features/chat/ChatBox';
-import { Box, Flex, Textarea, ActionIcon, Center } from '@mantine/core';
-import { IconSend } from '@tabler/icons-react';
-import { getHotkeyHandler, useLocalStorage } from '@mantine/hooks';
-import { type RequestProps } from '@/app/api/chat-stream/route';
-import { useState, useEffect } from 'react';
 import { TwitterButton } from '@/features/shareButton/Button';
-import { systemMessage } from './utils';
+import { ActionIcon, Box, Center, Flex, Textarea } from '@mantine/core';
+import { createFormContext } from '@mantine/form';
+import { getHotkeyHandler, useLocalStorage } from '@mantine/hooks';
+import { IconSend } from '@tabler/icons-react';
 import dayjs from 'dayjs';
+import { useEffect, useState } from 'react';
 import { Description } from './Description';
+import './style.css';
+import { systemMessage } from './utils';
 
 type FormValues = {
-  messages: MessageProps[]
-  message: string
-  loading: boolean
-  latestAiMessage: string
-  model: 'gpt-3.5-turbo' | 'gpt-4'
+  messages: MessageProps[];
+  message: string;
+  loading: boolean;
+  latestAiMessage: string;
+  model: 'gpt-3.5-turbo' | 'gpt-4';
 };
 const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
 
@@ -30,7 +30,7 @@ const DummyMessages = (num: number): MessageProps[] => {
   return array;
 };
 
-export default function Page (): JSX.Element {
+export default function Page(): JSX.Element {
   const [csrfToken, setCsrfToken] = useState<string>('loading...');
   useEffect(() => {
     const el = document.querySelector('meta[name="x-csrf-token"]');
@@ -105,23 +105,9 @@ export default function Page (): JSX.Element {
     <FormProvider form={form}>
       <Box ml={0} mr={0} maw={'100vw'}>
         <ChatBox messages={form.values.messages} height='60vh' latestAiMessage={form.values.latestAiMessage} />
-        <Flex align="center">
-          <Textarea
-            placeholder="入力してください"
-            autosize
-            minRows={1}
-            style={{ flex: 1, display: 'block' }}
-            {...form.getInputProps('message')}
-            onKeyDown={getHotkeyHandler([
-              ['mod+Enter', handleSubmit]
-            ])}
-          />
-          <ActionIcon
-            size={'lg'}
-            color="blue"
-            onClick={handleSubmit}
-            loading={form.values.loading}
-          >
+        <Flex align='center'>
+          <Textarea placeholder='入力してください' autosize minRows={1} style={{ flex: 1, display: 'block' }} {...form.getInputProps('message')} onKeyDown={getHotkeyHandler([['mod+Enter', handleSubmit]])} />
+          <ActionIcon size={'lg'} color='blue' onClick={handleSubmit} loading={form.values.loading}>
             <IconSend></IconSend>
           </ActionIcon>
         </Flex>

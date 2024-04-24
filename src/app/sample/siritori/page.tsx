@@ -1,22 +1,22 @@
 'use client';
-import './style.css';
-import { createFormContext } from '@mantine/form';
-import { type MessageProps } from '@/features/chat/ChatBox';
+import type { RequestProps } from '@/app/api/chat/route';
+import type { MessageProps } from '@/features/chat/ChatBox';
 import { ChatBox } from '@/features/chat/ChatBox';
-import { Box, Flex, Textarea, ActionIcon } from '@mantine/core';
-import { IconSend } from '@tabler/icons-react';
+import { ActionIcon, Box, Flex, Textarea } from '@mantine/core';
+import { createFormContext } from '@mantine/form';
 import { getHotkeyHandler } from '@mantine/hooks';
-import { type RequestProps } from '@/app/api/chat/route';
-import { useState, useEffect } from 'react';
+import { IconSend } from '@tabler/icons-react';
+import { useEffect, useState } from 'react';
+import './style.css';
 
 type FormValues = {
-  messages: MessageProps[]
-  message: string
-  loading: boolean
+  messages: MessageProps[];
+  message: string;
+  loading: boolean;
 };
 const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
 
-export default function Page (): JSX.Element {
+export default function Page(): JSX.Element {
   const [csrfToken, setCsrfToken] = useState<string>('loading...');
   useEffect(() => {
     const el = document.querySelector('meta[name="x-csrf-token"]');
@@ -97,24 +97,8 @@ export default function Page (): JSX.Element {
       <Box maw={'400px'} style={{ border: '1px solid #eee' }} ml={0} mah={'600px'}>
         <ChatBox messages={form.getInputProps('messages').value} height='60vh' latestAiMessage='' />
         <Flex>
-          <Textarea
-            placeholder="入力してください"
-            autosize
-            minRows={1}
-            style={{ flex: 1, display: 'block' }}
-            {...form.getInputProps('message')}
-            onKeyDown={getHotkeyHandler([
-              ['mod+Enter', handleSubmit]
-            ])}
-          />
-          <ActionIcon
-            size={'lg'}
-            variant={'outline'}
-            color="blue"
-            mt={'3px'}
-            onClick={handleSubmit}
-            loading={form.values.loading}
-          >
+          <Textarea placeholder='入力してください' autosize minRows={1} style={{ flex: 1, display: 'block' }} {...form.getInputProps('message')} onKeyDown={getHotkeyHandler([['mod+Enter', handleSubmit]])} />
+          <ActionIcon size={'lg'} variant={'outline'} color='blue' mt={'3px'} onClick={handleSubmit} loading={form.values.loading}>
             <IconSend></IconSend>
           </ActionIcon>
         </Flex>

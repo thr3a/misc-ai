@@ -1,14 +1,14 @@
-import Script from 'next/script';
-import '@mantine/core/styles.css';
-import '@mantine/notifications/styles.css';
-import { MantineProvider, Container, ColorSchemeScript } from '@mantine/core';
-import { Notifications } from '@mantine/notifications';
-import type { Metadata } from 'next';
-import { theme } from '@/theme';
 import { Providers } from '@/providers';
+import { theme } from '@/theme';
+import { ColorSchemeScript, Container, MantineProvider } from '@mantine/core';
+import '@mantine/core/styles.css';
+import { Notifications } from '@mantine/notifications';
+import '@mantine/notifications/styles.css';
+import type { Metadata } from 'next';
 import { headers } from 'next/headers';
+import Script from 'next/script';
 
-export async function generateMetadata (): Promise<Metadata> {
+export async function generateMetadata(): Promise<Metadata> {
   const csrfToken = headers().get('X-CSRF-Token') ?? 'missing';
   return {
     title: 'ChatGPTのごった煮',
@@ -19,13 +19,13 @@ export async function generateMetadata (): Promise<Metadata> {
   };
 }
 
-export default function RootLayout ({ children }: { children: React.ReactNode }): JSX.Element {
+export default function RootLayout({ children }: { children: React.ReactNode }): JSX.Element {
   return (
-    <html lang="ja">
+    <html lang='ja'>
       <head>
         <ColorSchemeScript />
-        <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no" />
-        <Script id="google-tag-manager" strategy="afterInteractive">
+        <meta name='viewport' content='minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no' />
+        <Script id='google-tag-manager' strategy='afterInteractive'>
           {`
         (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
         new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -36,12 +36,10 @@ export default function RootLayout ({ children }: { children: React.ReactNode })
         </Script>
       </head>
       <body>
-        <MantineProvider theme={theme} forceColorScheme="light">
+        <MantineProvider theme={theme} forceColorScheme='light'>
           <Notifications position={'top-right'} />
           <Providers>
-            <Container id='container'>
-              {children}
-            </Container>
+            <Container id='container'>{children}</Container>
           </Providers>
         </MantineProvider>
       </body>

@@ -1,11 +1,8 @@
-import { z } from 'zod';
-import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { PromptTemplate } from 'langchain/prompts';
 import { LLMChain } from 'langchain/chains';
-import {
-  StructuredOutputParser,
-  OutputFixingParser
-} from 'langchain/output_parsers';
+import { ChatOpenAI } from 'langchain/chat_models/openai';
+import { OutputFixingParser, StructuredOutputParser } from 'langchain/output_parsers';
+import { PromptTemplate } from 'langchain/prompts';
+import { z } from 'zod';
 
 const outputParser = StructuredOutputParser.fromZodSchema(
   z
@@ -30,7 +27,7 @@ const outputFixingParser = OutputFixingParser.fromLLM(chatModel, outputParser);
 
 // Don't forget to include formatting instructions in the prompt!
 const prompt = new PromptTemplate({
-  template: 'Answer the user\'s question as best you can:\n{format_instructions}\n{query}',
+  template: "Answer the user's question as best you can:\n{format_instructions}\n{query}",
   inputVariables: ['query'],
   partialVariables: {
     format_instructions: outputFixingParser.getFormatInstructions()

@@ -1,5 +1,5 @@
-import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
+import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 
 const model = new ChatGoogleGenerativeAI({
   modelName: 'gemini-pro',
@@ -12,11 +12,6 @@ const model = new ChatGoogleGenerativeAI({
   ]
 });
 
-const res = await model.invoke([
-  [
-    'human',
-    '浮世絵の特徴を３つ教えて下さい。'
-  ]
-]);
+const res = await model.invoke([['human', '浮世絵の特徴を３つ教えて下さい。']]);
 
 console.log(res);

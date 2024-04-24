@@ -9,7 +9,7 @@ const common = `
 - An ethical mindset
 `;
 
-export function initPrompt (topic: string): string {
+export function initPrompt(topic: string): string {
   return `
 # Task
 Act as a brainstorming participant.
@@ -20,7 +20,7 @@ ${topic}
 `;
 }
 
-export function loopPrompt (topic: string): string {
+export function loopPrompt(topic: string): string {
   return `
 # Task
 Discussing $TOPIC with me.
@@ -30,4 +30,4 @@ ${common}
 # Topic
 ${topic}
 `;
-};
+}

@@ -1,24 +1,24 @@
 'use client';
+import type { RequestProps } from '@/app/api/list-parser/route';
+import { Box, Button, CopyButton, Group, Radio, Stack, TextInput, Title } from '@mantine/core';
 import { createFormContext, isNotEmpty } from '@mantine/form';
-import { Box, Group, Button, Radio, TextInput, Stack, Title, CopyButton } from '@mantine/core';
-import { type RequestProps } from '@/app/api/list-parser/route';
-import { useState, useEffect } from 'react';
-import { PromptTemplate } from 'langchain/prompts';
 import { notifications } from '@mantine/notifications';
+import { IconCheck, IconClipboardCopy } from '@tabler/icons-react';
+import { PromptTemplate } from 'langchain/prompts';
+import { useEffect, useState } from 'react';
 import { supportedNamingConventions } from './utils';
-import { IconClipboardCopy, IconCheck } from '@tabler/icons-react';
 
 type FormValues = {
-  type: 'variable' | 'function' | 'branch'
-  purpose: string
-  candidates: string[]
-  namingConvention: 'camel case' | 'pascal case' | 'snake case' | 'kebab case'
-  loading: boolean
+  type: 'variable' | 'function' | 'branch';
+  purpose: string;
+  candidates: string[];
+  namingConvention: 'camel case' | 'pascal case' | 'snake case' | 'kebab case';
+  loading: boolean;
 };
 
 const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
 
-export default function Page (): JSX.Element {
+export default function Page(): JSX.Element {
   const [csrfToken, setCsrfToken] = useState<string>('loading...');
   useEffect(() => {
     const el = document.querySelector('meta[name="x-csrf-token"]');
@@ -84,44 +84,43 @@ ${form.values.purpose}`);
 
   return (
     <FormProvider form={form}>
-      <Box maw={600} mx="auto" component="form">
-        <Radio.Group label="名前の種類" {...form.getInputProps('type')}>
-          <Group mt="xs">
+      <Box maw={600} mx='auto' component='form'>
+        <Radio.Group label='名前の種類' {...form.getInputProps('type')}>
+          <Group mt='xs'>
             <Radio value='variable' label='変数名' />
             <Radio value='function' label='関数名' />
             <Radio value='branch' label='ブランチ名' />
           </Group>
         </Radio.Group>
-        <TextInput label='処理の概要を記述してください' withAsterisk {...form.getInputProps('purpose')} placeholder='素数かどうか判定する関数'/>
-        <Radio.Group label="命名規則" {...form.getInputProps('namingConvention')}>
-          <Stack mt="xs">
+        <TextInput label='処理の概要を記述してください' withAsterisk {...form.getInputProps('purpose')} placeholder='素数かどうか判定する関数' />
+        <Radio.Group label='命名規則' {...form.getInputProps('namingConvention')}>
+          <Stack mt='xs'>
             {supportedNamingConventions.map((nc, index) => (
               <Radio key={index} value={nc.name} label={nc.label} />
             ))}
           </Stack>
         </Radio.Group>
 
-        <Group justify="center">
-          <Button onClick={handleSubmit} loading={form.values.loading}>作成!</Button>
+        <Group justify='center'>
+          <Button onClick={handleSubmit} loading={form.values.loading}>
+            作成!
+          </Button>
         </Group>
-        <Group mt="sm" mb="sm">
+        <Group mt='sm' mb='sm'>
           <Title order={2}>生成結果</Title>
         </Group>
 
-        <Stack gap="sm">
+        <Stack gap='sm'>
           {form.values.candidates.map((candidate, index) => (
             <TextInput
               readOnly
               key={index}
               value={candidate.trim()}
-              rightSectionPointerEvents="all"
+              rightSectionPointerEvents='all'
               rightSection={
                 <CopyButton value={candidate.trim()}>
                   {({ copied, copy }) => (
-                    <Button
-                      color={copied ? 'teal' : 'blue'}
-                      onClick={copy}
-                    >
+                    <Button color={copied ? 'teal' : 'blue'} onClick={copy}>
                       {copied ? <IconCheck size={18} /> : <IconClipboardCopy size={18} />}
                     </Button>
                   )}

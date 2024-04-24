@@ -1,20 +1,20 @@
 'use client';
-import { createFormContext } from '@mantine/form';
-import { Box, Group, Button, Title, Paper, Text, Stack, Space, Textarea } from '@mantine/core';
-import { type RequestProps } from '@/app/api/chat-stream/route';
-import { useState, useEffect } from 'react';
+import type { RequestProps } from '@/app/api/chat-stream/route';
 import { initPrompt, loopPrompt } from '@/app/discuss/utils';
+import { Box, Button, Group, Paper, Space, Stack, Text, Textarea, Title } from '@mantine/core';
+import { createFormContext } from '@mantine/form';
+import { useEffect, useState } from 'react';
 
 type FormValues = {
-  topic: string
-  latestMessage: string
-  messages: string[]
-  loading: boolean
+  topic: string;
+  latestMessage: string;
+  messages: string[];
+  loading: boolean;
 };
 
 const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
 
-export default function Page (): JSX.Element {
+export default function Page(): JSX.Element {
   const [csrfToken, setCsrfToken] = useState<string>('loading...');
   useEffect(() => {
     const el = document.querySelector('meta[name="x-csrf-token"]');
@@ -32,7 +32,7 @@ export default function Page (): JSX.Element {
     }
   });
 
-  async function fetchAPI (params: RequestProps): Promise<string> {
+  async function fetchAPI(params: RequestProps): Promise<string> {
     let result = '';
     const res = await fetch('/api/chat-stream/', {
       method: 'POST',
@@ -93,45 +93,35 @@ export default function Page (): JSX.Element {
       if (count === 10) {
         form.setValues({ loading: false });
         break;
-      };
+      }
       count++;
     }
   };
 
   return (
     <FormProvider form={form}>
-      <Box maw={800} mx="auto" component="form">
-        <Textarea
-          label='議題'
-          withAsterisk
-          placeholder='一番可愛いサンリオキャラクターは誰か？'
-          autosize
-          minRows={2}
-          maxRows={4}
-          {...form.getInputProps('topic')}
-        ></Textarea>
-        <Group justify="center">
-          <Button onClick={handleSubmit} loading={form.values.loading} color={'orange'}>議論開始！</Button>
+      <Box maw={800} mx='auto' component='form'>
+        <Textarea label='議題' withAsterisk placeholder='一番可愛いサンリオキャラクターは誰か？' autosize minRows={2} maxRows={4} {...form.getInputProps('topic')}></Textarea>
+        <Group justify='center'>
+          <Button onClick={handleSubmit} loading={form.values.loading} color={'orange'}>
+            議論開始！
+          </Button>
         </Group>
-        <Group mt="sm" mb="sm">
+        <Group mt='sm' mb='sm'>
           <Title order={2}>生成結果</Title>
         </Group>
         <Stack>
           {form.values.messages.map((message, index) => (
-            <Paper shadow="xs" p='sm' withBorder key={index}>
-              <Text size='xs'>
-                {message}
-              </Text>
+            <Paper shadow='xs' p='sm' withBorder key={index}>
+              <Text size='xs'>{message}</Text>
             </Paper>
           ))}
         </Stack>
-        {form.values.latestMessage !== '' &&
-          <Paper shadow="xs" p='sm' withBorder mt={'md'}>
-            <Text size='xs'>
-              {form.values.latestMessage}
-            </Text>
+        {form.values.latestMessage !== '' && (
+          <Paper shadow='xs' p='sm' withBorder mt={'md'}>
+            <Text size='xs'>{form.values.latestMessage}</Text>
           </Paper>
-        }
+        )}
       </Box>
       <Space h={'xl'} />
       <Space h={'xl'} />

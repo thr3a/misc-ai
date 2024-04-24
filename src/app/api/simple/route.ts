@@ -1,18 +1,20 @@
+import { OpenAI } from 'langchain/llms/openai';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { OpenAI } from 'langchain/llms/openai';
 
 const requestSchema = z.object({
   prompt: z.string(),
   csrfToken: z.string().optional(),
-  modelParams: z.object({
-    name: z.string().optional(),
-    temperature: z.number().optional()
-  }).optional()
+  modelParams: z
+    .object({
+      name: z.string().optional(),
+      temperature: z.number().optional()
+    })
+    .optional()
 });
 export type RequestProps = z.infer<typeof requestSchema>;
 
-export async function POST (req: NextRequest): Promise<NextResponse> {
+export async function POST(req: NextRequest): Promise<NextResponse> {
   let body;
   try {
     body = await req.json();
@@ -25,11 +27,14 @@ export async function POST (req: NextRequest): Promise<NextResponse> {
   const result = requestSchema.safeParse(body);
   if (!result.success) {
     const { errors } = result.error;
-    return NextResponse.json({
-      status: 'ng',
-      errorMessage: 'Validation error',
-      errors
-    }, { status: 400 });
+    return NextResponse.json(
+      {
+        status: 'ng',
+        errorMessage: 'Validation error',
+        errors
+      },
+      { status: 400 }
+    );
   }
 
   const llm = new OpenAI({

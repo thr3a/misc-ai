@@ -1,42 +1,48 @@
-import { type NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
+import type { MessageProps } from '@/features/chat/ChatBox';
 import { ConversationChain } from 'langchain/chains';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { BufferWindowMemory, ChatMessageHistory } from 'langchain/memory';
-import { type MessageProps } from '@/features/chat/ChatBox';
 import { SystemMessage } from 'langchain/schema';
+import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
 const requestSchema = z.object({
   message: z.string(),
-  history: z.array(z.object({
-    body: z.string(),
-    role: z.enum(['human', 'ai'])
-  })),
+  history: z.array(
+    z.object({
+      body: z.string(),
+      role: z.enum(['human', 'ai'])
+    })
+  ),
   systemMessage: z.string(),
   csrfToken: z.string().optional(),
-  modelParams: z.object({
-    name: z.string().optional(),
-    temperature: z.number().optional(),
-    max_tokens: z.number().optional(),
-    stop: z.array(z.string()).optional()
-  }).optional()
+  modelParams: z
+    .object({
+      name: z.string().optional(),
+      temperature: z.number().optional(),
+      max_tokens: z.number().optional(),
+      stop: z.array(z.string()).optional()
+    })
+    .optional()
 });
 export type RequestProps = z.infer<typeof requestSchema>;
 
 export const createChatMessageHistory = async (messages: MessageProps[], ruleMessage: string): Promise<ChatMessageHistory> => {
   const history = new ChatMessageHistory();
   await history.addMessage(new SystemMessage(ruleMessage));
-  await Promise.all(messages.map(async (message) => {
-    if (message.role === 'human') {
-      await history.addUserMessage(message.body);
-    } else {
-      await history.addAIChatMessage(message.body);
-    }
-  }));
+  await Promise.all(
+    messages.map(async (message) => {
+      if (message.role === 'human') {
+        await history.addUserMessage(message.body);
+      } else {
+        await history.addAIChatMessage(message.body);
+      }
+    })
+  );
   return history;
 };
 
-export async function POST (req: NextRequest): Promise<NextResponse> {
+export async function POST(req: NextRequest): Promise<NextResponse> {
   let body;
   try {
     body = await req.json();
@@ -49,11 +55,14 @@ export async function POST (req: NextRequest): Promise<NextResponse> {
   const result = requestSchema.safeParse(body);
   if (!result.success) {
     const { errors } = result.error;
-    return NextResponse.json({
-      status: 'ng',
-      errorMessage: 'Validation error',
-      errors
-    }, { status: 400 });
+    return NextResponse.json(
+      {
+        status: 'ng',
+        errorMessage: 'Validation error',
+        errors
+      },
+      { status: 400 }
+    );
   }
   // const memory = new BufferMemory({
   //   chatHistory: new UpstashRedisChatMessageHistory({

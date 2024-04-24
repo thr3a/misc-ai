@@ -6,11 +6,13 @@ export const metadata: Metadata = {
   description: '単語/文章をシチュエーションに合わせてAIが変換します'
 };
 
-export default function PageLayout ({ children }: { children: React.ReactNode }): JSX.Element {
+export default function PageLayout({ children }: { children: React.ReactNode }): JSX.Element {
   return (
     <>
       <Title mt={'md'}>{metadata.title as string}</Title>
-      <Title order={6} mb={'md'} c={'dimmed'}>{metadata.description as string}</Title>
+      <Title order={6} mb={'md'} c={'dimmed'}>
+        {metadata.description as string}
+      </Title>
       {children}
     </>
   );

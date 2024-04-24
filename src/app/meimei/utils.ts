@@ -1,4 +1,4 @@
-export const supportedNamingConventions: Array<{ name: string, label: string }> = [
+export const supportedNamingConventions: Array<{ name: string; label: string }> = [
   {
     name: 'camel case',
     label: 'キャメルケース 例:getFullYear'

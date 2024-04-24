@@ -38,4 +38,4 @@ const debug = async (): Promise<void> => {
   await debug();
 })();
 
-export {};
+export type {};

@@ -1,4 +1,4 @@
-import { Title, Anchor, Text } from '@mantine/core';
+import { Anchor, Text, Title } from '@mantine/core';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -9,13 +9,17 @@ export const metadata: Metadata = {
   }
 };
 
-export default function PageLayout ({ children }: { children: React.ReactNode }): JSX.Element {
+export default function PageLayout({ children }: { children: React.ReactNode }): JSX.Element {
   return (
     <>
-      <Anchor href="/jkhiss">
-        <Title mt={'sm'} order={2}>{metadata.title as string}</Title>
+      <Anchor href='/jkhiss'>
+        <Title mt={'sm'} order={2}>
+          {metadata.title as string}
+        </Title>
       </Anchor>
-      <Text mb={'sm'} fz={'12px'} c={'dimmed'} fw={'bold'}>{metadata.description as string}</Text>
+      <Text mb={'sm'} fz={'12px'} c={'dimmed'} fw={'bold'}>
+        {metadata.description as string}
+      </Text>
       {children}
     </>
   );

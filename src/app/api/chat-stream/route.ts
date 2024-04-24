@@ -1,46 +1,52 @@
-import { type NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
+import type { MessageProps } from '@/features/chat/ChatBox';
+import { HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
+import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
+import { LangChainStream, StreamingTextResponse } from 'ai';
 import { LLMChain } from 'langchain/chains';
 // import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { BufferWindowMemory, ChatMessageHistory } from 'langchain/memory';
-import { type MessageProps } from '@/features/chat/ChatBox';
-import { StreamingTextResponse, LangChainStream } from 'ai';
 import { PromptTemplate } from 'langchain/prompts';
-import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
-import { HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
+import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
 const requestSchema = z.object({
   message: z.string(),
-  history: z.array(z.object({
-    body: z.string(),
-    role: z.enum(['human', 'ai'])
-  })),
+  history: z.array(
+    z.object({
+      body: z.string(),
+      role: z.enum(['human', 'ai'])
+    })
+  ),
   aiPrefix: z.string().optional().default('ai'),
   humanPrefix: z.string().optional().default('human'),
   systemMessage: z.string(),
   csrfToken: z.string().optional(),
-  modelParams: z.object({
-    name: z.string().optional(),
-    temperature: z.number().optional(),
-    max_tokens: z.number().optional(),
-    stop: z.array(z.string()).optional()
-  }).optional()
+  modelParams: z
+    .object({
+      name: z.string().optional(),
+      temperature: z.number().optional(),
+      max_tokens: z.number().optional(),
+      stop: z.array(z.string()).optional()
+    })
+    .optional()
 });
 export type RequestProps = z.input<typeof requestSchema>;
 
 export const createChatMessageHistory = async (messages: MessageProps[]): Promise<ChatMessageHistory> => {
   const history = new ChatMessageHistory();
-  await Promise.all(messages.map(async (message) => {
-    if (message.role === 'human') {
-      await history.addUserMessage(message.body);
-    } else {
-      await history.addAIChatMessage(message.body);
-    }
-  }));
+  await Promise.all(
+    messages.map(async (message) => {
+      if (message.role === 'human') {
+        await history.addUserMessage(message.body);
+      } else {
+        await history.addAIChatMessage(message.body);
+      }
+    })
+  );
   return history;
 };
 
-export async function POST (req: NextRequest): Promise<StreamingTextResponse> {
+export async function POST(req: NextRequest): Promise<StreamingTextResponse> {
   let body;
   try {
     body = await req.json();
@@ -53,11 +59,14 @@ export async function POST (req: NextRequest): Promise<StreamingTextResponse> {
   const result = requestSchema.safeParse(body);
   if (!result.success) {
     const { errors } = result.error;
-    return NextResponse.json({
-      status: 'ng',
-      errorMessage: 'Validation error',
-      errors
-    }, { status: 400 });
+    return NextResponse.json(
+      {
+        status: 'ng',
+        errorMessage: 'Validation error',
+        errors
+      },
+      { status: 400 }
+    );
   }
 
   const history = await createChatMessageHistory(result.data.history);

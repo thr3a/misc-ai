@@ -1,33 +1,31 @@
 'use client';
+import type { RequestProps } from '@/app/api/with-parser/route';
+import type { ggrenSchema } from '@/app/api/with-parser/schema';
+import { Box, Button, Group, Paper, Textarea } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
-import { Box, Group, Button, Paper, Textarea } from '@mantine/core';
-import { type RequestProps } from '@/app/api/with-parser/route';
-import { useState, useEffect } from 'react';
-import { PromptTemplate } from 'langchain/prompts';
-import { type ggrenSchema } from '@/app/api/with-parser/schema';
-import { type z } from 'zod';
 import { notifications } from '@mantine/notifications';
 import { IconExternalLink } from '@tabler/icons-react';
+import { PromptTemplate } from 'langchain/prompts';
+import { useEffect, useState } from 'react';
+import type { z } from 'zod';
 
 type FormValues = {
-  message: string
-  loading: boolean
-  result: z.infer<typeof ggrenSchema>
+  message: string;
+  loading: boolean;
+  result: z.infer<typeof ggrenSchema>;
 };
 
 const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
 
 const SearchButton = ({ keyword }: { keyword: string }): JSX.Element => {
-  return <Button
-    component="a"
-    target="_blank"
-    rel="noopener noreferrer"
-    leftSection={<IconExternalLink size={14} />}
-    href={`https://www.google.com/search?q=${keyword}`}
-  >{keyword}</Button>;
+  return (
+    <Button component='a' target='_blank' rel='noopener noreferrer' leftSection={<IconExternalLink size={14} />} href={`https://www.google.com/search?q=${keyword}`}>
+      {keyword}
+    </Button>
+  );
 };
 
-export default function Page (): JSX.Element {
+export default function Page(): JSX.Element {
   const [csrfToken, setCsrfToken] = useState<string>('loading...');
   useEffect(() => {
     const el = document.querySelector('meta[name="x-csrf-token"]');
@@ -93,24 +91,19 @@ Please list the five most suitable search keywords in English when searching Goo
 
   return (
     <FormProvider form={form}>
-      <Box maw={400} mx="auto" component="form">
-        <Textarea
-          label="調べたい内容"
-          {...form.getInputProps('message')}
-          placeholder='css remとpxの違い'
-          autosize
-          minRows={2}
-          maxRows={4}
-        />
-        <Group justify="flex-end">
-          <Button onClick={handleSubmit} loading={form.values.loading}>翻訳</Button>
+      <Box maw={400} mx='auto' component='form'>
+        <Textarea label='調べたい内容' {...form.getInputProps('message')} placeholder='css remとpxの違い' autosize minRows={2} maxRows={4} />
+        <Group justify='flex-end'>
+          <Button onClick={handleSubmit} loading={form.values.loading}>
+            翻訳
+          </Button>
         </Group>
         <Paper>
-          { form.values.result.map((item, index) => (
+          {form.values.result.map((item, index) => (
             <Box key={index} mt={'md'}>
               <SearchButton keyword={item.fields.Keyword} />
             </Box>
-          )) }
+          ))}
         </Paper>
       </Box>
     </FormProvider>

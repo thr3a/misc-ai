@@ -1,21 +1,21 @@
 'use client';
+import type { RequestProps } from '@/app/api/list-parser/route';
+import { Box, Button, CopyButton, Group, Stack, TextInput, Title } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
-import { Box, Group, Button, TextInput, Stack, Title, CopyButton } from '@mantine/core';
-import { type RequestProps } from '@/app/api/list-parser/route';
-import { useState, useEffect } from 'react';
-import { PromptTemplate } from 'langchain/prompts';
 import { notifications } from '@mantine/notifications';
-import { IconClipboardCopy, IconCheck } from '@tabler/icons-react';
+import { IconCheck, IconClipboardCopy } from '@tabler/icons-react';
+import { PromptTemplate } from 'langchain/prompts';
+import { useEffect, useState } from 'react';
 
 type FormValues = {
-  message: string
-  results: string[]
-  loading: boolean
+  message: string;
+  results: string[];
+  loading: boolean;
 };
 
 const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
 
-export default function Page (): JSX.Element {
+export default function Page(): JSX.Element {
   const [csrfToken, setCsrfToken] = useState<string>('loading...');
   useEffect(() => {
     const el = document.querySelector('meta[name="x-csrf-token"]');
@@ -76,29 +76,28 @@ messageに対する返信候補を5つ作成してください。
 
   return (
     <FormProvider form={form}>
-      <Box maw={400} mx="auto" component="form">
-        <TextInput label='メッセージ' withAsterisk {...form.getInputProps('message')}/>
-        <Group justify="center">
-          <Button onClick={handleSubmit} loading={form.values.loading}>送信</Button>
+      <Box maw={400} mx='auto' component='form'>
+        <TextInput label='メッセージ' withAsterisk {...form.getInputProps('message')} />
+        <Group justify='center'>
+          <Button onClick={handleSubmit} loading={form.values.loading}>
+            送信
+          </Button>
         </Group>
-        <Group mt="sm" mb="sm">
+        <Group mt='sm' mb='sm'>
           <Title order={2}>生成結果</Title>
         </Group>
 
-        <Stack gap="sm">
+        <Stack gap='sm'>
           {form.values.results.map((candidate, index) => (
             <TextInput
               readOnly
               key={index}
               value={candidate.trim()}
-              rightSectionPointerEvents="all"
+              rightSectionPointerEvents='all'
               rightSection={
                 <CopyButton value={candidate.trim()}>
                   {({ copied, copy }) => (
-                    <Button
-                      color={copied ? 'teal' : 'blue'}
-                      onClick={copy}
-                    >
+                    <Button color={copied ? 'teal' : 'blue'} onClick={copy}>
                       {copied ? <IconCheck size={18} /> : <IconClipboardCopy size={18} />}
                     </Button>
                   )}
