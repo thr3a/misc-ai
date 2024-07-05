@@ -37,10 +37,11 @@ export default function Page() {
     if (form.values.message === '') return;
     if (form.values.loading) return;
 
-    form.setValues({ loading: true });
+    const tmp = form.values.message;
+    form.setValues({ loading: true, message: '' });
     form.insertListItem('messages', { content: form.values.message, role: 'user' } as MessageProps);
 
-    const { messages, newMessage } = await continueConversation([...form.values.messages, { role: 'user', content: form.values.message }]);
+    const { messages, newMessage } = await continueConversation([...form.values.messages, { role: 'user', content: tmp }]);
 
     let textContent = '';
 
