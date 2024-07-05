@@ -58,7 +58,7 @@ export default function Page() {
         <ChatBox messages={form.values.messages} height='60vh' />
         <Flex align='center'>
           <Textarea placeholder='入力してください' autosize minRows={1} style={{ flex: 1, display: 'block' }} {...form.getInputProps('message')} onKeyDown={getHotkeyHandler([['mod+Enter', handleSubmit]])} />
-          <ActionIcon size={'lg'} color='blue' onClick={handleSubmit} loading={form.values.loading}>
+          <ActionIcon size='input-sm' color='blue' onClick={handleSubmit} loading={form.values.loading}>
             <IconSend />
           </ActionIcon>
         </Flex>
