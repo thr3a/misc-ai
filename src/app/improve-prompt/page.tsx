@@ -1,9 +1,7 @@
 'use client';
-import { Box, Button, Group, Paper, Textarea } from '@mantine/core';
-import { ActionIcon, CopyButton, Radio, Stack, TextInput, Title, Tooltip } from '@mantine/core';
+import { ActionIcon, Box, Button, CopyButton, Group, List, Paper, Text, Textarea, Tooltip } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
 import { IconCheck, IconCopy } from '@tabler/icons-react';
-import { IconExternalLink } from '@tabler/icons-react';
 import type { z } from 'zod';
 import { improvePrompt } from './actions';
 import type { schema } from './util';
@@ -15,7 +13,7 @@ export const maxDuration = 30;
 type FormValues = {
   message: string;
   loading: boolean;
-  result: string;
+  result: z.infer<typeof schema>;
 };
 
 const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
@@ -25,7 +23,7 @@ export default function Page() {
     initialValues: {
       message: 'ヨーロッパ観光するときの注意点って？',
       loading: false,
-      result: ''
+      result: { improved_prompt: '', advises: [] }
     }
   });
 
@@ -33,11 +31,9 @@ export default function Page() {
     if (form.values.message === '') return;
     if (form.values.loading) return;
 
-    form.setValues({ result: '', loading: true });
-
-    const { improved_prompt } = await improvePrompt(form.values.message);
-
-    form.setValues({ result: improved_prompt.improved_prompt, loading: false });
+    form.setValues({ result: { improved_prompt: '', advises: [] }, loading: true });
+    const { result } = await improvePrompt(form.values.message);
+    form.setValues({ result: result, loading: false });
   };
 
   return (
@@ -49,19 +45,29 @@ export default function Page() {
             送信!
           </Button>
         </Group>
-        <Textarea label='改良したプロンプト' {...form.getInputProps('result')} minRows={2} maxRows={10} autosize readOnly />
-        {form.values.result && (
-          <Group justify='flex-end'>
-            <CopyButton value={form.values.result}>
-              {({ copied, copy }) => (
-                <Tooltip label={copied ? 'コピーしました' : 'コピー'} withArrow position='left'>
-                  <ActionIcon color={copied ? 'teal' : 'blue'} onClick={copy} size='input-sm'>
-                    {copied ? <IconCheck size={18} /> : <IconCopy size={18} />}
-                  </ActionIcon>
-                </Tooltip>
-              )}
-            </CopyButton>
-          </Group>
+
+        <Text fw={'bold'}>結果</Text>
+        {form.values.result.improved_prompt && (
+          <>
+            <Textarea label='改善後のプロンプト' {...form.getInputProps('result.improved_prompt')} minRows={2} maxRows={10} autosize readOnly />
+            <Group justify='flex-end'>
+              <CopyButton value={form.values.result.improved_prompt}>
+                {({ copied, copy }) => (
+                  <Tooltip label={copied ? 'コピーしました' : 'コピー'} withArrow position='left'>
+                    <ActionIcon color={copied ? 'teal' : 'blue'} onClick={copy} size='input-sm'>
+                      {copied ? <IconCheck size={18} /> : <IconCopy size={18} />}
+                    </ActionIcon>
+                  </Tooltip>
+                )}
+              </CopyButton>
+            </Group>
+
+            <List>
+              {form.values.result.advises.map((x) => {
+                return <List.Item key={x.advise}>{x.advise}</List.Item>;
+              })}
+            </List>
+          </>
         )}
       </Box>
     </FormProvider>

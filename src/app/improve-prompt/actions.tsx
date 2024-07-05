@@ -7,7 +7,7 @@ import { schema, systemPrompt } from './util';
 export async function improvePrompt(input: string) {
   'use server';
 
-  const { object: improved_prompt } = await generateObject({
+  const { object: result } = await generateObject({
     model: openai('gpt-3.5-turbo'),
     system: systemPrompt,
     prompt: input,
@@ -15,5 +15,5 @@ export async function improvePrompt(input: string) {
     temperature: 0.4
   });
 
-  return { improved_prompt };
+  return { result };
 }
