@@ -2,9 +2,8 @@
 import { ActionIcon, Box, Button, CopyButton, Group, List, Paper, Text, Textarea, Tooltip } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
 import { IconCheck, IconCopy } from '@tabler/icons-react';
-import { readStreamableValue } from 'ai/rsc';
 import type { z } from 'zod';
-import { generate } from './actions';
+import { improvePrompt } from './actions';
 import type { schema } from './util';
 
 // Force the page to be dynamic and allow streaming responses up to 30 seconds
@@ -24,7 +23,7 @@ export default function Page() {
     initialValues: {
       message: 'ヨーロッパ観光するときの注意点って？',
       loading: false,
-      result: { improved_prompt: '', backgrounds: [] }
+      result: { improved_prompt: '', advises: [] }
     }
   });
 
@@ -32,16 +31,9 @@ export default function Page() {
     if (form.values.message === '') return;
     if (form.values.loading) return;
 
-    form.setValues({ result: { improved_prompt: '', backgrounds: [] }, loading: true });
-
-    const { object } = await generate(form.values.message);
-    for await (const partialObject of readStreamableValue(object)) {
-      if (partialObject) {
-        form.setValues({ result: partialObject });
-      }
-    }
-
-    form.setValues({ loading: false });
+    form.setValues({ result: { improved_prompt: '', advises: [] }, loading: true });
+    const { result } = await improvePrompt(form.values.message);
+    form.setValues({ result: result, loading: false });
   };
 
   return (
@@ -54,6 +46,7 @@ export default function Page() {
           </Button>
         </Group>
 
+        <Text fw={'bold'}>結果</Text>
         {form.values.result.improved_prompt && (
           <>
             <Textarea label='改善後のプロンプト' {...form.getInputProps('result.improved_prompt')} minRows={2} maxRows={10} autosize readOnly />
@@ -69,12 +62,9 @@ export default function Page() {
               </CopyButton>
             </Group>
 
-            <Text fw={'bold'} fz={'sm'}>
-              プロンプトに含めるとより効果的な項目
-            </Text>
             <List>
-              {form.values.result.backgrounds?.map((x, index) => {
-                return <List.Item key={index}>{x.background}</List.Item>;
+              {form.values.result.advises.map((x) => {
+                return <List.Item key={x.advise}>{x.advise}</List.Item>;
               })}
             </List>
           </>

@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "biome check --apply ./src",
+    "lint": "biome check --write --unsafe ./src",
     "serve": "python -m http.server -d out",
     "node-server": "node server.js"
   },

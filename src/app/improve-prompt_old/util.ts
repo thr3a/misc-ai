@@ -2,20 +2,20 @@ import { z } from 'zod';
 
 export const schema = z.object({
   improved_prompt: z.string().describe('改善後のプロンプト'),
-  backgrounds: z
+  advises: z
     .array(
       z.object({
-        background: z.string().describe('プロンプトに追加すべきコンテキスト/背景')
+        advise: z.string().describe('付与すべきコンテキスト')
       })
     )
-    .describe('5つの配列')
+    .describe('付与すべきコンテキストの3つの配列')
 });
 
 export const systemPrompt = `
 あなたはプロンプトエンジニアリングのエキスパートです。
 ユーザーはChatGPTの回答の品質向上を求めており、最高のプロンプトを作成することをゴールとしています。
 プロンプト改善のポイントに従って、例を参考に入力されたプロンプトを改善してください。
-改善後のプロンプトとユーザーがプロンプトに追加すべき個人情報/コンテキスト/背景を5つ出力してください。
+改善後のプロンプトとより最高のプロンプトにするために付与すべきコンテキストを3つ出力してください。
 
 # プロンプト改善のポイント
 

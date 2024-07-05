@@ -1,19 +1,31 @@
 'use server';
 
 import { openai } from '@ai-sdk/openai';
-import { generateObject } from 'ai';
+import { streamObject } from 'ai';
+import { createStreamableValue } from 'ai/rsc';
 import { schema, systemPrompt } from './util';
 
-export async function improvePrompt(input: string) {
+export async function generate(input: string) {
   'use server';
 
-  const { object: result } = await generateObject({
-    model: openai('gpt-3.5-turbo'),
-    system: systemPrompt,
-    prompt: input,
-    schema: schema,
-    temperature: 0.4
-  });
+  const stream = createStreamableValue();
 
-  return { result };
+  (async () => {
+    const { partialObjectStream } = await streamObject({
+      // model: openai('gpt-3.5-turbo'),
+      model: openai('gpt-4o'),
+      system: systemPrompt,
+      prompt: input,
+      schema: schema,
+      temperature: 0.7
+    });
+
+    for await (const partialObject of partialObjectStream) {
+      stream.update(partialObject);
+    }
+
+    stream.done();
+  })();
+
+  return { object: stream.value };
 }
