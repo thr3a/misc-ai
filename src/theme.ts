@@ -20,14 +20,14 @@ export const theme = createTheme({
     Textarea: {
       styles: (theme: MantineTheme) => ({
         label: {
-          // fontWeight: 'bold'
+          fontWeight: 'bold'
         },
         root: {
           // marginBottom: theme.spacing.xs,
-          fontSize: '16px'
+          // fontSize: '16px'
         },
         input: {
-          fontSize: '16px'
+          // fontSize: '16px'
         }
       })
     },

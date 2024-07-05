@@ -1,6 +1,8 @@
 'use client';
 import { Box, Button, Group, Paper, Textarea } from '@mantine/core';
+import { ActionIcon, CopyButton, Radio, Stack, TextInput, Title, Tooltip } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
+import { IconCheck, IconCopy } from '@tabler/icons-react';
 import { IconExternalLink } from '@tabler/icons-react';
 import type { z } from 'zod';
 import { improvePrompt } from './actions';
@@ -42,12 +44,25 @@ export default function Page() {
     <FormProvider form={form}>
       <Box mx='auto' component='form'>
         <Textarea label='改善前のプロンプト' {...form.getInputProps('message')} minRows={2} maxRows={10} autosize />
-        <Group justify='flex-end'>
+        <Group justify='center' mt={'sm'}>
           <Button onClick={handleSubmit} loading={form.values.loading}>
             送信!
           </Button>
         </Group>
         <Textarea label='改良したプロンプト' {...form.getInputProps('result')} minRows={2} maxRows={10} autosize readOnly />
+        {form.values.result && (
+          <Group justify='flex-end'>
+            <CopyButton value={form.values.result}>
+              {({ copied, copy }) => (
+                <Tooltip label={copied ? 'コピーしました' : 'コピー'} withArrow position='left'>
+                  <ActionIcon color={copied ? 'teal' : 'blue'} onClick={copy} size='input-sm'>
+                    {copied ? <IconCheck size={18} /> : <IconCopy size={18} />}
+                  </ActionIcon>
+                </Tooltip>
+              )}
+            </CopyButton>
+          </Group>
+        )}
       </Box>
     </FormProvider>
   );
