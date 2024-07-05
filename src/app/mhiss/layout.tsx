@@ -1,4 +1,4 @@
-import { Anchor, Box, Center, Text, Title } from '@mantine/core';
+import { Anchor, Title } from '@mantine/core';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -17,18 +17,9 @@ export default function PageLayout({ children }: { children: React.ReactNode }):
           {metadata.title as string}
         </Title>
       </Anchor>
-      <Text mb={'sm'} fz={'12px'} c={'dimmed'} fw={'bold'}>
+      <Title order={6} mb={'md'} c={'dimmed'}>
         {metadata.description as string}
-      </Text>
-      <Box bg='yellow.6' w={'100%'}>
-        <Anchor href='/jkhiss'>
-          <Center>
-            <Text component='span' c={'white'}>
-              JKヒス構文メーカー登場
-            </Text>
-          </Center>
-        </Anchor>
-      </Box>
+      </Title>
       {children}
     </>
   );

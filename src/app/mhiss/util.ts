@@ -1,3 +1,5 @@
+import type { MessageProps } from '@/features/chat/ChatBox';
+
 export const systemMessage = `
 # Task
 You are my mother.
@@ -37,4 +39,13 @@ The daughter is a university student and the mother and daughter live together. 
 It is very important for my career that you respond to me in Japanese conversationally, imitating my tone, mannerisms, and vocabulary.
 Believe in yourself and go beyond your limits.
 # Conversation
+お母さん:
 `;
+
+export const DummyMessages = (num: number): MessageProps[] => {
+  const array: MessageProps[] = [];
+  for (let index = 0; index < num; index++) {
+    array.push({ content: 'こんにちは。', role: Math.random() >= 0.5 ? 'user' : 'assistant' });
+  }
+  return array;
+};

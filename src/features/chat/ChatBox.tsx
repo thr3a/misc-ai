@@ -3,19 +3,18 @@
 import { Box, Group, Paper, ScrollArea, Space, Stack, Text } from '@mantine/core';
 
 export type MessageProps = {
-  body: string;
-  role: 'human' | 'ai';
+  role: 'user' | 'assistant';
+  content: string;
 };
 
 type ChatBoxProps = {
   messages: MessageProps[];
   height: string;
-  latestAiMessage: string;
 };
 
-const Message = (props: { body: string; role: 'human' | 'ai' }) => {
+const Message = (props: { body: string; role: 'user' | 'assistant' }) => {
   return (
-    <Paper shadow='xs' radius='md' pt='6px' pb='6px' p='xs' bg={props.role === 'ai' ? 'white' : '#8de055'} c={'dark.6'}>
+    <Paper shadow='xs' radius='md' pt='6px' pb='6px' p='xs' bg={props.role === 'user' ? 'white' : '#8de055'} c={'dark.6'}>
       <Text fz={'10px'} style={{ whiteSpace: 'pre-wrap' }}>
         {props.body}
       </Text>
@@ -23,26 +22,23 @@ const Message = (props: { body: string; role: 'human' | 'ai' }) => {
   );
 };
 
-export const ChatBox = ({ messages, height, latestAiMessage }: ChatBoxProps): JSX.Element => {
-  const clonedMessages = structuredClone(messages);
-  if (latestAiMessage !== '') {
-    clonedMessages.push({ body: latestAiMessage, role: 'ai' });
-  }
+export const ChatBox = ({ messages, height }: ChatBoxProps): JSX.Element => {
+  // const clonedMessages = structuredClone(messages);
   return (
     <ScrollArea pt={0} pb={0} pr={'xs'} pl={'xs'} type={'scroll'} h={height} bg={'#7494c0'}>
-      <Space h={'xs'}></Space>
+      <Space h={'xs'} />
       <Stack gap={'xs'}>
-        {clonedMessages.map(({ body, role }: MessageProps, index) => {
+        {messages.map(({ content, role }: MessageProps) => {
           return (
-            <Box key={index}>
-              <Group justify={role === 'ai' ? 'flex-start' : 'flex-end'}>
-                <Message body={body} role={role}></Message>
+            <Box key={content}>
+              <Group justify={role === 'assistant' ? 'flex-start' : 'flex-end'}>
+                <Message body={content} role={role} />
               </Group>
             </Box>
           );
         })}
       </Stack>
-      <Space h={'md'}></Space>
+      <Space h={'md'} />
     </ScrollArea>
   );
 };

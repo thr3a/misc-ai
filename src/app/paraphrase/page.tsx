@@ -1,126 +1,98 @@
 'use client';
-import type { RequestProps } from '@/app/api/with-parser/route';
-import type { paraphraseSchema } from '@/app/api/with-parser/schema';
-import { Box, Button, CopyButton, Group, Paper, Select, TextInput } from '@mantine/core';
+import { SuggestWords } from '@/app/paraphrase/actions';
+import type { schema } from '@/app/paraphrase/util';
+import { ActionIcon, Box, Button, CopyButton, Group, Radio, Stack, TextInput, Title, Tooltip } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
-import { notifications } from '@mantine/notifications';
-import { PromptTemplate } from 'langchain/prompts';
-import { useEffect, useState } from 'react';
+import { IconCheck, IconCopy } from '@tabler/icons-react';
 import type { z } from 'zod';
 
-const contexts: Array<{ value: string; label: string; prompt: string }> = [
-  { value: 'casual', label: 'カジュアル', prompt: 'casual,friendly,in chat' },
-  { value: 'business_mail', label: 'ビジネスメール', prompt: 'Business email, formal' },
-  { value: 'osaka', label: '関西弁', prompt: '関西弁,kansai dialect,Kansai-ben' }
-];
+// Force the page to be dynamic and allow streaming responses up to 30 seconds
+export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
+
+type ContextProps = {
+  casual: { label: string; prompt: string };
+  business_mail: { label: string; prompt: string };
+  osaka: { label: string; prompt: string };
+};
+const contexts: ContextProps = {
+  casual: { label: 'カジュアル', prompt: 'casual,friendly,in chat' },
+  business_mail: { label: 'ビジネスメール', prompt: 'Business email, formal' },
+  osaka: { label: '関西弁', prompt: '関西弁,kansai dialect,Kansai-ben' }
+};
 
 type FormValues = {
   message: string;
   loading: boolean;
-  context: (typeof contexts)[number]['value'];
-  result: z.infer<typeof paraphraseSchema>;
+  result: z.infer<typeof schema>;
+  context: keyof ContextProps;
 };
 
 const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
 
-export default function Page(): JSX.Element {
-  const [csrfToken, setCsrfToken] = useState<string>('loading...');
-  useEffect(() => {
-    const el = document.querySelector('meta[name="x-csrf-token"]');
-    if (el !== null) {
-      setCsrfToken(el.getAttribute('content') ?? 'missing');
-    }
-  }, []);
+export default function Page() {
   const form = useForm({
     initialValues: {
       message: '連絡ください',
       loading: false,
-      result: [
-        // { fields: { Text: 'こんにちは' } },
-        // { fields: { Text: 'こんにちは' } }
-      ],
+      result: { words: [] },
       context: 'casual'
     }
   });
 
-  const formatPrompt = (): PromptTemplate => {
-    return PromptTemplate.fromTemplate(`
-#Task
-I want you to act as a thesaurus containing a variety of Japanese words.
-Convert the indicated word into an accurate synonym, related word, or associated word using Style, and list 5 candidates according to the specified format.
-Candidates should not be overlapping or monotonous.
-#Language
-Japanese
-#Input
-{text}
-#Style
-{context}`);
-  };
   const handleSubmit = async (): Promise<void> => {
     if (form.values.message === '') return;
     if (form.values.loading) return;
 
-    form.setValues({ result: [], loading: true });
+    form.setValues({ result: { words: [] }, loading: true });
 
-    const prompt = formatPrompt();
-    const formattedPrompt = await prompt.format({
-      text: form.values.message,
-      context: contexts.find((x) => x.value === form.values.context)?.prompt
-    });
-    console.log(formattedPrompt);
-    const params: RequestProps = {
-      csrfToken,
-      prompt: formattedPrompt,
-      type: 'paraphrase',
-      modelParams: {
-        name: 'gpt-4'
-      }
-    };
-    const reqResponse = await fetch('/api/with-parser/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(params)
-    });
-    if (reqResponse.ok) {
-      const { result } = await reqResponse.json();
-      form.setValues({ result, loading: false });
-    } else {
-      notifications.show({
-        title: 'エラーが発生しました。',
-        message: '再度試してみてください',
-        withCloseButton: false,
-        color: 'red'
-      });
-      form.setValues({ loading: false });
-    }
+    const { words } = await SuggestWords(form.values.message, contexts[form.values.context].prompt);
+
+    form.setValues({ result: words, loading: false });
   };
 
   return (
     <FormProvider form={form}>
-      <Box maw={400} mx='auto' component='form'>
-        <TextInput label='言い換えたいワード・文章' {...form.getInputProps('message')} />
-        <Select label='スタイル' data={contexts} checkIconPosition='right' {...form.getInputProps('context')} />
-        <Group justify='flex-end'>
+      <Box maw={600} mx='auto' component='form'>
+        <TextInput label='言い換えたいワード・文章' withAsterisk {...form.getInputProps('message')} />
+        <Radio.Group label='スタイル' {...form.getInputProps('context')}>
+          <Stack mt='xs'>
+            {Object.keys(contexts).map((key) => (
+              <Radio key={key} value={key} label={contexts[key as keyof ContextProps].label} />
+            ))}
+          </Stack>
+        </Radio.Group>
+
+        <Group justify='center'>
           <Button onClick={handleSubmit} loading={form.values.loading}>
             変換!
           </Button>
         </Group>
-        <Paper>
-          {form.values.result.map((item, index) => (
-            <Box key={index} mt={'md'}>
-              <TextInput value={item.fields.Text} readOnly mb={0} />
-              <CopyButton value={item.fields.Text}>
-                {({ copied, copy }) => (
-                  <Button color={copied ? 'teal' : 'blue'} onClick={copy}>
-                    {copied ? 'コピーしました' : 'コピー'}
-                  </Button>
-                )}
-              </CopyButton>
-            </Box>
+        <Group mt='sm' mb='sm'>
+          <Title order={2}>生成結果</Title>
+        </Group>
+
+        <Stack gap='sm'>
+          {form.values.result.words.map((x) => (
+            <TextInput
+              readOnly
+              key={x.word}
+              value={x.word.trim()}
+              rightSectionPointerEvents='all'
+              rightSection={
+                <CopyButton value={x.word.trim()}>
+                  {({ copied, copy }) => (
+                    <Tooltip label={copied ? 'コピーしました' : 'コピー'} withArrow position='left'>
+                      <ActionIcon color={copied ? 'teal' : 'blue'} onClick={copy} size='input-sm'>
+                        {copied ? <IconCheck size={18} /> : <IconCopy size={18} />}
+                      </ActionIcon>
+                    </Tooltip>
+                  )}
+                </CopyButton>
+              }
+            />
           ))}
-        </Paper>
+        </Stack>
       </Box>
     </FormProvider>
   );

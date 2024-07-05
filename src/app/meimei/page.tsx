@@ -1,85 +1,47 @@
 'use client';
-import type { RequestProps } from '@/app/api/list-parser/route';
-import { Box, Button, CopyButton, Group, Radio, Stack, TextInput, Title } from '@mantine/core';
-import { createFormContext, isNotEmpty } from '@mantine/form';
-import { notifications } from '@mantine/notifications';
-import { IconCheck, IconClipboardCopy } from '@tabler/icons-react';
-import { PromptTemplate } from 'langchain/prompts';
-import { useEffect, useState } from 'react';
-import { supportedNamingConventions } from './utils';
+import { SuggestNames } from '@/app/meimei/actions';
+import { type schema, supportedNamingConventions } from '@/app/meimei/util';
+import { ActionIcon, Box, Button, CopyButton, Group, Radio, Stack, TextInput, Title, Tooltip } from '@mantine/core';
+import { createFormContext } from '@mantine/form';
+import { IconCheck, IconCopy } from '@tabler/icons-react';
+import type { z } from 'zod';
+
+// Force the page to be dynamic and allow streaming responses up to 30 seconds
+export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
 
 type FormValues = {
-  type: 'variable' | 'function' | 'branch';
-  purpose: string;
-  candidates: string[];
-  namingConvention: 'camel case' | 'pascal case' | 'snake case' | 'kebab case';
+  message: string;
   loading: boolean;
+  result: z.infer<typeof schema>;
+  type: 'variable' | 'function' | 'branch';
+  namingConvention: 'camel case' | 'pascal case' | 'snake case' | 'kebab case';
 };
 
 const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
 
-export default function Page(): JSX.Element {
-  const [csrfToken, setCsrfToken] = useState<string>('loading...');
-  useEffect(() => {
-    const el = document.querySelector('meta[name="x-csrf-token"]');
-    if (el !== null) {
-      setCsrfToken(el.getAttribute('content') ?? 'missing');
-    }
-  }, []);
+export default function Page() {
   const form = useForm({
     initialValues: {
+      message: '素数かどうか判定する関数',
       loading: false,
-      type: 'variable',
-      purpose: '',
-      // purpose: '素数かどうか判定する関数',
-      candidates: ['isPrime', 'checkPrime', 'primeChecker', 'validatePrime'],
-      namingConvention: 'camel case'
-    },
-    validate: {
-      purpose: isNotEmpty('概要は必須項目です')
+      result: {
+        candidates: ['isPrime', 'checkPrime', 'primeChecker', 'validatePrime'].map((candidate) => ({ candidate }))
+      },
+      namingConvention: 'camel case',
+      type: 'variable'
     }
   });
 
   const handleSubmit = async (): Promise<void> => {
-    if (form.values.purpose === '') return;
+    if (form.values.message === '') return;
     if (form.values.loading) return;
 
-    form.setValues({ candidates: [], loading: true });
+    form.setValues({ result: { candidates: [] }, loading: true });
 
-    const prompt = PromptTemplate.fromTemplate(`
-# Task
-Please suggest 6 appropriate ${form.values.type} names in ${form.values.namingConvention} format that are suitable for the overview.
-# Overview
-${form.values.purpose}`);
-    const formattedPrompt = await prompt.format({ prompt });
-    console.log(formattedPrompt);
-    const params: RequestProps = {
-      csrfToken,
-      prompt: formattedPrompt,
-      modelParams: {
-        name: 'gpt-4',
-        temperature: 0
-      }
-    };
-    const reqResponse = await fetch('/api/list-parser/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(params)
-    });
-    if (reqResponse.ok) {
-      const { result } = await reqResponse.json();
-      form.setValues({ candidates: result, loading: false });
-    } else {
-      notifications.show({
-        title: 'エラーが発生しました。',
-        message: '再度試してみてください',
-        withCloseButton: false,
-        color: 'red'
-      });
-      form.setValues({ loading: false });
-    }
+    const { candidates } = await SuggestNames(form.values.message, form.values.type, form.values.namingConvention);
+
+    form.setValues({ result: candidates, loading: false });
   };
 
   return (
@@ -92,11 +54,11 @@ ${form.values.purpose}`);
             <Radio value='branch' label='ブランチ名' />
           </Group>
         </Radio.Group>
-        <TextInput label='処理の概要を記述してください' withAsterisk {...form.getInputProps('purpose')} placeholder='素数かどうか判定する関数' />
+        <TextInput label='処理の概要を記述してください' withAsterisk {...form.getInputProps('message')} placeholder='素数かどうか判定する関数' />
         <Radio.Group label='命名規則' {...form.getInputProps('namingConvention')}>
           <Stack mt='xs'>
-            {supportedNamingConventions.map((nc, index) => (
-              <Radio key={index} value={nc.name} label={nc.label} />
+            {supportedNamingConventions.map((nc) => (
+              <Radio key={nc.label} value={nc.name} label={nc.label} />
             ))}
           </Stack>
         </Radio.Group>
@@ -111,18 +73,20 @@ ${form.values.purpose}`);
         </Group>
 
         <Stack gap='sm'>
-          {form.values.candidates.map((candidate, index) => (
+          {form.values.result.candidates.map((x) => (
             <TextInput
               readOnly
-              key={index}
-              value={candidate.trim()}
+              key={x.candidate}
+              value={x.candidate.trim()}
               rightSectionPointerEvents='all'
               rightSection={
-                <CopyButton value={candidate.trim()}>
+                <CopyButton value={x.candidate.trim()}>
                   {({ copied, copy }) => (
-                    <Button color={copied ? 'teal' : 'blue'} onClick={copy}>
-                      {copied ? <IconCheck size={18} /> : <IconClipboardCopy size={18} />}
-                    </Button>
+                    <Tooltip label={copied ? 'コピーしました' : 'コピー'} withArrow position='left'>
+                      <ActionIcon color={copied ? 'teal' : 'blue'} onClick={copy} size='input-sm'>
+                        {copied ? <IconCheck size={18} /> : <IconCopy size={18} />}
+                      </ActionIcon>
+                    </Tooltip>
                   )}
                 </CopyButton>
               }

@@ -1,21 +1,20 @@
 'use client';
-import type { RequestProps } from '@/app/api/with-parser/route';
-import type { ggrenSchema } from '@/app/api/with-parser/schema';
+import { SuggestSearchQueries } from '@/app/ggr-en/actions';
+import type { schema } from '@/app/ggr-en/util';
 import { Box, Button, Group, Paper, Textarea } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
-import { notifications } from '@mantine/notifications';
 import { IconExternalLink } from '@tabler/icons-react';
-import { PromptTemplate } from 'langchain/prompts';
-import { useEffect, useState } from 'react';
 import type { z } from 'zod';
+
+// Force the page to be dynamic and allow streaming responses up to 30 seconds
+export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
 
 type FormValues = {
   message: string;
   loading: boolean;
-  result: z.infer<typeof ggrenSchema>;
+  result: z.infer<typeof schema>;
 };
-
-const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
 
 const SearchButton = ({ keyword }: { keyword: string }): JSX.Element => {
   return (
@@ -25,23 +24,14 @@ const SearchButton = ({ keyword }: { keyword: string }): JSX.Element => {
   );
 };
 
-export default function Page(): JSX.Element {
-  const [csrfToken, setCsrfToken] = useState<string>('loading...');
-  useEffect(() => {
-    const el = document.querySelector('meta[name="x-csrf-token"]');
-    if (el !== null) {
-      setCsrfToken(el.getAttribute('content') ?? 'missing');
-    }
-  }, []);
+const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
+
+export default function Page() {
   const form = useForm({
     initialValues: {
-      message: '',
-      // message: 'css remとpxの違い',
+      message: 'css remとpxの違い',
       loading: false,
-      result: [
-        // { fields: { Keyword: 'zod schema json' } },
-        // { fields: { Keyword: 'zod schema JSON validation xxxxxxxxxx' } }
-      ]
+      result: { queries: [] }
     }
   });
 
@@ -49,59 +39,26 @@ export default function Page(): JSX.Element {
     if (form.values.message === '') return;
     if (form.values.loading) return;
 
-    form.setValues({ result: [], loading: true });
+    form.setValues({ result: { queries: [] }, loading: true });
 
-    const prompt = PromptTemplate.fromTemplate(`
-### Task:
-Please list the five most suitable search keywords in English when searching Google to solve the problem written in Input.
-### Input: {message}
-### Output:`);
-    const formattedPrompt = await prompt.format({
-      message: form.values.message
-    });
-    console.log(formattedPrompt);
-    const params: RequestProps = {
-      csrfToken,
-      prompt: formattedPrompt,
-      type: 'ggren',
-      modelParams: {
-        name: 'gpt-4'
-      }
-    };
-    const reqResponse = await fetch('/api/with-parser/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(params)
-    });
-    if (reqResponse.ok) {
-      const { result } = await reqResponse.json();
-      form.setValues({ result, loading: false });
-    } else {
-      notifications.show({
-        title: 'エラーが発生しました。',
-        message: '再度試してみてください',
-        withCloseButton: false,
-        color: 'red'
-      });
-      form.setValues({ loading: false });
-    }
+    const { queries } = await SuggestSearchQueries(form.values.message);
+
+    form.setValues({ result: queries, loading: false });
   };
 
   return (
     <FormProvider form={form}>
       <Box maw={400} mx='auto' component='form'>
-        <Textarea label='調べたい内容' {...form.getInputProps('message')} placeholder='css remとpxの違い' autosize minRows={2} maxRows={4} />
+        <Textarea label='調べたい内容' {...form.getInputProps('message')} placeholder='css remとpxの違い' minRows={2} maxRows={4} />
         <Group justify='flex-end'>
           <Button onClick={handleSubmit} loading={form.values.loading}>
-            翻訳
+            翻訳!
           </Button>
         </Group>
         <Paper>
-          {form.values.result.map((item, index) => (
-            <Box key={index} mt={'md'}>
-              <SearchButton keyword={item.fields.Keyword} />
+          {form.values.result.queries.map((item, index) => (
+            <Box key={item.query} mt={'md'}>
+              <SearchButton keyword={item.query} />
             </Box>
           ))}
         </Paper>

@@ -1,21 +1,14 @@
-import { Providers } from '@/providers';
 import { theme } from '@/theme';
 import { ColorSchemeScript, Container, MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
-import { Notifications } from '@mantine/notifications';
-import '@mantine/notifications/styles.css';
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import Script from 'next/script';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const csrfToken = headers().get('X-CSRF-Token') ?? 'missing';
   return {
-    title: 'ChatGPTのごった煮',
-    description: 'ChatGPTのごった煮',
-    other: {
-      'x-csrf-token': csrfToken
-    }
+    title: 'みすくあい',
+    description: 'みすくあい'
   };
 }
 
@@ -37,10 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
       </head>
       <body>
         <MantineProvider theme={theme} forceColorScheme='light'>
-          <Notifications position={'top-right'} />
-          <Providers>
-            <Container id='container'>{children}</Container>
-          </Providers>
+          <Container id='container'>{children}</Container>
         </MantineProvider>
       </body>
     </html>
