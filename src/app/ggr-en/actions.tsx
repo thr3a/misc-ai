@@ -8,7 +8,7 @@ export async function SuggestSearchQueries(input: string) {
   'use server';
 
   const { object: queries } = await generateObject({
-    model: openai('gpt-3.5-turbo'),
+    model: openai('gpt-4o'),
     system: 'Please list the five most suitable search queries in English when searching Google to solve the problem written in Input.',
     prompt: input,
     schema: schema,
