@@ -11,6 +11,7 @@
     "node-server": "node server.js"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^0.0.27",
     "@ai-sdk/cohere": "^0.0.3",
     "@ai-sdk/openai": "^0.0.34",
     "@biomejs/biome": "^1.8.3",

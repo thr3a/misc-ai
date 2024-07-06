@@ -1,5 +1,6 @@
 'use server';
 
+import { anthropic } from '@ai-sdk/anthropic';
 import { openai } from '@ai-sdk/openai';
 import { streamObject } from 'ai';
 import { createStreamableValue } from 'ai/rsc';
