@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'ダジャレべた褒めジェネレーター',
-  description: 'ChatGPTの無駄遣い'
+  description: 'オーエンを応援します！'
 };
 
 export default function PageLayout({ children }: { children: React.ReactNode }): JSX.Element {

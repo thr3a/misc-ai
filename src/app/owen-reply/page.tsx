@@ -24,7 +24,7 @@ const Tweet = (props: { content: string }) => {
       <Group>
         <Avatar src='https://assets.st-note.com/img/1676155437876-5NNUYKTjTE.png' radius='xl' />
         <div>
-          <Text size='sm'>皇帝ペンギン</Text>
+          <Text size='sm'>名無しさん</Text>
           <Text size='xs' c='dimmed'>
             3時間34分前
           </Text>
@@ -69,7 +69,7 @@ export default function Page() {
         <Textarea label='元ツイート' {...form.getInputProps('message')} minRows={2} maxRows={10} autosize />
         <Group justify='center' mt={'sm'}>
           <Button onClick={handleSubmit} loading={form.values.loading}>
-            クソリプ生成！
+            ダジャレを投稿！
           </Button>
         </Group>
 
