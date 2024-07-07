@@ -24,9 +24,9 @@ const Tweet = (props: { content: string }) => {
       <Group>
         <Avatar src='https://assets.st-note.com/img/1676155437876-5NNUYKTjTE.png' radius='xl' />
         <div>
-          <Text size='sm'>クソリプマン</Text>
+          <Text size='sm'>皇帝ペンギン</Text>
           <Text size='xs' c='dimmed'>
-            8時間10分前
+            3時間34分前
           </Text>
         </div>
       </Group>
@@ -40,7 +40,7 @@ const Tweet = (props: { content: string }) => {
 export default function Page() {
   const form = useForm({
     initialValues: {
-      message: '朝ごはんにバナナ食べたけどもうおなかすいちゃった！',
+      message: '布団が吹っ飛んだ',
       loading: false,
       result: { replies: [] }
       // result: { replies: [{ tweet: 'やほおー' }] }
