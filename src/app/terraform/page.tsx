@@ -47,8 +47,10 @@ export default function Page() {
   };
 
   const nextPrompt = (): string => {
-    return dedent`あなたはインフラエンジニアエキスパートです。
-    入力された実装したいシステム概要とTerraform resourceの一覧をもとにmain.tfを作成してください。
+    return dedent`
+    あなたはインフラエンジニアエキスパートです。
+    入力されたシステム概要とTerraform resourceの一覧をもとに、Terraformのmain.tfファイルを作成してください。
+    システム概要とリソース構造を理解できるように各ブロックの冒頭とコード内にコメントも含めてください。
 
     # 実装したいシステム概要
     ${form.values.message}
