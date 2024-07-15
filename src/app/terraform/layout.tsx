@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Terraformヘルパー',
-  description: 'ここに文章が入ります'
+  description: 'システム構築もAIにやらせよう'
 };
 
 export default function PageLayout({ children }: { children: React.ReactNode }): JSX.Element {

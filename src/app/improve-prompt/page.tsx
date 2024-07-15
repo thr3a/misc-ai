@@ -22,7 +22,7 @@ const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
 export default function Page() {
   const form = useForm({
     initialValues: {
-      message: 'ヨーロッパ観光するときの注意点って？',
+      message: '',
       loading: false,
       result: { improved_prompt: '', backgrounds: [] }
     }
@@ -47,7 +47,7 @@ export default function Page() {
   return (
     <FormProvider form={form}>
       <Box mx='auto' component='form'>
-        <Textarea label='改善前のプロンプト' {...form.getInputProps('message')} minRows={2} maxRows={10} autosize />
+        <Textarea label='改善前のプロンプト' {...form.getInputProps('message')} minRows={2} maxRows={10} autosize placeholder='ヨーロッパ観光するときの注意点って？' />
         <Group justify='center' mt={'sm'}>
           <Button onClick={handleSubmit} loading={form.values.loading}>
             送信!

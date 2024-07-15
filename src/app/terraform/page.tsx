@@ -1,7 +1,8 @@
 'use client';
-import { Box, Button, Group, List, Textarea } from '@mantine/core';
+import { Box, Button, CopyButton, Group, List, Textarea } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
 import { readStreamableValue } from 'ai/rsc';
+import dedent from 'ts-dedent';
 import type { z } from 'zod';
 import { generate } from './actions';
 import type { schema } from './util';
@@ -21,9 +22,11 @@ const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
 export default function Page() {
   const form = useForm({
     initialValues: {
-      message: '作成済みのAmazon SESのメールアドレス test@example.com にメールを受信したら、AWS Lambda を使って Discord の特定のチャンネルにタイトル、送信者（From）、内容を投稿したい',
+      message: '',
       loading: false,
-      result: { resources: [] }
+      result: {
+        resources: []
+      }
     }
   });
 
@@ -43,10 +46,23 @@ export default function Page() {
     form.setValues({ loading: false });
   };
 
+  const nextPrompt = (): string => {
+    return dedent`あなたはインフラエンジニアエキスパートです。
+    入力された実装したいシステム概要とTerraform resourceの一覧をもとにmain.tfを作成してください。
+
+    # 実装したいシステム概要
+    ${form.values.message}
+    # Terraformリソース一覧
+    ${form.values.result.resources.map((x) => `- ${x.name}: ${x.description}`).join('\n')}
+
+    \`\`\`hcl
+    `;
+  };
+
   return (
     <FormProvider form={form}>
       <Box mx='auto' component='form'>
-        <Textarea label='構築したいシステム内容を具体的に書く' {...form.getInputProps('message')} minRows={2} maxRows={10} autosize />
+        <Textarea label='構築したいシステム内容を具体的に書く' {...form.getInputProps('message')} minRows={2} maxRows={10} autosize placeholder='東京リージョンにサーバーを1台構築する' />
         <Group justify='center' mt={'sm'}>
           <Button onClick={handleSubmit} loading={form.values.loading}>
             生成！
@@ -64,6 +80,16 @@ export default function Page() {
                 );
               })}
             </List>
+
+            <Group justify='flex-end'>
+              <CopyButton value={nextPrompt()}>
+                {({ copied, copy }) => (
+                  <Button color={copied ? 'teal' : 'blue'} onClick={copy}>
+                    {copied ? 'コピーしました！' : 'ChatGPTに質問するプロンプトをコピーする'}
+                  </Button>
+                )}
+              </CopyButton>
+            </Group>
           </>
         )}
       </Box>

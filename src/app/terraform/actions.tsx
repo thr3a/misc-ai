@@ -35,7 +35,6 @@ Terraform resource nameとなぜシステムにそのリソースが必要なの
       model: openai('gpt-4o'),
       system: systemPrompt,
       prompt: ['# 実現したいシステム', input, '#必要なTerraform resource name'].join('\n'),
-      // prompt: input,
       schema: schema,
       temperature: 0.2
     });
