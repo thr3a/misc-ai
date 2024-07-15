@@ -2,7 +2,7 @@ import { Title } from '@mantine/core';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Terraformヘルパー',
+  title: 'Terraform code builder',
   description: 'システム構築もAIにやらせよう'
 };
 
