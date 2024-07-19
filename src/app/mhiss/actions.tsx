@@ -13,20 +13,20 @@ export async function continueConversation(history: MessageProps[]) {
 
   (async () => {
     // OPENAI
-    // const { textStream } = await streamText({
-    //   model: openai('gpt-3.5-turbo'),
-    //   system: systemMessage,
-    //   messages: history
-    // });
+    const { textStream } = await streamText({
+      model: openai('gpt-4o-mini'),
+      system: systemMessage,
+      messages: history
+    });
 
     // COHERE
-    console.log(history);
-    console.log(systemMessage2(history));
-    const { textStream } = await streamText({
-      model: cohere('command-r-plus'),
-      prompt: systemMessage2(history),
-      temperature: 0.8
-    });
+    // console.log(history);
+    // console.log(systemMessage2(history));
+    // const { textStream } = await streamText({
+    //   model: cohere('command-r-plus'),
+    //   prompt: systemMessage2(history),
+    //   temperature: 0.8
+    // });
 
     for await (const text of textStream) {
       stream.update(text);
