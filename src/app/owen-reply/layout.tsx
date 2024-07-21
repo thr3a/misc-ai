@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'ダジャレべた褒めジェネレーター',
-  description: 'オーエンを応援します！'
+  description: 'ダジャレxAIで自己肯定感を高めるソリューション'
 };
 
 export default function PageLayout({ children }: { children: React.ReactNode }): JSX.Element {
