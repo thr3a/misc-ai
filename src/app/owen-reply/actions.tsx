@@ -13,8 +13,8 @@ export async function generate(input: string) {
 
   (async () => {
     const { partialObjectStream } = await streamObject({
-      // model: openai('gpt-3.5-turbo'),
-      model: openai('gpt-4o'),
+      model: openai('gpt-4o-mini'),
+      // model: openai('gpt-4o'),
       // model: anthropic('claude-3-haiku-20240307'),
       system: systemPrompt,
       prompt: input,
