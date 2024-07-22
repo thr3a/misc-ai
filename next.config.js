@@ -11,7 +11,12 @@ const nextConfig = {
   // github pagesの場合
   // output: 'export',
   // k8sの場合
-  output: 'standalone'
+  output: 'standalone',
+  experimental: {
+    outputFileTracingIncludes: {
+      '/': './node_modules/discord.js/**'
+    }
+  }
 };
 
-module.exports = nextConfig
+module.exports = nextConfig;

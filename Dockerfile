@@ -42,14 +42,15 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+COPY --from=builder /app/src/scripts /app/scripts
+RUN npm install discord.js
+RUN echo '#!/bin/bash\n  npm run node-server & npx -y tsx /app/scripts/discord.ts & wait' > /app/start.sh
+
 USER nextjs
 
 EXPOSE 3000
 
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
-
-RUN echo '#!/bin/sh\nnpm run node-server & node --import tsx ./src/scripts/discord.ts & wait' > /app/start.sh
-RUN chmod +x /app/start.sh
 
 CMD ["bash", "/app/start.sh"]
