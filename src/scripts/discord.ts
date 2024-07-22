@@ -35,7 +35,9 @@ client.on('interactionCreate', async (interaction) => {
     const japanTime = now.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
 
     // レスポンスを送信
-    await interaction.reply(`現在の日本時間は ${japanTime} です。`);
+    await interaction.reply('wait...');
+    const message = `現在の日本時間は ${japanTime} です。`;
+    await interaction.editReply(message);
   }
 });
 
