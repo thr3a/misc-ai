@@ -49,7 +49,7 @@ EXPOSE 3000
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
 
-RUN echo '#!/bin/sh\nnpm run node-server & node --import tsx --env-file .env.local ./src/scripts/discord.ts & wait' > /app/start.sh
+RUN echo '#!/bin/sh\nnpm run node-server & node --import tsx ./src/scripts/discord.ts & wait' > /app/start.sh
 RUN chmod +x /app/start.sh
 
 CMD ["/app/start.sh"]
