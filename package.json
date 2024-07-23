@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "biome check --write --unsafe ./src",
     "serve": "python -m http.server -d out",
-    "node-server": "node server.js"
+    "node-server": "node server.js",
+    "discord": "node --import tsx --env-file .env.local --watch ./src/scripts/discord.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^0.0.30",
