@@ -1,8 +1,9 @@
+import { app } from '@/lib/firebase/firebase';
 import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 import { Client, Events, GatewayIntentBits, type Message, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
-import { app } from '../lib/firebase/firebase';
+import { tobariPrompt } from './util';
 
 const db = getFirestore(app);
 
@@ -39,7 +40,7 @@ if (!TOKEN) {
 }
 
 // スラッシュコマンドを定義
-const commands = [new SlashCommandBuilder().setName('time').setDescription('現在の時刻を表示します').toJSON()];
+const commands = [new SlashCommandBuilder().setName('time').setDescription('現在の時刻を表示します').toJSON(), new SlashCommandBuilder().setName('reset').setDescription('すべての会話履歴を削除します').toJSON()];
 
 // RESTインスタンスを作成
 const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -51,6 +52,7 @@ client.on(Events.MessageCreate, async (message: Message) => {
   // 一般チャンネルでの投稿のみ処理
   console.log(message.channel.id);
   if (message.channel.id === '1005750360301912210') {
+    await message.channel.sendTyping(); // タイピング表示を開始
     const chatHistory = await getChatHistory();
     const newMessage: MessageProps = { role: 'user', content: message.content };
     chatHistory.push(newMessage);
@@ -58,7 +60,7 @@ client.on(Events.MessageCreate, async (message: Message) => {
 
     const { text } = await generateText({
       model: openai('gpt-4o-mini'),
-      system: '内気なお嬢様の口調で回答してください。',
+      system: tobariPrompt,
       messages: chatHistory
     });
     await message.channel.send(text);
@@ -80,6 +82,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
     await interaction.reply('wait...');
     const message = `現在の日本時間は ${japanTime} です。`;
     await interaction.editReply(message);
+  } else if (commandName === 'reset') {
+    await interaction.reply('wait...');
+    const docRef = doc(db, 'chats', 'history');
+    await setDoc(docRef, { messages: [] });
+    await interaction.editReply('すべての会話履歴が削除されました。');
   }
 });
 
@@ -92,7 +99,7 @@ async function main() {
     console.log('スラッシュコマンドを登録中...');
 
     // スラッシュコマンドを登録
-    // await rest.put(Routes.applicationCommands(process.env.DISCORD_CLIENT_ID || 'dummy'), { body: commands });
+    await rest.put(Routes.applicationCommands(process.env.DISCORD_CLIENT_ID || 'dummy'), { body: commands });
 
     console.log('スラッシュコマンドが正常に登録されました。');
 
