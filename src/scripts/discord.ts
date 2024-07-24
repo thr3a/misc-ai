@@ -1,4 +1,4 @@
-import { openai } from '@ai-sdk/openai';
+import { createOpenAI } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 import { Client, Events, GatewayIntentBits, type Message, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
@@ -58,6 +58,9 @@ client.on(Events.MessageCreate, async (message: Message) => {
     chatHistory.push(newMessage);
     await updateChatHistory(chatHistory);
 
+    const openai = createOpenAI({
+      baseURL: 'http://deep.turai.work/v1'
+    });
     const { text } = await generateText({
       model: openai('gpt-4o-mini'),
       system: tobariPrompt,
