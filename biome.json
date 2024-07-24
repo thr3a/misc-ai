@@ -11,6 +11,9 @@
         "noImplicitAnyLet": "warn",
         "noExplicitAny": "warn",
         "noArrayIndexKey": "warn"
+      },
+      "complexity": {
+        "noForEach":"info"
       }
 		}
 	},
