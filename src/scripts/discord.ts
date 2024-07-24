@@ -1,8 +1,8 @@
-import { app } from '@/lib/firebase/firebase';
 import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 import { Client, Events, GatewayIntentBits, type Message, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
+import { app } from '../lib/firebase/firebase';
 import { tobariPrompt } from './util';
 
 const db = getFirestore(app);
@@ -97,7 +97,6 @@ client.once('ready', () => {
 async function main() {
   try {
     console.log('スラッシュコマンドを登録中...');
-
     // スラッシュコマンドを登録
     await rest.put(Routes.applicationCommands(process.env.DISCORD_CLIENT_ID || 'dummy'), { body: commands });
 
