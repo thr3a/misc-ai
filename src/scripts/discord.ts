@@ -2,7 +2,7 @@ import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 import { Client, Events, GatewayIntentBits, type Message, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
-import { app } from '../lib/firebase/firebase';
+import { app } from './firebase';
 import { tobariPrompt } from './util';
 
 const db = getFirestore(app);
