@@ -24,4 +24,4 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN npm run build
 
-CMD ["npx", "-y", "tsx", "/app/scripts/discord.ts"]
+CMD ["npx", "-y", "tsx", "/app/src/scripts/discord.ts"]
