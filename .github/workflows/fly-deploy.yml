@@ -1,5 +1,3 @@
-# See https://fly.io/docs/app-guides/continuous-deployment-with-github-actions/
-
 name: Fly Deploy
 on:
   push:
@@ -7,12 +5,14 @@ on:
       - main
 jobs:
   deploy:
-    name: Deploy app
+    name: Deploy
     runs-on: ubuntu-latest
-    concurrency: deploy-group    # optional: ensure only one action runs at a time
+    strategy:
+      matrix:
+        app: [misc-ai, thr3a-discord]
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only
+      - run: flyctl deploy --remote-only -a ${{ matrix.app }}
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

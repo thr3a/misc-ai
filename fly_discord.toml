@@ -1,18 +1,8 @@
-# fly.toml app configuration file generated for thr3a-discord on 2024-07-26T08:36:40+09:00
-#
-# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
-#
-
 app = 'thr3a-discord'
 primary_region = 'nrt'
 
 [build]
 dockerfile = 'Dockerfile.discord'
-
-# [services]
-# auto_start_machines = false
-# auto_stop_machines = false
-# min_machines_running = 1
 
 [[vm]]
 cpu_kind = "shared"
