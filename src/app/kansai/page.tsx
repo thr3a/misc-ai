@@ -1,5 +1,5 @@
 'use client';
-import { ActionIcon, Box, Button, CopyButton, Group, Radio, Stack, TextInput, Textarea, Title, Tooltip } from '@mantine/core';
+import { Box, Button, Group, Textarea, Title } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
 import type { z } from 'zod';
 import { Generate } from './actions';
@@ -20,7 +20,7 @@ const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
 export default function Page() {
   const form = useForm({
     initialValues: {
-      message: 'このうどん、すごくしょっぱいね',
+      message: 'よく焼いたパンなら好きだ。',
       loading: false,
       result: {
         text: ''
