@@ -23,7 +23,7 @@ const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
 export default function Page() {
   const form = useForm({
     initialValues: {
-      message: '素数かどうか判定する関数',
+      message: '',
       loading: false,
       result: {
         candidates: ['isPrime', 'checkPrime', 'primeChecker', 'validatePrime'].map((candidate) => ({ candidate }))
