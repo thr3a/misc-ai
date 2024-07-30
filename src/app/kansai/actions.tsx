@@ -11,7 +11,7 @@ export async function Generate(input: string) {
   const { object } = await generateObject({
     // model: openai('gpt-4o-mini'),
     model: anthropic('claude-3-5-sonnet-20240620'),
-    system: '',
+    system: systemPrompt,
     prompt: input,
     schema: schema,
     temperature: 0.3
