@@ -1,3 +1,10 @@
+# デプロイ
+
+```
+fly deploy -a thr3a-discord
+```
+
+
 - GPT同士戦わせる
 - 四象限マトリックス
 
