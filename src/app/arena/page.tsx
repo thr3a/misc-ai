@@ -32,7 +32,7 @@ const Tweet = (props: { content: string }) => {
 export default function Page() {
   const form = useForm({
     initialValues: {
-      message: 'どのお寿司のネタが一番美味しいか',
+      message: '',
       loading: false,
       result: []
     }
@@ -66,7 +66,7 @@ export default function Page() {
   return (
     <FormProvider form={form}>
       <Box mx='auto' component='form'>
-        <Textarea label='議題' {...form.getInputProps('message')} minRows={2} maxRows={10} autosize />
+        <Textarea label='議題' {...form.getInputProps('message')} minRows={2} maxRows={10} autosize placeholder='どのお寿司のネタが一番美味しいか' />
         <Group justify='center' mt={'sm'}>
           <Button onClick={handleSubmit} loading={form.values.loading}>
             討論開始！
