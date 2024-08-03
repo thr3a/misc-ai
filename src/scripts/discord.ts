@@ -4,7 +4,7 @@ import { generateText } from 'ai';
 import { Client, Events, GatewayIntentBits, type Message, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
 import { app } from './firebase';
-import { tobariPrompt } from './util';
+import { ririPrompt, tobariPrompt } from './util';
 
 const db = getFirestore(app);
 
@@ -13,8 +13,8 @@ type MessageProps = {
   content: string;
 };
 
-async function getChatHistory(): Promise<MessageProps[]> {
-  const docRef = doc(db, 'chats', 'history');
+async function getChatHistory(channelId: string): Promise<MessageProps[]> {
+  const docRef = doc(db, 'chats', channelId);
   const docSnap = await getDoc(docRef);
   if (docSnap.exists()) {
     return docSnap.data().messages;
@@ -22,8 +22,8 @@ async function getChatHistory(): Promise<MessageProps[]> {
   return [];
 }
 
-async function updateChatHistory(messages: MessageProps[]): Promise<void> {
-  const docRef = doc(db, 'chats', 'history');
+async function updateChatHistory(channelId: string, messages: MessageProps[]): Promise<void> {
+  const docRef = doc(db, 'chats', channelId);
   if (messages.length > 10) {
     messages.shift();
   }
@@ -50,14 +50,14 @@ client.on(Events.MessageCreate, async (message: Message) => {
   // ボット自身の投稿は無視
   if (message.author.bot) return;
 
-  // 一般チャンネルでの投稿のみ処理
-  console.log(message.channel.id);
-  if (message.channel.id === '1005750360301912210') {
+  const channelId = message.channel.id;
+  // 白銀鳥羽莉
+  if (channelId === '1005750360301912210') {
     await message.channel.sendTyping(); // タイピング表示を開始
-    const chatHistory = await getChatHistory();
+    const chatHistory = await getChatHistory(channelId);
     const newMessage: MessageProps = { role: 'user', content: message.content };
     chatHistory.push(newMessage);
-    await updateChatHistory(chatHistory);
+    await updateChatHistory(channelId, chatHistory);
 
     const openai = createOpenAI({
       baseURL: 'http://deep.turai.work/v1'
@@ -72,7 +72,31 @@ client.on(Events.MessageCreate, async (message: Message) => {
 
     const aiMessage: MessageProps = { role: 'assistant', content: text };
     chatHistory.push(aiMessage);
-    await updateChatHistory(chatHistory);
+    await updateChatHistory(message.channel.id, chatHistory);
+  }
+
+  // りりちゃん
+  if (channelId === '1269204261372166214') {
+    await message.channel.sendTyping(); // タイピング表示を開始
+    const chatHistory = await getChatHistory(channelId);
+    const newMessage: MessageProps = { role: 'user', content: message.content };
+    chatHistory.push(newMessage);
+    await updateChatHistory(channelId, chatHistory);
+
+    const openai = createOpenAI({
+      baseURL: 'http://deep.turai.work/v1'
+    });
+    const { text } = await generateText({
+      // model: openai('gpt-4o-mini'),
+      model: anthropic('claude-3-5-sonnet-20240620'),
+      system: ririPrompt,
+      messages: chatHistory
+    });
+    await message.channel.send(text);
+
+    const aiMessage: MessageProps = { role: 'assistant', content: text };
+    chatHistory.push(aiMessage);
+    await updateChatHistory(message.channel.id, chatHistory);
   }
 });
 
@@ -87,9 +111,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
     await interaction.reply('wait...');
     const message = `現在の日本時間は ${japanTime} です。`;
     await interaction.editReply(message);
-  } else if (commandName === 'reset') {
+  } else if (commandName === 'reset' && interaction.channel?.id) {
     await interaction.reply('wait...');
-    const docRef = doc(db, 'chats', 'history');
+    const docRef = doc(db, 'chats', interaction.channel?.id);
     await setDoc(docRef, { messages: [] });
     await interaction.editReply('すべての会話履歴が削除されました。');
   }
