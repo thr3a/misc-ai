@@ -1,7 +1,13 @@
 # デプロイ
 
-```
+```bash
 fly deploy -a thr3a-discord
+```
+
+# ts実行
+
+```bash
+node --import tsx --env-file .env.local --watch ./src/scripts/discord.ts
 ```
 
 
