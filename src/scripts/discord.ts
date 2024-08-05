@@ -30,6 +30,28 @@ async function updateChatHistory(channelId: string, messages: MessageProps[]): P
   await setDoc(docRef, { messages });
 }
 
+async function handleMessage(message: Message, prompt: string, channelId: string) {
+  await message.channel.sendTyping(); // タイピング表示を開始
+  const chatHistory = await getChatHistory(channelId);
+  const newMessage: MessageProps = { role: 'user', content: message.content };
+  chatHistory.push(newMessage);
+  await updateChatHistory(channelId, chatHistory);
+
+  const openai = createOpenAI({
+    baseURL: 'http://deep.turai.work/v1'
+  });
+  const { text } = await generateText({
+    model: openai('gpt-4o-mini'),
+    system: prompt,
+    messages: chatHistory
+  });
+  await message.channel.send(text);
+
+  const aiMessage: MessageProps = { role: 'assistant', content: text };
+  chatHistory.push(aiMessage);
+  await updateChatHistory(message.channel.id, chatHistory);
+}
+
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
 });
@@ -53,50 +75,11 @@ client.on(Events.MessageCreate, async (message: Message) => {
   const channelId = message.channel.id;
   // 白銀鳥羽莉
   if (channelId === '1005750360301912210') {
-    await message.channel.sendTyping(); // タイピング表示を開始
-    const chatHistory = await getChatHistory(channelId);
-    const newMessage: MessageProps = { role: 'user', content: message.content };
-    chatHistory.push(newMessage);
-    await updateChatHistory(channelId, chatHistory);
-
-    const openai = createOpenAI({
-      baseURL: 'http://deep.turai.work/v1'
-    });
-    const { text } = await generateText({
-      model: openai('gpt-4o-mini'),
-      // model: anthropic('claude-3-5-sonnet-20240620'),
-      system: tobariPrompt,
-      messages: chatHistory
-    });
-    await message.channel.send(text);
-
-    const aiMessage: MessageProps = { role: 'assistant', content: text };
-    chatHistory.push(aiMessage);
-    await updateChatHistory(message.channel.id, chatHistory);
+    await handleMessage(message, tobariPrompt, channelId);
   }
-
   // りりちゃん
   if (channelId === '1269204261372166214') {
-    await message.channel.sendTyping(); // タイピング表示を開始
-    const chatHistory = await getChatHistory(channelId);
-    const newMessage: MessageProps = { role: 'user', content: message.content };
-    chatHistory.push(newMessage);
-    await updateChatHistory(channelId, chatHistory);
-
-    const openai = createOpenAI({
-      baseURL: 'http://deep.turai.work/v1'
-    });
-    const { text } = await generateText({
-      model: openai('gpt-4o-mini'),
-      // model: anthropic('claude-3-5-sonnet-20240620'),
-      system: ririPrompt,
-      messages: chatHistory
-    });
-    await message.channel.send(text);
-
-    const aiMessage: MessageProps = { role: 'assistant', content: text };
-    chatHistory.push(aiMessage);
-    await updateChatHistory(message.channel.id, chatHistory);
+    await handleMessage(message, ririPrompt, channelId);
   }
 });
 
