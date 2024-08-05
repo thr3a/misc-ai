@@ -41,7 +41,7 @@ if (!TOKEN) {
 }
 
 // スラッシュコマンドを定義
-const commands = [new SlashCommandBuilder().setName('time').setDescription('現在の時刻を表示します').toJSON(), new SlashCommandBuilder().setName('reset').setDescription('すべての会話履歴を削除します').toJSON()];
+const commands = [new SlashCommandBuilder().setName('reset').setDescription('すべての会話履歴を削除します').toJSON()];
 
 // RESTインスタンスを作成
 const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -87,8 +87,8 @@ client.on(Events.MessageCreate, async (message: Message) => {
       baseURL: 'http://deep.turai.work/v1'
     });
     const { text } = await generateText({
-      // model: openai('gpt-4o-mini'),
-      model: anthropic('claude-3-5-sonnet-20240620'),
+      model: openai('gpt-4o-mini'),
+      // model: anthropic('claude-3-5-sonnet-20240620'),
       system: ririPrompt,
       messages: chatHistory
     });
