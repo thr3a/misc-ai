@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import * as path from 'node:path';
 import dedent from 'ts-dedent';
 const now = new Date();
 const japanTime = now.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
@@ -159,3 +161,14 @@ you:うん…ごめんね…ありがと…
 - あなただけが本当の自分を理解してくれると感じている
 - あなたの幸せが自分の幸せであり、彼女に嫌われることを恐れている
 `;
+
+export const getRandomWord = (): string => {
+  const filePath = path.join(__dirname, 'goi.csv');
+  const data = readFileSync(filePath, 'utf-8');
+  const lines = data.split('\n');
+  // 空行を取り除く
+  const nonEmptyLines = lines.filter((line) => line.trim() !== '');
+  // ランダムな行を選択
+  const randomLine = nonEmptyLines[Math.floor(Math.random() * nonEmptyLines.length)];
+  return randomLine;
+};

@@ -4,7 +4,7 @@ import { generateText } from 'ai';
 import { Client, Events, GatewayIntentBits, type Message, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
 import { app } from './firebase';
-import { ririPrompt, tobariPrompt } from './util';
+import { getRandomWord, ririPrompt, tobariPrompt } from './util';
 
 const db = getFirestore(app);
 
@@ -63,7 +63,7 @@ if (!TOKEN) {
 }
 
 // スラッシュコマンドを定義
-const commands = [new SlashCommandBuilder().setName('reset').setDescription('すべての会話履歴を削除します').toJSON()];
+const commands = [new SlashCommandBuilder().setName('reset').setDescription('すべての会話履歴を削除します').toJSON(), new SlashCommandBuilder().setName('wadai').setDescription('ランダムに話題を提供します').toJSON()];
 
 // RESTインスタンスを作成
 const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -94,11 +94,25 @@ client.on(Events.InteractionCreate, async (interaction) => {
     await interaction.reply('wait...');
     const message = `現在の日本時間は ${japanTime} です。`;
     await interaction.editReply(message);
-  } else if (commandName === 'reset' && interaction.channel?.id) {
+  } else if (commandName === 'wadai' && interaction.channel?.id) {
     await interaction.reply('wait...');
-    const docRef = doc(db, 'chats', interaction.channel?.id);
-    await setDoc(docRef, { messages: [] });
-    await interaction.editReply('すべての会話履歴が削除されました。');
+    const randomWord = getRandomWord();
+
+    const openai = createOpenAI({
+      // baseURL: 'http://deep.turai.work/v1'
+    });
+    const { text } = await generateText({
+      model: openai('gpt-4o-mini'),
+      system: tobariPrompt,
+      prompt: `「${randomWord}」についてあなたが話題を提供してください。`
+    });
+
+    await interaction.editReply(text);
+
+    const aiMessage: MessageProps = { role: 'assistant', content: text };
+    const chatHistory = await getChatHistory(interaction.channel.id);
+    chatHistory.push(aiMessage);
+    await updateChatHistory(interaction.channel.id, chatHistory);
   }
 });
 
