@@ -63,8 +63,8 @@ client.on(Events.MessageCreate, async (message: Message) => {
       baseURL: 'http://deep.turai.work/v1'
     });
     const { text } = await generateText({
-      // model: openai('gpt-4o-mini'),
-      model: anthropic('claude-3-5-sonnet-20240620'),
+      model: openai('gpt-4o-mini'),
+      // model: anthropic('claude-3-5-sonnet-20240620'),
       system: tobariPrompt,
       messages: chatHistory
     });
