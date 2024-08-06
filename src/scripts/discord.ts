@@ -41,7 +41,8 @@ async function handleMessage(message: Message, prompt: string, channelId: string
     baseURL: 'http://deep.turai.work/v1'
   });
   const { text } = await generateText({
-    model: openai('gpt-4o-mini'),
+    // model: openai('gpt-4o-mini'),
+    model: anthropic('claude-3-5-sonnet-20240620'),
     system: prompt,
     messages: chatHistory
   });
@@ -102,7 +103,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
       // baseURL: 'http://deep.turai.work/v1'
     });
     const { text } = await generateText({
-      model: openai('gpt-4o-mini'),
+      // model: openai('gpt-4o-mini'),
+      model: anthropic('claude-3-5-sonnet-20240620'),
       system: tobariPrompt,
       prompt: `「${randomWord}」についてあなたが話題を提供してください。`
     });
