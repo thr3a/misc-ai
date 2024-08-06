@@ -98,22 +98,18 @@ client.on(Events.InteractionCreate, async (interaction) => {
   } else if (commandName === 'wadai' && interaction.channel?.id) {
     await interaction.reply('wait...');
     const randomWord = getRandomWord();
-
     const openai = createOpenAI({
       // baseURL: 'http://deep.turai.work/v1'
     });
+    const chatHistory: MessageProps[] = [{ role: 'user', content: `「${randomWord}」についてあなたが話題を提供してください。` }];
     const { text } = await generateText({
       // model: openai('gpt-4o-mini'),
       model: anthropic('claude-3-5-sonnet-20240620'),
       system: tobariPrompt,
-      messages: [{ role: 'user', content: `「${randomWord}」についてあなたが話題を提供してください。` }]
+      messages: chatHistory
     });
-
     await interaction.editReply(text);
-
-    const aiMessage: MessageProps = { role: 'assistant', content: text };
-    const chatHistory = await getChatHistory(interaction.channel.id);
-    chatHistory.push(aiMessage);
+    chatHistory.push({ role: 'assistant', content: text });
     await updateChatHistory(interaction.channel.id, chatHistory);
   } else if (commandName === 'reset' && interaction.channel?.id) {
     await interaction.reply('wait...');
