@@ -44,7 +44,8 @@ async function handleMessage(message: Message, prompt: string, channelId: string
     // model: openai('gpt-4o-mini'),
     model: anthropic('claude-3-5-sonnet-20240620'),
     system: prompt,
-    messages: chatHistory
+    messages: chatHistory,
+    maxTokens: 256
   });
   await message.channel.send(text);
 
@@ -112,7 +113,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
       // model: openai('gpt-4o-mini'),
       model: anthropic('claude-3-5-sonnet-20240620'),
       system: tobariPrompt,
-      messages: chatHistory
+      messages: chatHistory,
+      maxTokens: 256
     });
     await interaction.editReply(text);
     chatHistory.push({ role: 'assistant', content: text });
