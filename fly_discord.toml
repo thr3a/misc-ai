@@ -4,6 +4,10 @@ primary_region = 'nrt'
 [build]
 dockerfile = 'Dockerfile.discord'
 
+[[services]]
+min_machines_running = 1
+
+
 [[vm]]
 cpu_kind = "shared"
 cpus = 1
