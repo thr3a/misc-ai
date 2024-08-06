@@ -64,7 +64,11 @@ if (!TOKEN) {
 }
 
 // スラッシュコマンドを定義
-const commands = [new SlashCommandBuilder().setName('reset').setDescription('すべての会話履歴を削除します').toJSON(), new SlashCommandBuilder().setName('wadai').setDescription('ランダムに話題を提供します').toJSON()];
+const commands = [
+  new SlashCommandBuilder().setName('time').setDescription('時間表示').toJSON(),
+  new SlashCommandBuilder().setName('reset').setDescription('すべての会話履歴を削除します').toJSON(),
+  new SlashCommandBuilder().setName('wadai').setDescription('ランダムに話題を提供します').toJSON()
+];
 
 // RESTインスタンスを作成
 const rest = new REST({ version: '10' }).setToken(TOKEN);
@@ -101,7 +105,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
     const openai = createOpenAI({
       // baseURL: 'http://deep.turai.work/v1'
     });
-    const chatHistory: MessageProps[] = [{ role: 'user', content: `「${randomWord}」についてあなたが話題を提供してください。` }];
+    const chatHistory: MessageProps[] = [
+      { role: 'user', content: `「${randomWord}」についてあなたが話題を提供してください。` }
+    ];
     const { text } = await generateText({
       // model: openai('gpt-4o-mini'),
       model: anthropic('claude-3-5-sonnet-20240620'),
@@ -127,7 +133,9 @@ async function main() {
   try {
     console.log('スラッシュコマンドを登録中...');
     // スラッシュコマンドを登録
-    await rest.put(Routes.applicationCommands(process.env.DISCORD_CLIENT_ID || 'dummy'), { body: commands });
+    await rest.put(Routes.applicationCommands(process.env.DISCORD_CLIENT_ID || 'dummy'), {
+      body: commands
+    });
 
     console.log('スラッシュコマンドが正常に登録されました。');
 
