@@ -115,6 +115,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
     const chatHistory = await getChatHistory(interaction.channel.id);
     chatHistory.push(aiMessage);
     await updateChatHistory(interaction.channel.id, chatHistory);
+  } else if (commandName === 'reset' && interaction.channel?.id) {
+    await interaction.reply('wait...');
+    const docRef = doc(db, 'chats', interaction.channel?.id);
+    await setDoc(docRef, { messages: [] });
+    await interaction.editReply('すべての会話履歴が削除されました。');
   }
 });
 
