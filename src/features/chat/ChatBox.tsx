@@ -14,7 +14,15 @@ type ChatBoxProps = {
 
 const Message = (props: { body: string; role: 'user' | 'assistant' }) => {
   return (
-    <Paper shadow='xs' radius='md' pt='6px' pb='6px' p='xs' bg={props.role === 'user' ? 'white' : '#8de055'} c={'dark.6'}>
+    <Paper
+      shadow='xs'
+      radius='md'
+      pt='6px'
+      pb='6px'
+      p='xs'
+      bg={props.role === 'user' ? 'white' : '#8de055'}
+      c={'dark.6'}
+    >
       <Text fz={'10px'} style={{ whiteSpace: 'pre-wrap' }}>
         {props.body}
       </Text>
@@ -32,7 +40,7 @@ export const ChatBox = ({ messages, height }: ChatBoxProps): JSX.Element => {
           return (
             <Box key={content}>
               <Group justify={role === 'assistant' ? 'flex-start' : 'flex-end'}>
-                <Message body={content} role={role} />
+                <Message body={content.trim()} role={role} />
               </Group>
             </Box>
           );
