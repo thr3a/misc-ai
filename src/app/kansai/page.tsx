@@ -42,7 +42,12 @@ export default function Page() {
   return (
     <FormProvider form={form}>
       <Box maw={600} mx='auto' component='form'>
-        <Textarea label='処理の概要を記述してください' withAsterisk {...form.getInputProps('message')} placeholder='駐車場に忘れ物してきちゃった！' />
+        <Textarea
+          label='処理の概要を記述してください'
+          withAsterisk
+          {...form.getInputProps('message')}
+          placeholder='駐車場に忘れ物してきちゃった！'
+        />
         <Group justify='center'>
           <Button onClick={handleSubmit} loading={form.values.loading}>
             変換！

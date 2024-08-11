@@ -1,5 +1,18 @@
 'use client';
-import { ActionIcon, Avatar, Box, Button, CopyButton, Group, List, Paper, Stack, Text, Textarea, Tooltip } from '@mantine/core';
+import {
+  ActionIcon,
+  Avatar,
+  Box,
+  Button,
+  CopyButton,
+  Group,
+  List,
+  Paper,
+  Stack,
+  Text,
+  Textarea,
+  Tooltip
+} from '@mantine/core';
 import { createFormContext } from '@mantine/form';
 import { readStreamableValue } from 'ai/rsc';
 import { generate } from './actions';
@@ -66,7 +79,14 @@ export default function Page() {
   return (
     <FormProvider form={form}>
       <Box mx='auto' component='form'>
-        <Textarea label='議題' {...form.getInputProps('message')} minRows={2} maxRows={10} autosize placeholder='どのお寿司のネタが一番美味しいか' />
+        <Textarea
+          label='議題'
+          {...form.getInputProps('message')}
+          minRows={2}
+          maxRows={10}
+          autosize
+          placeholder='どのお寿司のネタが一番美味しいか'
+        />
         <Group justify='center' mt={'sm'}>
           <Button onClick={handleSubmit} loading={form.values.loading}>
             討論開始！

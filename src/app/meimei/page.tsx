@@ -54,7 +54,12 @@ export default function Page() {
             <Radio value='branch' label='ブランチ名' />
           </Group>
         </Radio.Group>
-        <TextInput label='処理の概要を記述してください' withAsterisk {...form.getInputProps('message')} placeholder='素数かどうか判定する関数' />
+        <TextInput
+          label='処理の概要を記述してください'
+          withAsterisk
+          {...form.getInputProps('message')}
+          placeholder='素数かどうか判定する関数'
+        />
         <Radio.Group label='命名規則' {...form.getInputProps('namingConvention')}>
           <Stack mt='xs'>
             {supportedNamingConventions.map((nc) => (

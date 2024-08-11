@@ -1,5 +1,18 @@
 'use client';
-import { ActionIcon, Avatar, Box, Button, CopyButton, Group, List, Paper, Stack, Text, Textarea, Tooltip } from '@mantine/core';
+import {
+  ActionIcon,
+  Avatar,
+  Box,
+  Button,
+  CopyButton,
+  Group,
+  List,
+  Paper,
+  Stack,
+  Text,
+  Textarea,
+  Tooltip
+} from '@mantine/core';
 import { createFormContext } from '@mantine/form';
 import { readStreamableValue } from 'ai/rsc';
 import type { z } from 'zod';

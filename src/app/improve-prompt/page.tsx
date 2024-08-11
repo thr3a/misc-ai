@@ -47,7 +47,14 @@ export default function Page() {
   return (
     <FormProvider form={form}>
       <Box mx='auto' component='form'>
-        <Textarea label='改善前のプロンプト' {...form.getInputProps('message')} minRows={2} maxRows={10} autosize placeholder='ヨーロッパ観光するときの注意点って？' />
+        <Textarea
+          label='改善前のプロンプト'
+          {...form.getInputProps('message')}
+          minRows={2}
+          maxRows={10}
+          autosize
+          placeholder='ヨーロッパ観光するときの注意点って？'
+        />
         <Group justify='center' mt={'sm'}>
           <Button onClick={handleSubmit} loading={form.values.loading}>
             送信!
@@ -56,7 +63,14 @@ export default function Page() {
 
         {form.values.result.improved_prompt && (
           <>
-            <Textarea label='改善後のプロンプト' {...form.getInputProps('result.improved_prompt')} minRows={2} maxRows={10} autosize readOnly />
+            <Textarea
+              label='改善後のプロンプト'
+              {...form.getInputProps('result.improved_prompt')}
+              minRows={2}
+              maxRows={10}
+              autosize
+              readOnly
+            />
             <Group justify='flex-end'>
               <CopyButton value={form.values.result.improved_prompt}>
                 {({ copied, copy }) => (

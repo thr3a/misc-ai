@@ -16,7 +16,10 @@ export async function generate(topic: string, history: MessageProps[]) {
   (async () => {
     const { textStream } = await streamText({
       model: openai('gpt-4o-mini'),
-      system: history.length === 0 ? [firstSystemPrompt, '# 議題', topic].join('\n') : [systemPrompt, '# 議題', topic].join('\n'),
+      system:
+        history.length === 0
+          ? [firstSystemPrompt, '# 議題', topic].join('\n')
+          : [systemPrompt, '# 議題', topic].join('\n'),
       messages: history,
       temperature: 1
     });

@@ -41,7 +41,10 @@ export default function Page() {
     form.setValues({ loading: true, message: '' });
     form.insertListItem('messages', { content: form.values.message, role: 'user' } as MessageProps);
 
-    const { messages, newMessage } = await continueConversation([...form.values.messages, { role: 'user', content: tmp }]);
+    const { messages, newMessage } = await continueConversation([
+      ...form.values.messages,
+      { role: 'user', content: tmp }
+    ]);
 
     let textContent = '';
 
@@ -57,7 +60,14 @@ export default function Page() {
       <Box ml={0} mr={0} maw={'100vw'}>
         <ChatBox messages={form.values.messages} height='60vh' />
         <Flex align='center'>
-          <Textarea placeholder='入力してください' autosize minRows={1} style={{ flex: 1, display: 'block' }} {...form.getInputProps('message')} onKeyDown={getHotkeyHandler([['mod+Enter', handleSubmit]])} />
+          <Textarea
+            placeholder='入力してください'
+            autosize
+            minRows={1}
+            style={{ flex: 1, display: 'block' }}
+            {...form.getInputProps('message')}
+            onKeyDown={getHotkeyHandler([['mod+Enter', handleSubmit]])}
+          />
           <ActionIcon size='input-sm' color='blue' onClick={handleSubmit} loading={form.values.loading}>
             <IconSend />
           </ActionIcon>

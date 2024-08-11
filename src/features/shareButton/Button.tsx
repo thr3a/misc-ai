@@ -11,7 +11,14 @@ export const TwitterButton = ({ url, description, label = 'ツイート!' }: Pro
   const encoded = encodeURI(`${description} ${url}`);
   const openURL = `https://twitter.com/intent/tweet?text=${encoded}`;
   return (
-    <Button bg={'black'} leftSection={<IconBrandX size={14} />} component={Link} href={openURL} target='_blank' rel='noopener noreferrer'>
+    <Button
+      bg={'black'}
+      leftSection={<IconBrandX size={14} />}
+      component={Link}
+      href={openURL}
+      target='_blank'
+      rel='noopener noreferrer'
+    >
       {label}
     </Button>
   );

@@ -64,7 +64,14 @@ export default function Page() {
   return (
     <FormProvider form={form}>
       <Box mx='auto' component='form'>
-        <Textarea label='構築したいシステム内容を具体的に書く' {...form.getInputProps('message')} minRows={2} maxRows={10} autosize placeholder='東京リージョンにサーバーを1台構築する' />
+        <Textarea
+          label='構築したいシステム内容を具体的に書く'
+          {...form.getInputProps('message')}
+          minRows={2}
+          maxRows={10}
+          autosize
+          placeholder='東京リージョンにサーバーを1台構築する'
+        />
         <Group justify='center' mt={'sm'}>
           <Button onClick={handleSubmit} loading={form.values.loading}>
             生成！

@@ -18,7 +18,13 @@ type FormValues = {
 
 const SearchButton = ({ keyword }: { keyword: string }): JSX.Element => {
   return (
-    <Button component='a' target='_blank' rel='noopener noreferrer' leftSection={<IconExternalLink size={14} />} href={`https://www.google.com/search?q=${keyword}`}>
+    <Button
+      component='a'
+      target='_blank'
+      rel='noopener noreferrer'
+      leftSection={<IconExternalLink size={14} />}
+      href={`https://www.google.com/search?q=${keyword}`}
+    >
       {keyword}
     </Button>
   );
@@ -49,7 +55,13 @@ export default function Page() {
   return (
     <FormProvider form={form}>
       <Box maw={400} mx='auto' component='form'>
-        <Textarea label='調べたい内容' {...form.getInputProps('message')} placeholder='css remとpxの違い' minRows={2} maxRows={4} />
+        <Textarea
+          label='調べたい内容'
+          {...form.getInputProps('message')}
+          placeholder='css remとpxの違い'
+          minRows={2}
+          maxRows={4}
+        />
         <Group justify='flex-end'>
           <Button onClick={handleSubmit} loading={form.values.loading}>
             翻訳!
