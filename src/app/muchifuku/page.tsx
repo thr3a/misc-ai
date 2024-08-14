@@ -1,5 +1,5 @@
 'use client';
-import { Box, Button, Divider, Flex, Group, Stack, Text, TextInput } from '@mantine/core';
+import { Box, Button, Divider, Flex, Group, List, Paper, Stack, Text, TextInput, Title } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
 import { readStreamableValue } from 'ai/rsc';
 import type { z } from 'zod';
@@ -40,6 +40,25 @@ const Section = (props: { index: number; description: string; dialogues: string[
         </div>
       </Flex>
     </>
+  );
+};
+
+const Description = () => {
+  return (
+    <Paper>
+      <Title order={2}>無知フクロウとは？</Title>
+      <Text>
+        無知フクロウは、あにゃ氏が生み出した「無知」をテーマにしたユニークなフクロウのキャラクター。名の通り大抵のことを知らない。
+        純粋で善意の行動が多いものの、その無知さゆえに周囲に迷惑をかけてしまう。
+      </Text>
+      <List>
+        <List.Item>シュールでキュートな外見を持つフクロウのキャラクター</List.Item>
+        <List.Item>単純で純粋な性格で、物事を深く考えずに行動する傾向がある</List.Item>
+        <List.Item>「〜プ」という独特の言葉遣いをする</List.Item>
+        <List.Item>社会常識や状況判断が欠如している</List.Item>
+        <List.Item>LINEスタンプとして商品化されており、人気を集めている</List.Item>
+      </List>
+    </Paper>
   );
 };
 
@@ -86,9 +105,11 @@ export default function Page() {
     <FormProvider form={form}>
       <Box mx='auto' component='form'>
         <Text size='sm'>
-          お題に好きなワードやシチュエーションを入れて生成ボタンを押すとAIが二次創作作ってくれます。
+          お題に好きなワードやシチュエーションを入れて生成ボタンを押すとAIが二次創作作ってくれます。AI作なので本家と異なった無知フクでもあしからず。
         </Text>
+
         <TextInput label='お題' {...form.getInputProps('message')} placeholder='かき氷' />
+
         <Group justify='center' mt={'sm'}>
           <Button onClick={handleSubmit} loading={form.values.loading}>
             4コマ生成!
@@ -104,6 +125,7 @@ export default function Page() {
             return <Section index={index} description={x.description} dialogues={x.dialogues} key={index} />;
           })}
         </Stack>
+        <Description />
       </Box>
     </FormProvider>
   );
