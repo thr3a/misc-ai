@@ -18,7 +18,7 @@ export async function generate(input: string) {
       system: systemPrompt,
       prompt: input,
       schema: schema,
-      temperature: 0.4
+      temperature: 1
     });
 
     for await (const partialObject of partialObjectStream) {

@@ -1,5 +1,5 @@
 'use client';
-import { Box, Button, Divider, Flex, Group, List, Paper, Stack, Text, TextInput, Title } from '@mantine/core';
+import { Box, Button, Group, Paper, TextInput, Title } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
 import { readStreamableValue } from 'ai/rsc';
 import type { z } from 'zod';
