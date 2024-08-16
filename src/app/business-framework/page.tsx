@@ -42,7 +42,7 @@ const Section = (props: { name: string; description: string; reason: string; exa
 export default function Page() {
   const form = useForm({
     initialValues: {
-      message: '社内の技術ブログのPVを上げたい',
+      message: '',
       loading: false,
       result: {
         frameworks: []
@@ -74,7 +74,11 @@ export default function Page() {
   return (
     <FormProvider form={form}>
       <Box mx='auto' component='form'>
-        <TextInput label='課題(具体的に)' {...form.getInputProps('message')} placeholder='かき氷' />
+        <TextInput
+          label='課題(具体的に)'
+          {...form.getInputProps('message')}
+          placeholder='新しい電子レンジどれにするか迷っています。'
+        />
 
         <Group justify='center' mt={'sm'} mb={'sm'}>
           <Button onClick={handleSubmit} loading={form.values.loading}>
