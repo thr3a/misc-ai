@@ -81,12 +81,7 @@ export default function Page() {
     form.setValues({
       result: {
         title: '',
-        sections: [
-          {
-            description: '',
-            dialogues: []
-          }
-        ]
+        sections: []
       },
       loading: true
     });
