@@ -21,14 +21,20 @@ const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
 const Section = (props: { name: string; description: string; reason: string; example: string }) => {
   return (
     <>
-      <Title order={1} mb='xs'>
-        {props.name}
-      </Title>
-      <div>
-        <div>概要: {props.description}</div>
-        <div>理由: {props.reason}</div>
-        <div>例: {props.example}</div>
-      </div>
+      <Paper mb={'lg'}>
+        <Title order={1} mb='xs'>
+          {props.name}
+        </Title>
+        <div>
+          <div>概要: {props.description}</div>
+          <div>理由: {props.reason}</div>
+          <div style={{ whiteSpace: 'pre-wrap' }}>
+            例:
+            <br />
+            {props.example}
+          </div>
+        </div>
+      </Paper>
     </>
   );
 };
