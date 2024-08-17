@@ -1,5 +1,5 @@
 # ref: https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile
-FROM node:20-bullseye-slim AS base
+FROM node:22-bookworm-slim AS base
 
 # Install dependencies only when needed
 FROM base AS deps
