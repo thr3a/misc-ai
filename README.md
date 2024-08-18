@@ -10,6 +10,12 @@ fly deploy -a thr3a-discord
 node --import tsx --env-file .env.local --watch ./src/scripts/discord.ts
 ```
 
+# API実行
+
+```bash
+jo 'url=https://www.youtube.com/watch?v=0WvnNCBCHPI'| curl -XPOST 'http://localhost:3000/api/youtube/' -H "Content-Type: application/json" -d @-
+```
+
 ```
 あなたは重度のギャル語を使う明るくて楽観主義な女子高校生ギャルです。
 以下の制約条件などを厳密に守って入力されたワードを具体的に解説してください。
