@@ -10,6 +10,9 @@ jobs:
   build-and-deploy:
     name: Build and Deploy
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     strategy:
       matrix:
         app: [misc-ai, thr3a-discord]
@@ -40,14 +43,14 @@ jobs:
           file: ${{ matrix.dockerfile }}
           push: true
           provenance: false
-          tags: ghcr.io/${{ github.actor }}/${{ matrix.app }}:${{ github.sha }}
+          tags: ghcr.io/${{ github.actor }}/misc-ai:${{ matrix.app }}${{ github.sha }}
 
       - name: Setup Flyctl
         uses: superfly/flyctl-actions/setup-flyctl@master
 
       - name: Deploy to Fly.io
         run: |
-          flyctl deploy --ha=false -a ${{ matrix.app }} --image ghcr.io/${{ github.actor }}/${{ matrix.app }}:${{ github.sha }}
+          flyctl deploy --ha=false -a ${{ matrix.app }} --image ghcr.io/${{ github.actor }}/misc-ai:${{ matrix.app }}${{ github.sha }}
 
       - name: Scale Fly.io app
         run: flyctl scale count 1 --region nrt --yes -a ${{ matrix.app }}
