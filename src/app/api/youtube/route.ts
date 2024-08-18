@@ -18,25 +18,35 @@ const requestSchema = z.object({
   url: z.string()
 });
 
-export async function GET(req: NextRequest): Promise<NextResponse> {
-  // GETパラメータを取得
-  const params = Object.fromEntries(req.nextUrl.searchParams.entries());
-
-  // リクエストスキーマバリデーション
-  const result = requestSchema.safeParse(params);
-  if (!result.success) {
-    const { errors } = result.error;
-    return NextResponse.json({ status: 'ng', errors }, { status: 400 });
+export async function POST(req: NextRequest): Promise<NextResponse> {
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch (e) {
+    return NextResponse.json({
+      status: 'ng',
+      errorMessage: 'Parse error'
+    });
   }
-
-  const { url } = result.data;
+  const schema = requestSchema.safeParse(body);
+  if (!schema.success) {
+    const { errors } = schema.error;
+    return NextResponse.json(
+      {
+        status: 'ng',
+        errorMessage: 'Validation error',
+        errors
+      },
+      { status: 400 }
+    );
+  }
 
   try {
     // YouTube動画を音声のみで一時ファイルにダウンロード
     const { create: createYoutubeDl } = youtubedlexec;
     const youtubedl = createYoutubeDl('/usr/bin/yt-dlp_linux'); // youtube-dlのパスは適宜変更してください
     const outputPath = `/tmp/${Date.now()}.mp3`;
-    await youtubedl(url, {
+    await youtubedl(schema.data.url, {
       extractAudio: true,
       audioFormat: 'mp3',
       output: outputPath
