@@ -10,7 +10,7 @@ import { systemPrompt } from './util';
 
 // OpenAI APIキーを設定
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY // 環境変数からAPIキーを読み込む
+  apiKey: process.env.OPENAI_API_KEY ?? 'dummy' // 環境変数からAPIキーを読み込む
 });
 
 // リクエストスキーマ定義
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
     // YouTube動画を音声のみで一時ファイルにダウンロード
     const { create: createYoutubeDl } = youtubedlexec;
-    const youtubedl = createYoutubeDl('/home/thr3a/work/misc-ai/yt-dlp_linux'); // youtube-dlのパスは適宜変更してください
+    const youtubedl = createYoutubeDl('/usr/bin/yt-dlp_linux'); // youtube-dlのパスは適宜変更してください
     const outputPath = `/tmp/${Date.now()}.mp3`;
     await youtubedl(url, {
       extractAudio: true,
