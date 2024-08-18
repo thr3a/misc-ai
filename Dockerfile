@@ -6,6 +6,7 @@ FROM base AS deps
 WORKDIR /app
 
 ENV YOUTUBE_DL_SKIP_PYTHON_CHECK=1
+ENV YOUTUBE_DL_SKIP_DOWNLOAD=true
 
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
 RUN \
