@@ -5,8 +5,6 @@ FROM node:22-bookworm-slim AS base
 FROM base AS deps
 WORKDIR /app
 
-ENV YOUTUBE_DL_SKIP_PYTHON_CHECK=1
-
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
 RUN \
   if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
@@ -35,6 +33,7 @@ COPY . .
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV YOUTUBE_DL_SKIP_PYTHON_CHECK=1
 
 RUN npm run build
 
