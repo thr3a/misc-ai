@@ -15,18 +15,18 @@ export async function continueConversation(history: MessageProps[]) {
 
   (async () => {
     // OPENAI
-    // const { textStream } = await streamText({
-    //   model: openai('gpt-4o-mini'),
-    //   system: systemMessage,
-    //   messages: history
-    // });
-
-    // google
     const { textStream } = await streamText({
-      model: google('models/gemini-1.5-flash-latest', geminiNoneFilters),
+      model: openai('gpt-4o-mini'),
       system: systemMessage,
       messages: history
     });
+
+    // google
+    // const { textStream } = await streamText({
+    //   model: google('models/gemini-1.5-flash-latest', geminiNoneFilters),
+    //   system: systemMessage,
+    //   messages: history
+    // });
 
     for await (const text of textStream) {
       stream.update(text);
