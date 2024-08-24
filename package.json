@@ -24,6 +24,7 @@
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",
     "ai": "^3.3.9",
+    "cheerio": "^1.0.0",
     "dayjs": "^1.11.12",
     "discord.js": "^14.15.3",
     "firebase": "^10.13.0",

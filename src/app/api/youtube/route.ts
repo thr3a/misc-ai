@@ -5,7 +5,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { YoutubeTranscript } from 'youtube-transcript';
 import { z } from 'zod';
-import { systemPrompt } from './util';
+import { getPageTitle, systemPrompt } from './util';
 
 // OpenAI APIキーを設定
 const openai = new OpenAI({
@@ -43,11 +43,18 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const transcribedText = await YoutubeTranscript.fetchTranscript(schema.data.url, { lang: 'ja' });
 
+    const prompt = [
+      '#動画のタイトル',
+      await getPageTitle(schema.data.url),
+      '#動画の文字起こし',
+      transcribedText.map((x) => x.text).join('')
+    ].join('\n');
+
     // ChatGPT APIに文字起こし結果を送信して要約
     const result = await generateText({
       model: google('models/gemini-1.5-flash-latest', geminiNoneFilters),
       system: systemPrompt,
-      prompt: transcribedText.map((x) => x.text).join('')
+      prompt: prompt
     });
 
     // 要約結果をJSON形式で返却

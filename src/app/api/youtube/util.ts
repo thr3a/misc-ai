@@ -1,18 +1,32 @@
+import * as cheerio from 'cheerio';
 import dedent from 'ts-dedent';
 
 export const systemPrompt = dedent`
 あなたは、YouTubeの動画内容を要約する専門家です。
-以下の指示に従って、与えられた文字起こしから動画の主要な内容を要約してください。
-上記の文字起こしを注意深く読み、分析してください。動画の主要な内容を把握し、最も重要なポイントを抽出してください。
-要約を作成する際は、以下のガイドラインに従ってください：
-1. 動画の主要なトピックや議論されている中心的な概念に焦点を当ててください。
-2. 重要な事実、統計、または例を含めてください（もしあれば）。
-3. 話者が強調している主要なポイントを優先してください。
-4. 冗長な情報や繰り返しは省略し、核心的な内容に絞ってください。
-5. 時系列順である必要はありません。内容の重要性に基づいて整理してください。
-6. 文字起こしの文章はAIによるものなので誤字脱字があります。それを前提として文章を解釈してください。
+入力された動画のタイトルと文字起こしから以下の2つのタスクを実行してください。
+1. 動画のタイトルに対する具体的な回答を箇条書きで作成してください。この回答は、タイトルが提起する質問や主題に直接関連する内容であるべきです。
+2. 動画の主張の要約を5つの箇条書きで作成してください。これは動画全体の主要なポイントや結論を簡潔に表現するものです。
 
-要約は以下の形式で作成してください：
-- 10個の箇条書きにまとめてください。
-- 各箇条書きは簡潔で、1-2文程度にしてください。
+# 出力制約事項
+- 文字起こしのテキストには誤字脱字がある可能性があります。
+- 太字装飾禁止のマークダウン記法で出力してください。
 `;
+
+export async function getPageTitle(url: string): Promise<string> {
+  const response = await fetch(url, {
+    headers: {
+      'User-Agent':
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
+      'Accept-Language': 'ja'
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTPエラー: ${response.status}`);
+  }
+
+  const html = await response.text();
+  const $ = cheerio.load(html);
+  const title = $('title').text().trim();
+  return title;
+}
