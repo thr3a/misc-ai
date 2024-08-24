@@ -10,7 +10,7 @@
       "suspicious": {
         "noImplicitAnyLet": "warn",
         "noExplicitAny": "warn",
-        "noArrayIndexKey": "warn"
+        "noArrayIndexKey": "off"
       },
       "complexity": {
         "noForEach":"info"
