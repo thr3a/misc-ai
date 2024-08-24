@@ -14,7 +14,8 @@ const openai = new OpenAI({
 
 // リクエストスキーマ定義
 const requestSchema = z.object({
-  url: z.string()
+  url: z.string(),
+  key: z.string()
 });
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -40,6 +41,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     );
   }
 
+  if (process.env.SECRET_KEY !== schema.data.key) {
+    return NextResponse.json(
+      {
+        status: 'ng',
+        errorMessage: 'key error'
+      },
+      { status: 400 }
+    );
+  }
+
   try {
     const transcribedText = await YoutubeTranscript.fetchTranscript(schema.data.url, { lang: 'ja' });
 
@@ -54,7 +65,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const result = await generateText({
       model: google('models/gemini-1.5-flash-latest', geminiNoneFilters),
       system: systemPrompt,
-      prompt: prompt
+      prompt: prompt,
+      temperature: 0
     });
 
     // 要約結果をJSON形式で返却
