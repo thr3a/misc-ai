@@ -1,16 +1,9 @@
-import { geminiNoneFilters } from '@/lib/google';
-import { google } from '@ai-sdk/google';
+import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 import { type NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
 import { YoutubeTranscript } from 'youtube-transcript';
 import { z } from 'zod';
 import { getPageTitle, systemPrompt } from './util';
-
-// OpenAI APIキーを設定
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY ?? 'dummy' // 環境変数からAPIキーを読み込む
-});
 
 // リクエストスキーマ定義
 const requestSchema = z.object({
@@ -63,10 +56,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     // ChatGPT APIに文字起こし結果を送信して要約
     const result = await generateText({
-      model: google('models/gemini-1.5-flash-latest', geminiNoneFilters),
+      model: openai('gpt-4o-mini'),
       system: systemPrompt,
       prompt: prompt,
-      temperature: 0
+      temperature: 0.2
     });
 
     // 要約結果をJSON形式で返却

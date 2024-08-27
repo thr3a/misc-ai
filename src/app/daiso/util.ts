@@ -2,6 +2,8 @@
 
 import { createHash } from 'node:crypto';
 
+// https://archive.md/Z3jy7
+
 type ResponseProps = {
   str_cd: string;
   str_name: string;
