@@ -23,7 +23,7 @@ export async function continueConversation(history: MessageProps[]) {
 
     // google
     const { textStream } = await streamText({
-      model: google('models/gemini-1.5-flash-latest', geminiNoneFilters),
+      model: google('gemini-1.5-flash-latest', geminiNoneFilters),
       system: systemMessage,
       messages: history
     });
