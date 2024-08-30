@@ -35,7 +35,7 @@
     "ts-dedent": "^2.2.0",
     "tsx": "^4.19.0",
     "typescript": "5.2.2",
-    "youtube-transcript": "^1.2.1",
+    "youtube-transcript": "github:thr3a/youtube-transcript",
     "zod": "^3.23.8"
   },
   "devDependencies": {
