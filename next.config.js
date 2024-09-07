@@ -11,7 +11,10 @@ const nextConfig = {
   // github pagesの場合
   // output: 'export',
   // k8sの場合
-  output: 'standalone'
+  output: 'standalone',
+  experimental: {
+    missingSuspenseWithCSRBailout: false
+  }
 };
 
 module.exports = nextConfig;
