@@ -3,6 +3,7 @@ import { Box, Button, Group, Table, type TableData, TextInput } from '@mantine/c
 import { createFormContext } from '@mantine/form';
 import { useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
+import { Suspense } from 'react';
 import { getZaiko } from './util';
 
 // Force the page to be dynamic and allow streaming responses up to 30 seconds
@@ -49,18 +50,20 @@ export default function Page() {
   };
 
   return (
-    <FormProvider form={form}>
-      <Box maw={400} mx='auto' component='form'>
-        <TextInput label='JANコード' {...form.getInputProps('jan')} />
-        <Group justify='flex-end'>
-          <Button onClick={handleSubmit}>送信</Button>
-          <Button color='gray' onClick={handleReset}>
-            クリア
-          </Button>
-        </Group>
+    <Suspense>
+      <FormProvider form={form}>
+        <Box maw={400} mx='auto' component='form'>
+          <TextInput label='JANコード' {...form.getInputProps('jan')} />
+          <Group justify='flex-end'>
+            <Button onClick={handleSubmit}>送信</Button>
+            <Button color='gray' onClick={handleReset}>
+              クリア
+            </Button>
+          </Group>
 
-        <Table striped data={form.values.result} />
-      </Box>
-    </FormProvider>
+          <Table striped data={form.values.result} />
+        </Box>
+      </FormProvider>
+    </Suspense>
   );
 }
