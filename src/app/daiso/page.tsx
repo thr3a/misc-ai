@@ -1,6 +1,8 @@
 'use client';
 import { Box, Button, Group, Table, type TableData, TextInput } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
+import { useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 import { getZaiko } from './util';
 
 // Force the page to be dynamic and allow streaming responses up to 30 seconds
@@ -15,12 +17,20 @@ type FormValues = {
 const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
 
 export default function Page() {
+  const searchParams = useSearchParams();
   const form = useForm({
     initialValues: {
       jan: '',
       result: {}
     }
   });
+
+  useEffect(() => {
+    const jan = searchParams.get('jan');
+    if (jan) {
+      form.setValues({ jan: jan });
+    }
+  }, [searchParams, form.setValues]);
 
   const handleSubmit = async (): Promise<void> => {
     if (form.values.jan === '') return;
