@@ -24,7 +24,7 @@ export default function Page() {
     initialValues: {
       message: '',
       loading: false,
-      result: { improved_prompt: '', backgrounds: [] }
+      result: { improved_prompt: '', supplementary_info_suggestions: [] }
     }
   });
 
@@ -32,7 +32,7 @@ export default function Page() {
     if (form.values.message === '') return;
     if (form.values.loading) return;
 
-    form.setValues({ result: { improved_prompt: '', backgrounds: [] }, loading: true });
+    form.setValues({ result: { improved_prompt: '', supplementary_info_suggestions: [] }, loading: true });
 
     const { object } = await generate(form.values.message);
     for await (const partialObject of readStreamableValue(object)) {
@@ -87,7 +87,7 @@ export default function Page() {
               プロンプトに含めるとより効果的な項目
             </Text>
             <List>
-              {form.values.result.backgrounds?.map((x, index) => {
+              {form.values.result.supplementary_info_suggestions?.map((x, index) => {
                 return <List.Item key={index}>{x.background}</List.Item>;
               })}
             </List>
