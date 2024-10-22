@@ -1,5 +1,5 @@
 'use client';
-import { ActionIcon, Box, Button, CopyButton, Group, List, Paper, Text, Textarea, Tooltip } from '@mantine/core';
+import { ActionIcon, Box, Button, CopyButton, Group, List, Text, Textarea, Tooltip } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
 import { IconCheck, IconCopy } from '@tabler/icons-react';
 import { readStreamableValue } from 'ai/rsc';
@@ -25,10 +25,9 @@ export default function Page() {
       message: '',
       loading: false,
       result: {
-        improved_prompt:
-          'あなたは栄養士です。20分以内に準備できる高タンパク質のレシピを含む、1週間の夕食メニューを教えてください。各日のメニューは表形式でまとめてください。',
-        steps: [{ step: 'すてっぷ1' }, { step: 'すてっぷ2' }],
-        supplementary_info_suggestions: [{ info: '高タンパク質の食材やレシピに興味があること' }]
+        improved_prompt: '',
+        steps: [],
+        supplementary_info_suggestions: []
       }
     }
   });
@@ -36,8 +35,8 @@ export default function Page() {
   const handleSubmit = async (): Promise<void> => {
     if (form.values.message === '') return;
     if (form.values.loading) return;
-
-    form.setValues({ result: { improved_prompt: '', steps: [], supplementary_info_suggestions: [] }, loading: true });
+    form.reset();
+    form.setValues({ loading: true });
 
     const { object } = await generate(form.values.message);
     for await (const partialObject of readStreamableValue(object)) {
