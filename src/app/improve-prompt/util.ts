@@ -3,10 +3,15 @@ import { z } from 'zod';
 
 export const schema = z.object({
   improved_prompt: z.string().describe('改善されたプロンプト'),
+  steps: z.array(
+    z.object({
+      step: z.string().describe('タスク実行に必要なステップ')
+    })
+  ),
   supplementary_info_suggestions: z
     .array(
       z.object({
-        background: z.string().describe('プロンプトに補足すべき情報')
+        info: z.string().describe('プロンプトに補足すべき情報')
       })
     )
     .describe('補足情報の配列')
@@ -55,10 +60,10 @@ export const systemPrompt = dedent`
 
 # Steps
 
-1. 高タンパク質な食材を選定する。
-2. 選定した食材を使用して、バランスの取れた食事を考える。
-3. 朝食、昼食、夕食に分けてメニューを提案する。
-4. 食事ごとに主要な高タンパク質食材を明記する。
+高タンパク質な食材を選定する。
+選定した食材を使用して、バランスの取れた食事を考える。
+朝食、昼食、夕食に分けてメニューを提案する。
+食事ごとに主要な高タンパク質食材を明記する。
 
 # 補足すべき情報
 - 食事制限やアレルギーに関する情報
@@ -69,4 +74,5 @@ export const systemPrompt = dedent`
 
 # Notice
 - 背景を予想してプロンプトに情報付加してもかまいません。
+- ステップにはナンバリングはつけないでください。
 `;

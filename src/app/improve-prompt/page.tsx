@@ -24,7 +24,12 @@ export default function Page() {
     initialValues: {
       message: '',
       loading: false,
-      result: { improved_prompt: '', supplementary_info_suggestions: [] }
+      result: {
+        improved_prompt:
+          'あなたは栄養士です。20分以内に準備できる高タンパク質のレシピを含む、1週間の夕食メニューを教えてください。各日のメニューは表形式でまとめてください。',
+        steps: [{ step: 'すてっぷ1' }, { step: 'すてっぷ2' }],
+        supplementary_info_suggestions: [{ info: '高タンパク質の食材やレシピに興味があること' }]
+      }
     }
   });
 
@@ -32,7 +37,7 @@ export default function Page() {
     if (form.values.message === '') return;
     if (form.values.loading) return;
 
-    form.setValues({ result: { improved_prompt: '', supplementary_info_suggestions: [] }, loading: true });
+    form.setValues({ result: { improved_prompt: '', steps: [], supplementary_info_suggestions: [] }, loading: true });
 
     const { object } = await generate(form.values.message);
     for await (const partialObject of readStreamableValue(object)) {
@@ -42,6 +47,18 @@ export default function Page() {
     }
 
     form.setValues({ loading: false });
+  };
+
+  const fullPrompt = (): string => {
+    const array = [form.values.result.improved_prompt];
+    if (form.values.result.steps && form.values.result.steps.length > 0) {
+      array.push('');
+      array.push('# Steps');
+      form.values.result.steps.forEach((x, index) => {
+        array.push(`${index + 1}. ${x.step}`);
+      });
+    }
+    return array.join('\n');
   };
 
   return (
@@ -63,14 +80,7 @@ export default function Page() {
 
         {form.values.result.improved_prompt && (
           <>
-            <Textarea
-              label='改善後のプロンプト'
-              {...form.getInputProps('result.improved_prompt')}
-              minRows={2}
-              maxRows={10}
-              autosize
-              readOnly
-            />
+            <Textarea label='改善後のプロンプト' value={fullPrompt()} minRows={2} maxRows={10} autosize readOnly />
             <Group justify='flex-end'>
               <CopyButton value={form.values.result.improved_prompt}>
                 {({ copied, copy }) => (
@@ -82,13 +92,12 @@ export default function Page() {
                 )}
               </CopyButton>
             </Group>
-
             <Text fw={'bold'} fz={'sm'}>
               プロンプトに含めるとより効果的な項目
             </Text>
             <List>
               {form.values.result.supplementary_info_suggestions?.map((x, index) => {
-                return <List.Item key={index}>{x.background}</List.Item>;
+                return <List.Item key={index}>{x.info}</List.Item>;
               })}
             </List>
           </>
