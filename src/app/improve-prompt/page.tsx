@@ -35,8 +35,7 @@ export default function Page() {
   const handleSubmit = async (): Promise<void> => {
     if (form.values.message === '') return;
     if (form.values.loading) return;
-    form.reset();
-    form.setValues({ loading: true });
+    form.setValues({ result: { improved_prompt: '', steps: [], supplementary_info_suggestions: [] }, loading: true });
 
     const { object } = await generate(form.values.message);
     for await (const partialObject of readStreamableValue(object)) {
@@ -54,7 +53,10 @@ export default function Page() {
       array.push('');
       array.push('# Steps');
       form.values.result.steps.forEach((x, index) => {
-        array.push(`${index + 1}. ${x.step}`);
+        if (x.step) {
+          // ChatGPT側のナンバリングは削除してこちらでつける
+          array.push(`${index + 1}. ${x.step.replace(/^\d+\.\s+/, '')}`);
+        }
       });
     }
     return array.join('\n');
