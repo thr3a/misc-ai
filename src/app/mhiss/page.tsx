@@ -49,7 +49,7 @@ export default function Page() {
     let textContent = '';
 
     for await (const delta of readStreamableValue(newMessage)) {
-      textContent = `${textContent}${delta}`;
+      textContent = `${textContent}${delta}`.replaceAll(/[「」｢｣]/g, '');
       form.setValues({ messages: [...messages, { role: 'assistant', content: textContent }] });
     }
     form.setValues({ message: '', loading: false });
