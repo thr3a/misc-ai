@@ -83,7 +83,7 @@ export default function Page() {
           <>
             <Textarea label='改善後のプロンプト' value={fullPrompt()} minRows={2} maxRows={10} autosize readOnly />
             <Group justify='flex-end'>
-              <CopyButton value={form.values.result.improved_prompt}>
+              <CopyButton value={fullPrompt()}>
                 {({ copied, copy }) => (
                   <Tooltip label={copied ? 'コピーしました' : 'コピー'} withArrow position='left'>
                     <ActionIcon color={copied ? 'teal' : 'blue'} onClick={copy} size='input-sm'>

@@ -1,6 +1,6 @@
 'use server';
 
-// import { anthropic } from '@ai-sdk/anthropic';
+import { anthropic } from '@ai-sdk/anthropic';
 import { openai } from '@ai-sdk/openai';
 import { streamObject } from 'ai';
 import { createStreamableValue } from 'ai/rsc';
@@ -14,8 +14,8 @@ export async function generate(input: string) {
   (async () => {
     const { partialObjectStream } = await streamObject({
       // model: openai('gpt-3.5-turbo'),
-      // model: anthropic('claude-3-5-sonnet-20240620'),
-      model: openai('gpt-4o-mini'),
+      // model: anthropic('claude-3-5-sonnet-latest'),
+      model: openai('gpt-4o'),
       system: systemPrompt,
       prompt: input,
       schema: schema,

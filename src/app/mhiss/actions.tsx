@@ -21,7 +21,8 @@ export async function continueConversation(history: MessageProps[]) {
     const { textStream } = await streamText({
       model: openai('gpt-4o-mini'),
       system: systemMessage,
-      messages: history
+      messages: history,
+      temperature: 1
     });
 
     // google
