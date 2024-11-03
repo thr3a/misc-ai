@@ -72,6 +72,7 @@ export default function Page() {
           maxRows={10}
           autosize
           placeholder='ヨーロッパ観光するときの注意点って？'
+          autoFocus
         />
         <Group justify='center' mt={'sm'}>
           <Button onClick={handleSubmit} loading={form.values.loading}>
