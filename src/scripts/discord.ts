@@ -1,7 +1,16 @@
 import { anthropic } from '@ai-sdk/anthropic';
 import { createOpenAI } from '@ai-sdk/openai';
 import { generateText } from 'ai';
-import { Client, Events, GatewayIntentBits, type Message, REST, Routes, SlashCommandBuilder } from 'discord.js';
+import {
+  Client,
+  Events,
+  GatewayIntentBits,
+  type Message,
+  REST,
+  Routes,
+  SlashCommandBuilder,
+  type TextChannel
+} from 'discord.js';
 import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
 import { app } from './firebase';
 import { getRandomWord, ririPrompt, tobariPrompt } from './util';
@@ -31,7 +40,10 @@ async function updateChatHistory(channelId: string, messages: MessageProps[]): P
 }
 
 async function handleMessage(message: Message, prompt: string, channelId: string) {
-  await message.channel.sendTyping(); // タイピング表示を開始
+  if (!message.channel.isTextBased()) return;
+  const channel = message.channel as TextChannel;
+
+  await channel.sendTyping(); // タイピング表示を開始
   const chatHistory = await getChatHistory(channelId);
   const newMessage: MessageProps = { role: 'user', content: message.content };
   chatHistory.push(newMessage);
@@ -47,11 +59,11 @@ async function handleMessage(message: Message, prompt: string, channelId: string
     messages: chatHistory,
     maxTokens: 256
   });
-  await message.channel.send(text);
+  await channel.send(text);
 
   const aiMessage: MessageProps = { role: 'assistant', content: text };
   chatHistory.push(aiMessage);
-  await updateChatHistory(message.channel.id, chatHistory);
+  await updateChatHistory(channel.id, chatHistory);
 }
 
 const client = new Client({
