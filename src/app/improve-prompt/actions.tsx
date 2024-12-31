@@ -14,13 +14,19 @@ export async function generate(input: string) {
   const stream = createStreamableValue();
 
   (async () => {
+    const inputPrompt = [
+      '#改善前のプロンプト',
+      '=====プロンプトここから=====',
+      input,
+      '=====プロンプトここまで====='
+    ].join('\n');
     const { partialObjectStream } = await streamObject({
       model: google('gemini-2.0-flash-exp', geminiNoneFilters),
       // model: openai('gpt-3.5-turbo'),
       // model: anthropic('claude-3-5-sonnet-latest'),
       // model: openai('gpt-4o'),
       system: systemPrompt,
-      prompt: input,
+      prompt: inputPrompt,
       schema: schema,
       temperature: 0.7
     });
