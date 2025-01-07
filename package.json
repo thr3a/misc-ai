@@ -12,24 +12,24 @@
     "discord": "node --import tsx --env-file .env.local --watch ./src/scripts/discord.ts"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^1.0.6",
-    "@ai-sdk/google": "^1.0.12",
-    "@ai-sdk/openai": "^1.0.11",
+    "@ai-sdk/anthropic": "^1.0.7",
+    "@ai-sdk/google": "^1.0.13",
+    "@ai-sdk/openai": "^1.0.14",
     "@biomejs/biome": "^1.9.4",
-    "@mantine/core": "^7.14.3",
-    "@mantine/form": "^7.14.3",
-    "@mantine/hooks": "^7.14.3",
-    "@tabler/icons-react": "^3.23.0",
+    "@mantine/core": "^7.15.3",
+    "@mantine/form": "^7.15.3",
+    "@mantine/hooks": "^7.15.3",
+    "@tabler/icons-react": "^3.27.1",
     "@types/node": "22.10.1",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
-    "ai": "^4.0.22",
+    "ai": "^4.0.28",
     "cheerio": "^1.0.0",
     "dayjs": "^1.11.13",
     "discord.js": "^14.15.3",
     "firebase": "^11.0.2",
     "next": "^14.2.15",
-    "openai": "^4.77.0",
+    "openai": "^4.77.3",
     "qrcode.react": "^4.1.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
@@ -37,7 +37,7 @@
     "tsx": "^4.19.2",
     "typescript": "5.2.2",
     "youtube-transcript": "github:thr3a/youtube-transcript",
-    "zod": "^3.23.8"
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "encoding": "^0.1.13"
