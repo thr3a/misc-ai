@@ -17,10 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
     <html lang='ja'>
       <head>
         <ColorSchemeScript />
-        <meta
-          name='viewport'
-          content='minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no, maximum-scale=1.0'
-        />
+        <meta name='viewport' content='minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no' />
         <Script id='google-tag-manager' strategy='afterInteractive'>
           {`
         (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
