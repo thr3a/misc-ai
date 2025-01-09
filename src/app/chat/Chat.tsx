@@ -1,39 +1,25 @@
 import { ActionIcon, Box, Group, Paper, ScrollArea, Space, Stack, Textarea } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
 import { IconSend } from '@tabler/icons-react';
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
 
-type MessageProps = {
-  role: 'user' | 'ai';
+export type MessageProps = {
+  role: 'user' | 'assistant';
   content: string;
 };
 
-const dummyMessages: MessageProps[] = [
-  {
-    role: 'ai',
-    content: '**こんにちは！** 何かお手伝いできることはありますか？\n\n\n[リンク](https://mantine.dev/)'
-  },
-  {
-    role: 'user',
-    content: 'Mantineについて教えてください。'
-  },
-  {
-    role: 'ai',
-    content:
-      'Mantineは、ReactベースのUIコンポーネントライブラリです。\n- 美しいデザイン\n- 豊富なコンポーネント\n- カスタマイズ可能'
-  }
-];
-
 const Message = ({ message }: { message: MessageProps }) => {
   return (
-    <Paper pt='md' pb='md' pr={'xs'} pl={'xs'} radius='0' bg={message.role === 'user' ? 'red.1' : 'blue.1'} withBorder>
+    <Paper p={'xs'} radius='0' bg={message.role === 'user' ? 'red.1' : 'blue.1'} withBorder>
       <ReactMarkdown
         components={{
-          p: Fragment
+          p: ({ children }) => <Box style={{ margin: 0, padding: 0 }}>{children}</Box>,
+          ul: ({ children }) => <ul style={{ paddingLeft: '10px' }}>{children}</ul>
         }}
-        remarkPlugins={[remarkGfm]}
+        remarkPlugins={[remarkBreaks, remarkGfm]}
       >
         {message.content}
       </ReactMarkdown>
@@ -43,7 +29,7 @@ const Message = ({ message }: { message: MessageProps }) => {
 
 // Messagesコンポーネント
 // メッセージのリストを表示する
-const Messages = ({ messages }: { messages: MessageProps[] }) => {
+export const Messages = ({ messages }: { messages: MessageProps[] }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // メッセージが更新されたら、一番下までスクロールする
@@ -56,10 +42,7 @@ const Messages = ({ messages }: { messages: MessageProps[] }) => {
       h='80vh'
       type='always'
       // bd='1px solid red'
-      pt={0}
-      pb={0}
-      pr={'xs'}
-      pl={'xs'}
+      p={0}
     >
       <Stack>
         {messages.map((message, index) => (
@@ -72,7 +55,7 @@ const Messages = ({ messages }: { messages: MessageProps[] }) => {
   );
 };
 
-const MessageInput = ({
+export const MessageInput = ({
   onSendMessage,
   isResponding
 }: {
@@ -105,36 +88,5 @@ const MessageInput = ({
         <IconSend />
       </ActionIcon>
     </Group>
-  );
-};
-
-export const Chat = () => {
-  const [messages, setMessages] = useState<MessageProps[]>(dummyMessages);
-  const [isResponding, setIsResponding] = useState(false);
-
-  // メッセージが送信されたときの処理
-  const handleSendMessage = (message: string) => {
-    // ユーザーのメッセージを追加
-    setMessages((prevMessages) => [...prevMessages, { role: 'user', content: message }]);
-    setIsResponding(true);
-
-    // ダミーの応答を生成
-    setTimeout(() => {
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          role: 'ai',
-          content: `「**${message}**」についてですね。少々お待ちください...`
-        }
-      ]);
-      setIsResponding(false);
-    }, 1000);
-  };
-
-  return (
-    <Box>
-      <Messages messages={messages} />
-      <MessageInput onSendMessage={handleSendMessage} isResponding={isResponding} />
-    </Box>
   );
 };

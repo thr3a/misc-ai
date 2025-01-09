@@ -2,7 +2,7 @@ import { Title } from '@mantine/core';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'ちゃっと',
+  title: 'ギャルチャット',
   description: 'チャット'
 };
 
