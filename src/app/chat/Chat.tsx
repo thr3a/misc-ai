@@ -1,34 +1,49 @@
-import { Box, Button, Group, Paper, ScrollArea, Textarea } from '@mantine/core';
-import { IconPlayerStop, IconSend } from '@tabler/icons-react';
-import { useEffect, useRef, useState } from 'react';
+import { ActionIcon, Box, Group, Paper, ScrollArea, Space, Stack, Textarea } from '@mantine/core';
+import { getHotkeyHandler } from '@mantine/hooks';
+import { IconSend } from '@tabler/icons-react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-type MessageType = {
+type MessageProps = {
   role: 'user' | 'ai';
   content: string;
 };
 
-const Message = ({ message }: { message: MessageType }) => {
+const dummyMessages: MessageProps[] = [
+  {
+    role: 'ai',
+    content: '**こんにちは！** 何かお手伝いできることはありますか？\n\n\n[リンク](https://mantine.dev/)'
+  },
+  {
+    role: 'user',
+    content: 'Mantineについて教えてください。'
+  },
+  {
+    role: 'ai',
+    content:
+      'Mantineは、ReactベースのUIコンポーネントライブラリです。\n- 美しいデザイン\n- 豊富なコンポーネント\n- カスタマイズ可能'
+  }
+];
+
+const Message = ({ message }: { message: MessageProps }) => {
   return (
-    <Paper
-      pt={0}
-      pb={0}
-      pr={'xs'}
-      pl={'xs'}
-      radius='0'
-      mb='xs'
-      bg={message.role === 'user' ? 'red.1' : 'blue.1'}
-      withBorder
-    >
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+    <Paper pt='md' pb='md' pr={'xs'} pl={'xs'} radius='0' bg={message.role === 'user' ? 'red.1' : 'blue.1'} withBorder>
+      <ReactMarkdown
+        components={{
+          p: Fragment
+        }}
+        remarkPlugins={[remarkGfm]}
+      >
+        {message.content}
+      </ReactMarkdown>
     </Paper>
   );
 };
 
 // Messagesコンポーネント
 // メッセージのリストを表示する
-const Messages = ({ messages }: { messages: MessageType[] }) => {
+const Messages = ({ messages }: { messages: MessageProps[] }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // メッセージが更新されたら、一番下までスクロールする
@@ -37,17 +52,26 @@ const Messages = ({ messages }: { messages: MessageType[] }) => {
   });
 
   return (
-    <ScrollArea h='80vh' type='always' bd='1px solid red' pt={0} pb={0} pr={'xs'} pl={'xs'}>
-      {messages.map((message, index) => (
-        <Message key={index} message={message} />
-      ))}
+    <ScrollArea
+      h='80vh'
+      type='always'
+      // bd='1px solid red'
+      pt={0}
+      pb={0}
+      pr={'xs'}
+      pl={'xs'}
+    >
+      <Stack>
+        {messages.map((message, index) => (
+          <Message key={index} message={message} />
+        ))}
+        <Space h='md' />
+      </Stack>
       <div ref={messagesEndRef} />
     </ScrollArea>
   );
 };
 
-// MessageInputコンポーネント
-// メッセージの入力欄と送信ボタンを表示する
 const MessageInput = ({
   onSendMessage,
   isResponding
@@ -65,38 +89,27 @@ const MessageInput = ({
     }
   };
 
-  // Shiftキー＋エンターキーで送信
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === 'Enter' && event.shiftKey) {
-      event.preventDefault();
-      handleSendMessage();
-    }
-  };
-
   return (
-    <Group grow>
+    <Group gap={'0'}>
       <Textarea
+        w={'100%'}
         placeholder='メッセージを入力...'
         value={message}
         onChange={(event) => setMessage(event.currentTarget.value)}
-        onKeyDown={handleKeyDown}
+        onKeyDown={getHotkeyHandler([['mod+Enter', handleSendMessage]])}
         autosize
         minRows={1}
-        maxRows={4}
+        style={{ flex: 1, display: 'block' }}
       />
-      <Button onClick={handleSendMessage} disabled={isResponding} size='xl' radius='xl'>
-        {isResponding ? <IconPlayerStop /> : <IconSend />}
-      </Button>
+      <ActionIcon size='input-sm' color='blue' onClick={handleSendMessage} loading={isResponding}>
+        <IconSend />
+      </ActionIcon>
     </Group>
   );
 };
 
-// Chatコンポーネント
-// チャットUI全体を構成する
 export const Chat = () => {
-  const [messages, setMessages] = useState<MessageType[]>([
-    { role: 'ai', content: 'こんにちは！\n\n何か質問はありますか？' }
-  ]);
+  const [messages, setMessages] = useState<MessageProps[]>(dummyMessages);
   const [isResponding, setIsResponding] = useState(false);
 
   // メッセージが送信されたときの処理
@@ -119,7 +132,7 @@ export const Chat = () => {
   };
 
   return (
-    <Box p='md'>
+    <Box>
       <Messages messages={messages} />
       <MessageInput onSendMessage={handleSendMessage} isResponding={isResponding} />
     </Box>
