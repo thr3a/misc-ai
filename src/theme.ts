@@ -24,10 +24,10 @@ export const theme = createTheme({
         },
         root: {
           // marginBottom: theme.spacing.xs,
-          // fontSize: '16px'
+          fontSize: '16px'
         },
         input: {
-          // fontSize: '16px'
+          fontSize: '16px'
         }
       })
     },
