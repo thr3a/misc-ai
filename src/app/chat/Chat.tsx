@@ -39,7 +39,7 @@ export const Messages = ({ messages }: { messages: MessageProps[] }) => {
 
   return (
     <ScrollArea
-      h='80vh'
+      h='80dvh'
       type='always'
       // bd='1px solid red'
       p={0}
