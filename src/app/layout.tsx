@@ -2,7 +2,7 @@ import { theme } from '@/theme';
 import { ColorSchemeScript, Container, MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
 import type { Metadata } from 'next';
-import { headers } from 'next/headers';
+// import { headers } from 'next/headers';
 import Script from 'next/script';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -17,7 +17,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
     <html lang='ja'>
       <head>
         <ColorSchemeScript />
-        <meta name='viewport' content='minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no' />
+        <meta
+          name='viewport'
+          content='minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no, maximum-scale=1.0'
+        />
         <Script id='google-tag-manager' strategy='afterInteractive'>
           {`
         (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
