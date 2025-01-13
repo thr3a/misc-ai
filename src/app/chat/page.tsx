@@ -20,11 +20,12 @@ export default function Home() {
 
   // メッセージが送信されたときの処理
   const handleSubmit = async (input: string): Promise<void> => {
+    const updatedConversation: MessageProps[] = [...conversation, { role: 'user', content: input }];
     // ユーザーのメッセージを追加
-    setConversation([...conversation, { role: 'user', content: input }]);
+    setConversation(updatedConversation);
     setIsResponding(true);
 
-    const { messages, newMessage } = await continueConversation([...conversation, { role: 'user', content: input }]);
+    const { messages, newMessage } = await continueConversation(updatedConversation);
 
     let textContent = '';
     for await (const delta of readStreamableValue(newMessage)) {
