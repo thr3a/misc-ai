@@ -15,7 +15,7 @@ export async function continueConversation(history: MessageProps[]) {
   (async () => {
     const { textStream } = streamText({
       model: google('gemini-2.0-flash-exp', geminiNoneFilters),
-      system: systemPrompt,
+      system: await systemPrompt(),
       messages: history,
       temperature: 0
     });

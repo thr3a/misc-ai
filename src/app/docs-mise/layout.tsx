@@ -1,9 +1,10 @@
 import { Title } from '@mantine/core';
 import type { Metadata } from 'next';
+import { appName } from './util';
 
 export const metadata: Metadata = {
-  title: 'kamal質問部屋',
-  description: 'kamalについて回答します。'
+  title: `${appName}質問部屋`,
+  description: `${appName}について回答します。`
 };
 
 export default function PageLayout({ children }: { children: React.ReactNode }): JSX.Element {

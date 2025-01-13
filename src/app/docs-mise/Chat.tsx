@@ -62,7 +62,7 @@ export const MessageInput = ({
   onSendMessage: (message: string) => void;
   isResponding: boolean;
 }) => {
-  const [message, setMessage] = useState('/upのエンドポイントを/healthに変更したい');
+  const [message, setMessage] = useState('最新版のrubyをインストールしたい');
 
   // 送信ボタンが押されたときの処理
   const handleSendMessage = () => {
@@ -76,7 +76,7 @@ export const MessageInput = ({
     <Group gap={'0'}>
       <Textarea
         w={'100%'}
-        placeholder='メッセージを入力...'
+        placeholder='メッセージを入力 Cmd+Enterで送信'
         value={message}
         onChange={(event) => setMessage(event.currentTarget.value)}
         onKeyDown={getHotkeyHandler([['mod+Enter', handleSendMessage]])}
