@@ -21,7 +21,7 @@ proxy:
   ssl: false
   host: ai.turai.work
   # Proxy connects to your container on port 80 by default.
-  app_port: 3001
+  app_port: 3000
   healthcheck:
     path: /api/health
 
