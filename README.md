@@ -1,13 +1,13 @@
 # デプロイ
 
 ```bash
-fly deploy -a thr3a-discord
+dotenv kamal deploy
 ```
 
 # ts実行
 
 ```bash
-node --import tsx --env-file .env.local --watch ./src/scripts/discord.ts
+node --import tsx --env-file .env --watch ./src/scripts/discord.ts
 ```
 
 # API実行
