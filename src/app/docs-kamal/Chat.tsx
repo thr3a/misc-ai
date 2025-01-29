@@ -62,7 +62,7 @@ export const MessageInput = ({
   onSendMessage: (message: string) => void;
   isResponding: boolean;
 }) => {
-  const [message, setMessage] = useState('最新版のrubyをインストールしたい');
+  const [message, setMessage] = useState('kamal build deliverとkamal build pushの違い');
 
   // 送信ボタンが押されたときの処理
   const handleSendMessage = () => {
