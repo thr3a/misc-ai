@@ -14,7 +14,18 @@ const nextConfig = {
   output: 'standalone',
   experimental: {
     missingSuspenseWithCSRBailout: false
-  }
+  },
+  headers: [
+    {
+      source: '*',
+      headers: [
+        {
+          key: 'X-Accel-Buffering',
+          value: 'no'
+        }
+      ]
+    }
+  ]
 };
 
 module.exports = nextConfig;
