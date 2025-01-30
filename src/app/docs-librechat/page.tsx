@@ -36,8 +36,8 @@ export default function Home() {
 
   return (
     <Box>
-      <Messages messages={conversation} />
       <MessageInput onSendMessage={handleSubmit} isResponding={isResponding} />
+      <Messages messages={conversation} />
     </Box>
   );
 }

@@ -13,7 +13,7 @@ export type MessageProps = {
 
 const Message = ({ message }: { message: MessageProps }) => {
   return (
-    <Paper p={'xs'} radius='0' bg={message.role === 'user' ? 'red.1' : 'blue.1'} withBorder>
+    <Paper p={'xs'} radius='0' bg={message.role === 'user' ? 'blue.1' : 'gray.1'} withBorder>
       <ReactMarkdown
         components={{
           p: ({ children }) => <Box style={{ margin: 0, padding: 0 }}>{children}</Box>,
@@ -62,7 +62,7 @@ export const MessageInput = ({
   onSendMessage: (message: string) => void;
   isResponding: boolean;
 }) => {
-  const [message, setMessage] = useState('最新版のrubyをインストールしたい');
+  const [message, setMessage] = useState('RAGの設定について教えて');
 
   // 送信ボタンが押されたときの処理
   const handleSendMessage = () => {

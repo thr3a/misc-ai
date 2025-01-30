@@ -2,7 +2,7 @@ import dedent from 'ts-dedent';
 
 const markdownUrl =
   'https://raw.githubusercontent.com/thr3a/docs-generator-for-chatgpt/refs/heads/master/librechat/index.md';
-export const appName = 'librechat';
+export const appName = 'LibreChat';
 
 export const systemPrompt = async (): Promise<string> => {
   try {
