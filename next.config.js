@@ -2,30 +2,28 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  // basePath: process.env.GITHUB_ACTIONS && 'nextjs-template',
   trailingSlash: true,
   images: {
     unoptimized: true
   },
   poweredByHeader: false,
-  // github pagesの場合
-  // output: 'export',
-  // k8sの場合
-  output: 'standalone',
+  output: 'standalone', // k8sの場合の設定
   experimental: {
     missingSuspenseWithCSRBailout: false
   },
-  headers: [
-    {
-      source: '*',
-      headers: [
-        {
-          key: 'X-Accel-Buffering',
-          value: 'no'
-        }
-      ]
-    }
-  ]
+  async headers() {
+    return [
+      {
+        source: '/:path*{/}?', // 全てのパスと末尾スラッシュに対応
+        headers: [
+          {
+            key: 'X-Accel-Buffering',
+            value: 'no' // ストリーミングを有効化するためにバッファリングを無効化
+          }
+        ]
+      }
+    ];
+  }
 };
 
 module.exports = nextConfig;
