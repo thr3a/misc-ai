@@ -1,6 +1,6 @@
 'use client';
 
-import { Box } from '@mantine/core';
+import { Anchor, Box, Text } from '@mantine/core';
 import { readStreamableValue } from 'ai/rsc';
 import { useState } from 'react';
 import { MessageInput, type MessageProps, Messages } from './Chat';
@@ -36,8 +36,8 @@ export default function Home() {
 
   return (
     <Box>
-      <Messages messages={conversation} />
       <MessageInput onSendMessage={handleSubmit} isResponding={isResponding} />
+      <Messages messages={conversation} />
     </Box>
   );
 }

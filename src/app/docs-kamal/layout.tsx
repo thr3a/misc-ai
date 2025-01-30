@@ -1,4 +1,4 @@
-import { Title } from '@mantine/core';
+import { Anchor, Title } from '@mantine/core';
 import type { Metadata } from 'next';
 import { appName } from './util';
 
@@ -14,7 +14,10 @@ export default function PageLayout({ children }: { children: React.ReactNode }):
         {metadata.title as string}
       </Title>
       <Title order={6} mb={'md'} c={'dimmed'}>
-        {metadata.description as string}
+        <Anchor href='https://kamal-deploy.org/' target='_blank'>
+          Kamal
+        </Anchor>
+        とはDockerを利用したWebアプリケーションのデプロイメントツールです。公式ドキュメントに基づいて正確にチャットできます。
       </Title>
       {children}
     </>
