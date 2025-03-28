@@ -3,7 +3,7 @@
 import { geminiNoneFilters } from '@/lib/google';
 // import { anthropic } from '@ai-sdk/anthropic';
 import { google } from '@ai-sdk/google';
-// import { openai } from '@ai-sdk/openai';
+import { openai } from '@ai-sdk/openai';
 import { streamObject } from 'ai';
 import { createStreamableValue } from 'ai/rsc';
 import { schema, systemPrompt } from './util';
@@ -21,10 +21,10 @@ export async function generate(input: string) {
       '=====プロンプトここまで====='
     ].join('\n');
     const { partialObjectStream } = await streamObject({
-      model: google('gemini-2.0-pro-exp-02-05', geminiNoneFilters),
+      // model: google('gemini-2.0-pro-exp-02-05', geminiNoneFilters),
       // model: openai('gpt-3.5-turbo'),
       // model: anthropic('claude-3-5-sonnet-latest'),
-      // model: openai('gpt-4o'),
+      model: openai('gpt-4o'),
       system: systemPrompt,
       prompt: inputPrompt,
       schema: schema,
