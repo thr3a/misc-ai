@@ -2,7 +2,8 @@
 
 import { Box, Button, Center, Group, TextInput, Textarea } from '@mantine/core';
 import { readStreamableValue } from 'ai/rsc';
-import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { MessageInput, type MessageProps, Messages } from './Chat';
 import { continueConversation, fetchTranscript } from './actions';
 
@@ -15,6 +16,15 @@ export default function Home() {
   const [messageInputValue, setMessageInputValue] = useState('');
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [transcript, setTranscript] = useState('');
+
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const url = searchParams.get('url');
+    if (url && youtubeUrl === '') {
+      setYoutubeUrl(url);
+    }
+  }, [searchParams, youtubeUrl]);
 
   const handleFetchTranscript = async () => {
     const result = await fetchTranscript(youtubeUrl);
