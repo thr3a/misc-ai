@@ -1,12 +1,37 @@
 'use server';
 
+import type { SuccessResponseSchema } from '@/app/api/youtube/route';
 import { openai } from '@ai-sdk/openai';
 import { streamText } from 'ai';
 import { createStreamableValue } from 'ai/rsc';
 import type { MessageProps } from './Chat';
 import { systemPrompt } from './util';
 
-export async function continueConversation(history: MessageProps[]) {
+export async function fetchTranscript(
+  youtubeUrl: string
+): Promise<SuccessResponseSchema | { status: 'error'; message: string }> {
+  try {
+    const response = await fetch('http://localhost:3000/api/youtube/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ url: youtubeUrl, key: process.env.SECRET_KEY })
+    });
+
+    if (!response.ok) {
+      throw new Error('字幕の取得に失敗しました');
+    }
+
+    const data = await response.json();
+
+    return { status: 'ok', title: data.title, transcribed: data.transcribed } as SuccessResponseSchema;
+  } catch (error) {
+    return { status: 'error', message: String(error) };
+  }
+}
+
+export async function continueConversation(transcript: string, history: MessageProps[]) {
   'use server';
 
   const stream = createStreamableValue();
@@ -14,7 +39,7 @@ export async function continueConversation(history: MessageProps[]) {
   (async () => {
     const { textStream } = streamText({
       model: openai('gpt-4o-mini'),
-      system: systemPrompt,
+      system: systemPrompt(transcript),
       messages: history
     });
 

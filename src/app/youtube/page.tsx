@@ -1,30 +1,24 @@
 'use client';
 
-import { Box, Textarea } from '@mantine/core';
+import { Box, Button, TextInput, Textarea } from '@mantine/core';
 import { readStreamableValue } from 'ai/rsc';
 import { useState } from 'react';
 import { MessageInput, type MessageProps, Messages } from './Chat';
-import { continueConversation } from './actions';
-import { fetchTranscript } from './util';
+import { continueConversation, fetchTranscript } from './actions';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
 export default function Home() {
-  const [conversation, setConversation] = useState<MessageProps[]>([
-    {
-      role: 'assistant',
-      content: 'こんにちは！ **みかん**さん！'
-    }
-  ]);
+  const [conversation, setConversation] = useState<MessageProps[]>([]);
   const [isResponding, setIsResponding] = useState(false);
-  const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [youtubeUrl, setYoutubeUrl] = useState('https://www.youtube.com/watch?v=xaY01JIAcCI');
   const [transcript, setTranscript] = useState('');
 
   const handleFetchTranscript = async () => {
     const result = await fetchTranscript(youtubeUrl);
     if (result.status === 'ok') {
-      setTranscript(result.transcribed);
+      setTranscript(result.title + result.transcribed);
     } else {
       setTranscript('字幕の取得に失敗しました');
     }
@@ -37,7 +31,7 @@ export default function Home() {
     setConversation(updatedConversation);
     setIsResponding(true);
 
-    const { messages, newMessage } = await continueConversation(updatedConversation);
+    const { messages, newMessage } = await continueConversation(transcript, updatedConversation);
 
     let textContent = '';
     for await (const delta of readStreamableValue(newMessage)) {
@@ -49,10 +43,15 @@ export default function Home() {
 
   return (
     <Box>
+      <TextInput
+        placeholder='YouTubeのURLを入力'
+        value={youtubeUrl}
+        onChange={(event) => setYoutubeUrl(event.currentTarget.value)}
+      />
+      <Button onClick={handleFetchTranscript}>字幕を取得</Button>
       <Textarea value={transcript} readOnly minRows={5} />
-
-      <Messages messages={conversation} />
       <MessageInput onSendMessage={handleSubmit} isResponding={isResponding} />
+      <Messages messages={conversation} />
     </Box>
   );
 }

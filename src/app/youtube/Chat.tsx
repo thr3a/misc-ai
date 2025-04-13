@@ -27,15 +27,13 @@ const Message = ({ message }: { message: MessageProps }) => {
   );
 };
 
-// Messagesコンポーネント
-// メッセージのリストを表示する
 export const Messages = ({ messages }: { messages: MessageProps[] }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // メッセージが更新されたら、一番下までスクロールする
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  });
+  // useEffect(() => {
+  //   messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  // });
 
   return (
     <ScrollArea
@@ -64,7 +62,6 @@ export const MessageInput = ({
 }) => {
   const [message, setMessage] = useState('');
 
-  // 送信ボタンが押されたときの処理
   const handleSendMessage = () => {
     if (message.trim() !== '') {
       onSendMessage(message);

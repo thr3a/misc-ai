@@ -3,7 +3,12 @@ import { YoutubeTranscript } from 'youtube-transcript';
 import { z } from 'zod';
 import { getPageTitle } from './util';
 
-// リクエストスキーマ定義
+export type SuccessResponseSchema = {
+  status: 'ok';
+  title: string;
+  transcribed: string;
+};
+
 const requestSchema = z.object({
   url: z.string(),
   key: z.string()
@@ -47,9 +52,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const transcribedText = transcribed.map((x) => x.text).join('');
     const title = await getPageTitle(schema.data.url);
 
-    return NextResponse.json({ status: 'ok', title: title, transcribed: transcribedText });
+    return NextResponse.json({ status: 'ok', title: title, transcribed: transcribedText } as SuccessResponseSchema);
   } catch (error) {
-    console.error(error);
+    console.error('Error fetching transcript:', error);
     return NextResponse.json({ status: 'ng', message: 'Internal Server Error' }, { status: 500 });
   }
 }
