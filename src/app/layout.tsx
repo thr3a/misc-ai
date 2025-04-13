@@ -1,5 +1,5 @@
 import { theme } from '@/theme';
-import { ColorSchemeScript, Container, MantineProvider } from '@mantine/core';
+import { ColorSchemeScript, Container, MantineProvider, mantineHtmlProps } from '@mantine/core';
 import '@mantine/core/styles.css';
 import type { Metadata } from 'next';
 // import { headers } from 'next/headers';
@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang='ja'>
+    <html lang='ja' {...mantineHtmlProps}>
       <head>
         <ColorSchemeScript />
         <meta name='viewport' content='minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no' />
