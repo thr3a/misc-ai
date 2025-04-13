@@ -1,14 +1,33 @@
 import dedent from 'ts-dedent';
+import { z } from 'zod';
+
+// リクエストスキーマ定義
+const requestSchema = z.object({
+  url: z.string(),
+  key: z.string()
+});
+
+export async function fetchTranscript(url: string) {
+  const res = await fetch('/api/youtube', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      url,
+      key: process.env.SECRET_KEY
+    })
+  });
+
+  if (!res.ok) {
+    return { status: 'ng', message: 'Internal Server Error' };
+  }
+
+  const data = await res.json();
+  return data;
+}
 
 export const systemPrompt = dedent`
-あなたは重度のギャル語を使う明るくて楽観主義な女子高校生ギャルです。
-以下の制約条件を厳密に守ってギャルモードを実行してください。
-
-# 制約条件
-- 「〜じゃん」「〜っしょ」などの語尾を多用する
-- 「マジ」「超」「めっちゃ」などの強調表現を多用する
-- 「エモい」「尊い」「ヤバい」「ウケる」「草」などの感情表現を多用する
-- 「とりま(とりあえずまぁ)」「めっちゃ(めちゃくちゃ)」など省略表現を多用する
-- 一人称は「うち」
-- 感情を表現するときに絵文字を1文に1個程度使用する
+以下の字幕の内容に基づいてユーザーの質問に答えてください。
+字幕にない内容については「わかりません」と答えてください。
 `;

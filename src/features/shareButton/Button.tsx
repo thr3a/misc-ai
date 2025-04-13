@@ -7,7 +7,7 @@ type Props = {
   label?: string;
 };
 
-export const TwitterButton = ({ url, description, label = 'ツイート!' }: Props): JSX.Element => {
+export const TwitterButton = ({ url, description, label = 'ツイート!' }: Props) => {
   const encoded = encodeURI(`${description} ${url}`);
   const openURL = `https://twitter.com/intent/tweet?text=${encoded}`;
   return (

@@ -30,7 +30,7 @@ const Message = (props: { body: string; role: 'user' | 'assistant' }) => {
   );
 };
 
-export const ChatBox = ({ messages, height }: ChatBoxProps): JSX.Element => {
+export const ChatBox = ({ messages, height }: ChatBoxProps) => {
   // const clonedMessages = structuredClone(messages);
   return (
     <ScrollArea pt={0} pb={0} pr={'xs'} pl={'xs'} type={'scroll'} h={height} bg={'#7494c0'}>

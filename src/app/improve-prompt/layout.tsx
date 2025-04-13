@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: 'ChatGPT用のプロンプトを効果的なプロンプトに改善します'
 };
 
-export default function PageLayout({ children }: { children: React.ReactNode }): JSX.Element {
+export default function PageLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Title mt={'md'} order={2}>

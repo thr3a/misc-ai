@@ -87,13 +87,11 @@ export default function Page() {
         </Group>
 
         {form.values.result.replies?.length > 0 && (
-          <>
-            <Stack mt={'sm'} gap='md'>
-              {form.values.result.replies?.map((x, index) => {
-                return <Tweet content={x.tweet} key={index} />;
-              })}
-            </Stack>
-          </>
+          <Stack mt={'sm'} gap='md'>
+            {form.values.result.replies?.map((x, index) => {
+              return <Tweet content={x.tweet} key={index} />;
+            })}
+          </Stack>
         )}
       </Box>
     </FormProvider>

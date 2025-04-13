@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: '英語のGoogle検索キーワードに翻訳します'
 };
 
-export default function PageLayout({ children }: { children: React.ReactNode }): JSX.Element {
+export default function PageLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Title mt={'md'} order={2}>

@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: 'ダイソー在庫検索'
 };
 
-export default function PageLayout({ children }: { children: React.ReactNode }): JSX.Element {
+export default function PageLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Title mt={'md'} order={2}>

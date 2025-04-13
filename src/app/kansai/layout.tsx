@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: 'AIが入力された文章を大阪弁に変換します。'
 };
 
-export default function PageLayout({ children }: { children: React.ReactNode }): JSX.Element {
+export default function PageLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Title mt={'md'} order={2}>

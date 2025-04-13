@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: '具体⇔抽象 相互変換'
 };
 
-export default function PageLayout({ children }: { children: React.ReactNode }): JSX.Element {
+export default function PageLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Anchor href='/abstract'>

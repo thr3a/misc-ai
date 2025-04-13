@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: 'テスト中'
 };
 
-export default function PageLayout({ children }: { children: React.ReactNode }): JSX.Element {
+export default function PageLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Anchor href='/arena'>

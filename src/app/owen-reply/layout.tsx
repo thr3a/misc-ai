@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: 'ダジャレxAIで自己肯定感を高めるソリューション'
 };
 
-export default function PageLayout({ children }: { children: React.ReactNode }): JSX.Element {
+export default function PageLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Title mt={'md'} order={2}>

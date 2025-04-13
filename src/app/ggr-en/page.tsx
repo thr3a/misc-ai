@@ -16,7 +16,7 @@ type FormValues = {
   result: z.infer<typeof schema>;
 };
 
-const SearchButton = ({ keyword }: { keyword: string }): JSX.Element => {
+const SearchButton = ({ keyword }: { keyword: string }) => {
   return (
     <Button
       component='a'

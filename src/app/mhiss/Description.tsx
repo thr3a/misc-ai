@@ -2,7 +2,7 @@
 
 import { Paper, Space, Text, Title } from '@mantine/core';
 
-export const Description = (): JSX.Element => {
+export const Description = () => {
   return (
     <Paper>
       <Title order={2}>お母さんヒス構文とは?</Title>

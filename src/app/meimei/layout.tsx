@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: 'AI先生が自動で変数名や関数名を命名してくれます。'
 };
 
-export default function PageLayout({ children }: { children: React.ReactNode }): JSX.Element {
+export default function PageLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Title mt={'md'} order={2}>
