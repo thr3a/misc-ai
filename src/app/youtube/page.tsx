@@ -3,6 +3,7 @@
 import { Box, Button, Center, Group, TextInput, Textarea } from '@mantine/core';
 import { readStreamableValue } from 'ai/rsc';
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import { useEffect, useState } from 'react';
 import { MessageInput, type MessageProps, Messages } from './Chat';
 import { continueConversation, fetchTranscript } from './actions';
@@ -16,15 +17,6 @@ export default function Home() {
   const [messageInputValue, setMessageInputValue] = useState('');
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [transcript, setTranscript] = useState('');
-
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const url = searchParams.get('url');
-    if (url && youtubeUrl === '') {
-      setYoutubeUrl(url);
-    }
-  }, [searchParams, youtubeUrl]);
 
   const handleFetchTranscript = async () => {
     const result = await fetchTranscript(youtubeUrl);
@@ -58,25 +50,24 @@ export default function Home() {
 
   return (
     <Box>
+      <Suspense fallback={<div>Loading...</div>}>
+        <SearchParamsComponent setYoutubeUrl={setYoutubeUrl} youtubeUrl={youtubeUrl} />
+      </Suspense>
       <TextInput
         placeholder='https://www.youtube.com/watch?v=xaY01JIAcCI'
         value={youtubeUrl}
         onChange={(event) => setYoutubeUrl(event.currentTarget.value)}
       />
-
       <Center>
         <Button mb={'md'} onClick={handleFetchTranscript}>
           字幕を取得
         </Button>
       </Center>
-
       <Textarea value={transcript} readOnly minRows={5} mb={'md'} />
-
       <Group gap={'xs'}>
         <Button onClick={() => handleButtonClick('３行の箇条書きで要約して')}>要約</Button>
         <Button onClick={() => handleButtonClick('結論を述べてください')}>結論</Button>
       </Group>
-
       <MessageInput
         onSendMessage={handleSubmit}
         isResponding={isResponding}
@@ -86,4 +77,20 @@ export default function Home() {
       <Messages messages={conversation} />
     </Box>
   );
+}
+
+function SearchParamsComponent({
+  setYoutubeUrl,
+  youtubeUrl
+}: { setYoutubeUrl: React.Dispatch<React.SetStateAction<string>>; youtubeUrl: string }) {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const url = searchParams.get('url');
+    if (url && youtubeUrl === '') {
+      setYoutubeUrl(url);
+    }
+  }, [searchParams, youtubeUrl, setYoutubeUrl]);
+
+  return null;
 }
