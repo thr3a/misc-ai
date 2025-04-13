@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Button, TextInput, Textarea } from '@mantine/core';
+import { Box, Button, Center, TextInput, Textarea } from '@mantine/core';
 import { readStreamableValue } from 'ai/rsc';
 import { useState } from 'react';
 import { MessageInput, type MessageProps, Messages } from './Chat';
@@ -48,7 +48,9 @@ export default function Home() {
         value={youtubeUrl}
         onChange={(event) => setYoutubeUrl(event.currentTarget.value)}
       />
-      <Button onClick={handleFetchTranscript}>字幕を取得</Button>
+      <Center>
+        <Button onClick={handleFetchTranscript}>字幕を取得</Button>
+      </Center>
       <Textarea value={transcript} readOnly minRows={5} />
       <MessageInput onSendMessage={handleSubmit} isResponding={isResponding} />
       <Messages messages={conversation} />

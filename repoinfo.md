@@ -1,6 +1,0 @@
-- Nodejs v22 es2022
-- mantine v7
-- Typescript
-- nextjs v15 app router
-- biome
-- コードコメントは日本語で 既存のコードコメントは指示がない限り変えないこと

@@ -11,7 +11,8 @@ export async function fetchTranscript(
   youtubeUrl: string
 ): Promise<SuccessResponseSchema | { status: 'error'; message: string }> {
   try {
-    const response = await fetch('http://localhost:3000/api/youtube/', {
+    const apiUrl = process.env.API_BASE_URL || 'http://localhost:3000';
+    const response = await fetch(`${apiUrl}/api/youtube/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

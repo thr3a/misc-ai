@@ -1,0 +1,12 @@
+# ライブラリ概要
+
+- 言語: TypeScript
+- フレームワーク: Next.js  v15 AppRouter
+- UI: mantine react v7
+- hook: mantine hook
+- 日付ライブラリ: Day.js
+- lint: biome
+
+# 注意点
+
+- コードコメントは日本語で 既存のコードコメントは指示がない限り変えないこと
