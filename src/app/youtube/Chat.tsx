@@ -55,17 +55,18 @@ export const Messages = ({ messages }: { messages: MessageProps[] }) => {
 
 export const MessageInput = ({
   onSendMessage,
-  isResponding
+  isResponding,
+  value,
+  onChange
 }: {
   onSendMessage: (message: string) => void;
   isResponding: boolean;
+  value: string;
+  onChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }) => {
-  const [message, setMessage] = useState('');
-
   const handleSendMessage = () => {
-    if (message.trim() !== '') {
-      onSendMessage(message);
-      setMessage('');
+    if (value.trim() !== '') {
+      onSendMessage(value);
     }
   };
 
@@ -73,9 +74,9 @@ export const MessageInput = ({
     <Group gap={'0'}>
       <Textarea
         w={'100%'}
-        placeholder='メッセージを入力...'
-        value={message}
-        onChange={(event) => setMessage(event.currentTarget.value)}
+        placeholder='聞きたい内容を入力してください'
+        value={value}
+        onChange={onChange}
         onKeyDown={getHotkeyHandler([['mod+Enter', handleSendMessage]])}
         autosize
         minRows={1}

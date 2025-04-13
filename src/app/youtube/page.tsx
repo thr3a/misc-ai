@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Button, Center, TextInput, Textarea } from '@mantine/core';
+import { Box, Button, Center, Group, TextInput, Textarea } from '@mantine/core';
 import { readStreamableValue } from 'ai/rsc';
 import { useState } from 'react';
 import { MessageInput, type MessageProps, Messages } from './Chat';
@@ -12,7 +12,8 @@ export const maxDuration = 30;
 export default function Home() {
   const [conversation, setConversation] = useState<MessageProps[]>([]);
   const [isResponding, setIsResponding] = useState(false);
-  const [youtubeUrl, setYoutubeUrl] = useState('https://www.youtube.com/watch?v=xaY01JIAcCI');
+  const [messageInputValue, setMessageInputValue] = useState('');
+  const [youtubeUrl, setYoutubeUrl] = useState('');
   const [transcript, setTranscript] = useState('');
 
   const handleFetchTranscript = async () => {
@@ -41,18 +42,37 @@ export default function Home() {
     setIsResponding(false);
   };
 
+  const handleButtonClick = (text: string) => {
+    setMessageInputValue(text);
+  };
+
   return (
     <Box>
       <TextInput
-        placeholder='YouTubeのURLを入力'
+        placeholder='https://www.youtube.com/watch?v=xaY01JIAcCI'
         value={youtubeUrl}
         onChange={(event) => setYoutubeUrl(event.currentTarget.value)}
       />
+
       <Center>
-        <Button onClick={handleFetchTranscript}>字幕を取得</Button>
+        <Button mb={'md'} onClick={handleFetchTranscript}>
+          字幕を取得
+        </Button>
       </Center>
-      <Textarea value={transcript} readOnly minRows={5} />
-      <MessageInput onSendMessage={handleSubmit} isResponding={isResponding} />
+
+      <Textarea value={transcript} readOnly minRows={5} mb={'md'} />
+
+      <Group gap={'xs'}>
+        <Button onClick={() => handleButtonClick('３行の箇条書きで要約して')}>要約</Button>
+        <Button onClick={() => handleButtonClick('結論を述べてください')}>結論</Button>
+      </Group>
+
+      <MessageInput
+        onSendMessage={handleSubmit}
+        isResponding={isResponding}
+        value={messageInputValue}
+        onChange={(event) => setMessageInputValue(event.currentTarget.value)}
+      />
       <Messages messages={conversation} />
     </Box>
   );
