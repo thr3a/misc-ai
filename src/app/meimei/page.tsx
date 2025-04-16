@@ -14,7 +14,7 @@ type FormValues = {
   message: string;
   loading: boolean;
   result: z.infer<typeof schema>;
-  type: 'variable' | 'function' | 'branch';
+  type: '変数名' | 'メソッド名' | 'ブランチ名' | 'GitHubのプロジェクト名';
   namingConvention: 'camel case' | 'pascal case' | 'snake case' | 'kebab case';
 };
 
@@ -29,7 +29,7 @@ export default function Page() {
         candidates: ['isPrime', 'checkPrime', 'primeChecker', 'validatePrime'].map((candidate) => ({ candidate }))
       },
       namingConvention: 'camel case',
-      type: 'variable'
+      type: '変数名'
     }
   });
 
@@ -49,13 +49,14 @@ export default function Page() {
       <Box maw={600} mx='auto' component='form'>
         <Radio.Group label='名前の種類' {...form.getInputProps('type')}>
           <Group mt='xs'>
-            <Radio value='variable' label='変数名' />
-            <Radio value='function' label='関数名' />
-            <Radio value='branch' label='ブランチ名' />
+            <Radio value='変数名' label='変数名' />
+            <Radio value='メソッド名' label='関数名' />
+            <Radio value='ブランチ名' label='ブランチ名' />
+            <Radio value='GitHubのプロジェクト名' label='GitHubのプロジェクト名' />
           </Group>
         </Radio.Group>
         <TextInput
-          label='処理の概要を記述してください'
+          label='処理の概要をなるべく詳しく記述してください'
           withAsterisk
           {...form.getInputProps('message')}
           placeholder='素数かどうか判定する関数'
