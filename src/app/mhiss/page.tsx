@@ -19,6 +19,7 @@ type FormValues = {
   message: string;
   loading: boolean;
   messages: MessageProps[];
+  count: number;
 };
 
 const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
@@ -29,16 +30,22 @@ export default function Page() {
       message: '今日は帰りが遅くなるね',
       // messages: DummyMessages(10),
       messages: [],
-      loading: false
+      loading: false,
+      count: 0
     }
   });
 
   const handleSubmit = async (): Promise<void> => {
+    // 5回以上送信した場合は送信不可
+    if (form.values.count >= 5) {
+      form.insertListItem('messages', { content: '上限に達しました。しばらくしてからまた来てね', role: 'assistant' });
+      return;
+    }
     if (form.values.message === '') return;
     if (form.values.loading) return;
 
     const tmp = form.values.message;
-    form.setValues({ loading: true, message: '' });
+    form.setValues({ loading: true, message: '', count: form.values.count + 1 });
     form.insertListItem('messages', { content: form.values.message, role: 'user' } as MessageProps);
 
     const { messages, newMessage } = await continueConversation([
