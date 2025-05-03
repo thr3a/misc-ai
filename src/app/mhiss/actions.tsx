@@ -16,7 +16,7 @@ export async function continueConversation(history: MessageProps[]) {
       // baseURL: 'https://llamacpp.turai.work/v1'
     });
     const { textStream } = await streamText({
-      model: openai('gpt-4o-mini'),
+      model: openai('gpt-4.1-nano'),
       system: systemMessage,
       messages: history,
       temperature: 1

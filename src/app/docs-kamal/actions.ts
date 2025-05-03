@@ -1,7 +1,6 @@
 'use server';
 
-import { geminiNoneFilters } from '@/lib/google';
-import { google } from '@ai-sdk/google';
+import { openai } from '@ai-sdk/openai';
 import { streamText } from 'ai';
 import { createStreamableValue } from 'ai/rsc';
 import type { MessageProps } from './Chat';
@@ -14,7 +13,7 @@ export async function continueConversation(history: MessageProps[]) {
 
   (async () => {
     const { textStream } = streamText({
-      model: google('gemini-2.0-flash-exp', geminiNoneFilters),
+      model: openai('gpt-4.1-nano'),
       system: await systemPrompt(),
       messages: history,
       temperature: 0
