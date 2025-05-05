@@ -2,8 +2,8 @@ import { Title } from '@mantine/core';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'UI作成',
-  description: 'UI作成'
+  title: 'TailwindCSS UI生成ツール',
+  description: 'UI入力するとTailwindCSS対応のHTML生成できます。'
 };
 
 export default function PageLayout({ children }: { children: React.ReactNode }) {
