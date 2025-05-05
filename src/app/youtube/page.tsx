@@ -67,16 +67,20 @@ export default function Home() {
         )}
       />
       <Textarea label='動画の字幕' value={transcript} readOnly minRows={5} mb={'md'} />
-      <Group gap={'xs'}>
-        <Button onClick={() => handleButtonClick('３行の箇条書きで要約して')}>要約</Button>
-        <Button onClick={() => handleButtonClick('結論を述べてください')}>結論</Button>
-      </Group>
       <MessageInput
         onSendMessage={handleSubmit}
         isResponding={isResponding}
         value={messageInputValue}
         onChange={(event) => setMessageInputValue(event.currentTarget.value)}
       />
+      <Group gap={'xs'}>
+        <Button variant='light' onClick={() => handleButtonClick('３行の箇条書きで要約して')}>
+          要約
+        </Button>
+        <Button variant='light' onClick={() => handleButtonClick('結論を述べてください')}>
+          結論
+        </Button>
+      </Group>
       <Messages messages={conversation} />
     </Box>
   );

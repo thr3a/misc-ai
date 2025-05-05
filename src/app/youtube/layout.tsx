@@ -2,8 +2,8 @@ import { Title } from '@mantine/core';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Youtube Chat',
-  description: 'Youtubeの字幕からチャット'
+  title: 'YoutubeタイパAI',
+  description: '4倍速再生は遅い'
 };
 
 export default function PageLayout({ children }: { children: React.ReactNode }) {
