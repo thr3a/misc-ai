@@ -1,103 +1,120 @@
 'use client';
 
 import { Box, Button, Group, TextInput, Textarea } from '@mantine/core';
+import { createFormContext } from '@mantine/form';
 import { readStreamableValue } from 'ai/rsc';
 import { useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect } from 'react';
 import { MessageInput, type MessageProps, Messages } from './Chat';
 import { continueConversation, fetchTranscript } from './actions';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
-export default function Home() {
-  const [conversation, setConversation] = useState<MessageProps[]>([]);
-  const [isResponding, setIsResponding] = useState(false);
-  const [messageInputValue, setMessageInputValue] = useState('');
-  const [youtubeUrl, setYoutubeUrl] = useState('');
-  const [transcript, setTranscript] = useState('');
+// フォーム値の型
+type FormValues = {
+  youtubeUrl: string;
+  transcript: string;
+  messageInputValue: string;
+  conversation: MessageProps[];
+  isResponding: boolean;
+};
 
+const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
+
+export default function Home() {
+  const form = useForm({
+    initialValues: {
+      youtubeUrl: '',
+      transcript: '',
+      messageInputValue: '',
+      conversation: [],
+      isResponding: false
+    }
+  });
+
+  // 字幕取得
   const handleFetchTranscript = async () => {
-    const result = await fetchTranscript(youtubeUrl);
+    const result = await fetchTranscript(form.values.youtubeUrl);
     if (result.status === 'ok') {
-      setTranscript(result.title + result.transcribed);
+      form.setFieldValue('transcript', result.title + result.transcribed);
     } else {
-      setTranscript('字幕の取得に失敗しました');
+      form.setFieldValue('transcript', '字幕の取得に失敗しました');
     }
   };
 
-  // メッセージが送信されたときの処理
+  // メッセージ送信
   const handleSubmit = async (input: string): Promise<void> => {
-    const updatedConversation: MessageProps[] = [...conversation, { role: 'user', content: input }];
-    // ユーザーのメッセージを追加
-    setConversation(updatedConversation);
-    setIsResponding(true);
+    const updatedConversation: MessageProps[] = [...form.values.conversation, { role: 'user', content: input }];
+    form.setValues({
+      ...form.values,
+      conversation: updatedConversation,
+      isResponding: true
+    });
 
-    const { messages, newMessage } = await continueConversation(transcript, updatedConversation);
+    const { messages, newMessage } = await continueConversation(form.values.transcript, updatedConversation);
 
     let textContent = '';
     for await (const delta of readStreamableValue(newMessage)) {
       textContent = `${textContent}${delta}`;
-      setConversation([...messages, { role: 'assistant', content: textContent }]);
+      form.setFieldValue('conversation', [...messages, { role: 'assistant', content: textContent }]);
     }
-    setIsResponding(false);
+    form.setFieldValue('isResponding', false);
   };
 
   const handleButtonClick = (text: string) => {
-    setMessageInputValue(text);
+    form.setFieldValue('messageInputValue', text);
   };
 
   return (
-    <Box>
-      <Suspense fallback={<div>Loading...</div>}>
-        <SearchParamsComponent setYoutubeUrl={setYoutubeUrl} youtubeUrl={youtubeUrl} />
-      </Suspense>
-      <TextInput
-        w='100%'
-        placeholder='https://www.youtube.com/watch?v=xaY01JIAcCI'
-        value={youtubeUrl}
-        label='YoutubeのURLを入力してください'
-        onChange={(event) => setYoutubeUrl(event.currentTarget.value)}
-        inputContainer={(children) => (
-          <Group align='flex-start' gap='0' w='100%'>
-            <Box flex={1}>{children}</Box>
-            <Button onClick={handleFetchTranscript}>取得</Button>
-          </Group>
-        )}
-      />
-      <Textarea label='動画の字幕' value={transcript} readOnly minRows={5} mb={'md'} />
-      <MessageInput
-        onSendMessage={handleSubmit}
-        isResponding={isResponding}
-        value={messageInputValue}
-        onChange={(event) => setMessageInputValue(event.currentTarget.value)}
-      />
-      <Group gap={'xs'}>
-        <Button variant='light' onClick={() => handleButtonClick('３行の箇条書きで要約して')}>
-          要約
-        </Button>
-        <Button variant='light' onClick={() => handleButtonClick('結論を述べてください')}>
-          結論
-        </Button>
-      </Group>
-      <Messages messages={conversation} />
-    </Box>
+    <FormProvider form={form}>
+      <Box>
+        <Suspense fallback={<div>Loading...</div>}>
+          <SearchParamsComponent />
+        </Suspense>
+        <TextInput
+          // w='100%'
+          label='YoutubeのURLを入力して取得ボタンを押してください'
+          placeholder='https://www.youtube.com/watch?v=xaY01JIAcCI'
+          {...form.getInputProps('youtubeUrl')}
+          inputContainer={(children) => (
+            <Group align='flex-start' gap='0' w='100%'>
+              <Box flex={1}>{children}</Box>
+              <Button onClick={handleFetchTranscript}>取得</Button>
+            </Group>
+          )}
+        />
+        <Textarea label='動画の字幕' readOnly minRows={5} mb={'md'} {...form.getInputProps('transcript')} />
+        <MessageInput
+          onSendMessage={handleSubmit}
+          isResponding={form.values.isResponding}
+          value={form.values.messageInputValue}
+          onChange={(event) => form.setFieldValue('messageInputValue', event.currentTarget.value)}
+        />
+        <Group gap={'xs'}>
+          <Button variant='light' onClick={() => handleButtonClick('３行の箇条書きで要約して')}>
+            要約
+          </Button>
+          <Button variant='light' onClick={() => handleButtonClick('結論を述べてください')}>
+            結論
+          </Button>
+        </Group>
+        <Messages messages={form.values.conversation} />
+      </Box>
+    </FormProvider>
   );
 }
 
-function SearchParamsComponent({
-  setYoutubeUrl,
-  youtubeUrl
-}: { setYoutubeUrl: React.Dispatch<React.SetStateAction<string>>; youtubeUrl: string }) {
+function SearchParamsComponent() {
+  const form = useFormContext();
   const searchParams = useSearchParams();
 
   useEffect(() => {
     const url = searchParams.get('url');
-    if (url && youtubeUrl === '') {
-      setYoutubeUrl(url);
+    if (url && form.values.youtubeUrl === '') {
+      form.setFieldValue('youtubeUrl', url);
     }
-  }, [searchParams, youtubeUrl, setYoutubeUrl]);
+  }, [searchParams, form]);
 
   return null;
 }
