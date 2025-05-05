@@ -18,6 +18,7 @@ type FormValues = {
   messageInputValue: string;
   conversation: MessageProps[];
   isResponding: boolean;
+  isFetchingTranscript: boolean; // 字幕取得中フラグ
 };
 
 const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
@@ -27,19 +28,25 @@ export default function Home() {
     initialValues: {
       youtubeUrl: '',
       transcript: '',
-      messageInputValue: '',
+      messageInputValue: '結論を述べてください',
       conversation: [],
-      isResponding: false
+      isResponding: false,
+      isFetchingTranscript: false // 初期値
     }
   });
 
   // 字幕取得
   const handleFetchTranscript = async () => {
-    const result = await fetchTranscript(form.values.youtubeUrl);
-    if (result.status === 'ok') {
-      form.setFieldValue('transcript', result.title + result.transcribed);
-    } else {
-      form.setFieldValue('transcript', '字幕の取得に失敗しました');
+    form.setFieldValue('isFetchingTranscript', true); // 取得開始
+    try {
+      const result = await fetchTranscript(form.values.youtubeUrl);
+      if (result.status === 'ok') {
+        form.setFieldValue('transcript', result.title + result.transcribed);
+      } else {
+        form.setFieldValue('transcript', '字幕の取得に失敗しました');
+      }
+    } finally {
+      form.setFieldValue('isFetchingTranscript', false); // 取得終了
     }
   };
 
@@ -80,7 +87,9 @@ export default function Home() {
           inputContainer={(children) => (
             <Group align='flex-start' gap='0' w='100%'>
               <Box flex={1}>{children}</Box>
-              <Button onClick={handleFetchTranscript}>取得</Button>
+              <Button onClick={handleFetchTranscript} loading={form.values.isFetchingTranscript}>
+                取得
+              </Button>
             </Group>
           )}
         />

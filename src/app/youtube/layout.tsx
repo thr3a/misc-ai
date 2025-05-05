@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'YoutubeタイパAI',
-  description: '4倍速再生は遅い'
+  description: '4倍速再生では遅すぎる'
 };
 
 export default function PageLayout({ children }: { children: React.ReactNode }) {
