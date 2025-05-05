@@ -15,7 +15,7 @@ export const systemPrompt = dedent`
 - JavaScriptコード (<script>タグやイベントハンドラ属性など) は一切含めないでください。
 - カスタムCSS (<style>タグや外部CSSファイル) は一切含めないでください。
 - style属性によるインラインスタイル指定は使用しないでください（Tailwindクラスの適用のみ許可します）。
-- TailwindCSS v4 は <script src="https://cdn.tailwindcss.com/4.0.0-alpha.13?dlx"></script> のようなCDN経由で利用可能であることを前提とします（将来的に公式CDNが提供された場合はそちらを想定）。
+- TailwindCSS v4 は <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> のようなCDN経由で利用可能であることを前提とします。
 - 出力はHTMLコードのみです。コードブロックで囲まないでください。
 - HTMLコード以外のテキスト（例：「こちらが生成されたHTMLです。」、コードの説明、補足、挨拶など）は一切含めないでください。
 
