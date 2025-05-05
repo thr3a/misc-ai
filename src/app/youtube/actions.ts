@@ -39,7 +39,8 @@ export async function continueConversation(transcript: string, history: MessageP
 
   (async () => {
     const { textStream } = streamText({
-      model: openai('gpt-4o-mini'),
+      // model: openai('gpt-4o-mini'),
+      model: openai('gpt-4.1-nano'),
       system: systemPrompt(transcript),
       messages: history
     });
