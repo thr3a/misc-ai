@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Button, Center, Group, TextInput, Textarea } from '@mantine/core';
+import { Box, Button, Group, TextInput, Textarea } from '@mantine/core';
 import { readStreamableValue } from 'ai/rsc';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
@@ -54,16 +54,19 @@ export default function Home() {
         <SearchParamsComponent setYoutubeUrl={setYoutubeUrl} youtubeUrl={youtubeUrl} />
       </Suspense>
       <TextInput
+        w='100%'
         placeholder='https://www.youtube.com/watch?v=xaY01JIAcCI'
         value={youtubeUrl}
+        label='YoutubeのURLを入力してください'
         onChange={(event) => setYoutubeUrl(event.currentTarget.value)}
+        inputContainer={(children) => (
+          <Group align='flex-start' gap='0' w='100%'>
+            <Box flex={1}>{children}</Box>
+            <Button onClick={handleFetchTranscript}>取得</Button>
+          </Group>
+        )}
       />
-      <Center>
-        <Button mb={'md'} onClick={handleFetchTranscript}>
-          字幕を取得
-        </Button>
-      </Center>
-      <Textarea value={transcript} readOnly minRows={5} mb={'md'} />
+      <Textarea label='動画の字幕' value={transcript} readOnly minRows={5} mb={'md'} />
       <Group gap={'xs'}>
         <Button onClick={() => handleButtonClick('３行の箇条書きで要約して')}>要約</Button>
         <Button onClick={() => handleButtonClick('結論を述べてください')}>結論</Button>
