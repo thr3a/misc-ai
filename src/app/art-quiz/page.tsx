@@ -9,9 +9,9 @@ import StartScreen from './StartScreen';
 import type { AnkiRow, QuizQuestion } from './util';
 
 // クイズの出題数
-function createQuizQuestions(rows: AnkiRow[], count: number): QuizQuestion[] {
-  // ジャンル=ギリシャ神話のみ
-  const filtered = rows.filter((row) => row.ジャンル === 'ギリシャ神話');
+function createQuizQuestions(rows: AnkiRow[], count: number, genre: string): QuizQuestion[] {
+  // 選択されたジャンルのみ
+  const filtered = rows.filter((row) => row.ジャンル === genre);
   // 副題ごとにユニーク化
   const unique = Array.from(new Map(filtered.map((row) => [row.副題, row])).values());
   // シャッフル
@@ -48,8 +48,9 @@ export default function ArtQuizPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [quizCount, setQuizCount] = useState<number>(5);
+  const [genre, setGenre] = useState<string>('ギリシャ神話');
 
-  const fetchQuiz = async (count: number) => {
+  const fetchQuiz = async (count: number, genre: string) => {
     setLoading(true);
     setError(null);
     setSelected(null);
@@ -60,7 +61,7 @@ export default function ArtQuizPage() {
       const res = await fetch('/api/art-quiz');
       if (!res.ok) throw new Error('APIリクエストに失敗しました');
       const data: AnkiRow[] = await res.json();
-      setQuestions(createQuizQuestions(data, count));
+      setQuestions(createQuizQuestions(data, count, genre));
     } catch (e: unknown) {
       if (e instanceof Error) {
         setError(e.message);
@@ -72,9 +73,9 @@ export default function ArtQuizPage() {
     }
   };
 
-  const handleStart = async (count: number) => {
+  const handleStart = async (count: number, genre: string) => {
     setQuizCount(count === 0 ? -1 : count); // -1は全問
-    await fetchQuiz(count);
+    await fetchQuiz(count, genre);
     startQuiz();
   };
 
@@ -123,13 +124,13 @@ export default function ArtQuizPage() {
         <Text c='red' mb='md'>
           {error}
         </Text>
-        <Button onClick={() => fetchQuiz(quizCount === -1 ? 0 : quizCount)}>再読み込み</Button>
+        <Button onClick={() => fetchQuiz(quizCount === -1 ? 0 : quizCount, genre)}>再読み込み</Button>
       </Box>
     );
   }
 
   if (!started) {
-    return <StartScreen onStart={handleStart} />;
+    return <StartScreen onStart={handleStart} genre={genre} setGenre={setGenre} />;
   }
 
   if (showResult) {

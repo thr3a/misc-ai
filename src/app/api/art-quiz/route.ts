@@ -14,10 +14,13 @@ export async function GET(req: NextRequest) {
   }
 
   const rows = await sheet.getRows();
-  // ジャンル=ギリシャ神話のみ
-  const filtered: AnkiRow[] = rows
-    .map((row) => row.toObject() as AnkiRow)
-    .filter((row) => row.ジャンル === 'ギリシャ神話');
+  const allRows: AnkiRow[] = rows.map((row) => row.toObject() as AnkiRow);
+
+  const { searchParams } = req.nextUrl;
+  const genre = searchParams.get('genre');
+
+  // ジャンル指定時は該当ジャンルのみ、未指定時は全件
+  const filtered = genre ? allRows.filter((row) => row.ジャンル === genre) : allRows;
 
   // JSON形式で返す
   return NextResponse.json(filtered, {
