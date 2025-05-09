@@ -9,14 +9,14 @@ WORKDIR /app
 ENV YOUTUBE_DL_SKIP_PYTHON_CHECK=1
 ENV YOUTUBE_DL_SKIP_DOWNLOAD=true
 
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+# package.json と package-lock.json のみをコピー
+COPY package.json package-lock.json* ./
 
-RUN --mount=type=cache,target=/app/node_modules \
-  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i --frozen-lockfile; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+# npm ci を実行。npmのキャッシュディレクトリをマウント
+RUN --mount=type=cache,target=/root/.npm \
+    if [ -f package-lock.json ]; then npm ci; \
+    else echo "Lockfile not found." && exit 1; \
+    fi
 
 
 # Rebuild the source code only when needed
