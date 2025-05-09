@@ -8,7 +8,6 @@ import type { AnkiRow, QuizQuestion } from './util';
 // クイズの出題数
 const QUIZ_COUNT = 5;
 
-// AnkiRow[]からQuizQuestion[]を生成
 function createQuizQuestions(rows: AnkiRow[]): QuizQuestion[] {
   // 副題ごとにユニーク化
   const unique = Array.from(new Map(rows.map((row) => [row.副題, row])).values());
@@ -48,7 +47,6 @@ export default function ArtQuizPage() {
   const [showResult, setShowResult] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // クイズデータ取得
   const fetchQuiz = async () => {
     setLoading(true);
     setSelected(null);
@@ -85,7 +83,6 @@ export default function ArtQuizPage() {
     }, 1000);
   };
 
-  // タイトルへ戻る
   const handleReset = () => {
     resetQuiz();
     setQuestions([]);
@@ -95,7 +92,6 @@ export default function ArtQuizPage() {
     setShowResult(false);
   };
 
-  // ローディング
   if (loading) {
     return (
       <Box maw={500} mx='auto' mt='lg'>
@@ -104,7 +100,6 @@ export default function ArtQuizPage() {
     );
   }
 
-  // スタート画面
   if (!started) {
     return (
       <Box maw={500} mx='auto' mt='lg'>
@@ -120,7 +115,6 @@ export default function ArtQuizPage() {
     );
   }
 
-  // 結果画面
   if (showResult) {
     return (
       <Box maw={500} mx='auto' mt='lg'>
@@ -137,7 +131,6 @@ export default function ArtQuizPage() {
     );
   }
 
-  // クイズ画面
   const q = questions[current];
   return (
     <Box maw={500} mx='auto' mt='lg'>
