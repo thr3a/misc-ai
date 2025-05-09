@@ -1,4 +1,4 @@
-import { Title } from '@mantine/core';
+import { Box, Title } from '@mantine/core';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -15,7 +15,9 @@ export default function PageLayout({ children }: { children: React.ReactNode }) 
       <Title order={6} mb={'md'} c={'dimmed'}>
         {metadata.description as string}
       </Title>
-      {children}
+      <Box maw={500} mx='auto'>
+        {children}
+      </Box>
     </>
   );
 }
