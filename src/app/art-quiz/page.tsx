@@ -61,8 +61,12 @@ export default function ArtQuizPage() {
       if (!res.ok) throw new Error('APIリクエストに失敗しました');
       const data: AnkiRow[] = await res.json();
       setQuestions(createQuizQuestions(data, count));
-    } catch (e: any) {
-      setError(e?.message || '不明なエラーが発生しました');
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError(String(e) || '不明なエラーが発生しました');
+      }
     } finally {
       setLoading(false);
     }
