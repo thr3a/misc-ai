@@ -1,13 +1,6 @@
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 
-export type AnkiRow = {
-  ジャンル: string;
-  副題: string;
-  タイトル: string;
-  タグ1?: string;
-  タグ2?: string;
-  タグ3?: string;
-};
+import type { AnkiRow } from '../app/art-quiz/util';
 
 const SHEET_ID = '1AuPZohWbAXg-u9G9gNU7vnk1204iDFlk6eOtTDkzBrY';
 const SHEET_NAME = '暗記表';
