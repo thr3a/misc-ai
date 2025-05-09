@@ -9,18 +9,15 @@ import StartScreen from './StartScreen';
 import type { AnkiRow, QuizQuestion } from './util';
 
 // クイズの出題数
-const QUIZ_COUNT = 5;
-
-function createQuizQuestions(rows: AnkiRow[]): QuizQuestion[] {
+function createQuizQuestions(rows: AnkiRow[], count: number): QuizQuestion[] {
+  // ジャンル=ギリシャ神話のみ
+  const filtered = rows.filter((row) => row.ジャンル === 'ギリシャ神話');
   // 副題ごとにユニーク化
-  const unique = Array.from(new Map(rows.map((row) => [row.副題, row])).values());
-
+  const unique = Array.from(new Map(filtered.map((row) => [row.副題, row])).values());
   // シャッフル
   const shuffled = unique.sort(() => Math.random() - 0.5);
-
-  // 5問分だけ
-  const selected = shuffled.slice(0, QUIZ_COUNT);
-
+  // count=0なら全問、0以外ならcount問
+  const selected = count === 0 ? shuffled : shuffled.slice(0, count);
   // 選択肢生成
   return selected.map((row) => {
     // 正解
@@ -50,8 +47,9 @@ export default function ArtQuizPage() {
   const [showResult, setShowResult] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [quizCount, setQuizCount] = useState<number>(5);
 
-  const fetchQuiz = async () => {
+  const fetchQuiz = async (count: number) => {
     setLoading(true);
     setError(null);
     setSelected(null);
@@ -62,7 +60,7 @@ export default function ArtQuizPage() {
       const res = await fetch('/api/art-quiz');
       if (!res.ok) throw new Error('APIリクエストに失敗しました');
       const data: AnkiRow[] = await res.json();
-      setQuestions(createQuizQuestions(data));
+      setQuestions(createQuizQuestions(data, count));
     } catch (e: any) {
       setError(e?.message || '不明なエラーが発生しました');
     } finally {
@@ -70,8 +68,9 @@ export default function ArtQuizPage() {
     }
   };
 
-  const handleStart = async () => {
-    await fetchQuiz();
+  const handleStart = async (count: number) => {
+    setQuizCount(count === 0 ? -1 : count); // -1は全問
+    await fetchQuiz(count);
     startQuiz();
   };
 
@@ -120,7 +119,7 @@ export default function ArtQuizPage() {
         <Text c='red' mb='md'>
           {error}
         </Text>
-        <Button onClick={() => fetchQuiz()}>再読み込み</Button>
+        <Button onClick={() => fetchQuiz(quizCount === -1 ? 0 : quizCount)}>再読み込み</Button>
       </Box>
     );
   }
@@ -130,7 +129,7 @@ export default function ArtQuizPage() {
   }
 
   if (showResult) {
-    return <ResultScreen score={score} onReset={handleReset} />;
+    return <ResultScreen score={score} onReset={handleReset} total={questions.length} />;
   }
 
   const q = questions[current];
@@ -138,7 +137,7 @@ export default function ArtQuizPage() {
     <QuizScreen
       question={q}
       current={current}
-      total={QUIZ_COUNT}
+      total={questions.length}
       score={score}
       selected={selected}
       onSelect={handleSelect}

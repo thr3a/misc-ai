@@ -6,17 +6,17 @@ import { Box, Button, Group, Text, Title } from '@mantine/core';
 type Props = {
   score: number;
   onReset: () => void;
+  total: number;
 };
 
-export default function ResultScreen({ score, onReset }: Props) {
-  const QUIZ_COUNT = 5;
+export default function ResultScreen({ score, onReset, total }: Props) {
   return (
     <Box mt='lg'>
       <Title order={2} ta='center' mb='md'>
         結果発表
       </Title>
       <Text ta='center' size='xl' mb='md'>
-        {QUIZ_COUNT}問中 {score}問正解！
+        {total}問中 {score}問正解！
       </Text>
       <Group justify='center'>
         <Button onClick={onReset}>もう一度挑戦</Button>
