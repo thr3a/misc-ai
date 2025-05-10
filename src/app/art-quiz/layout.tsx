@@ -2,8 +2,8 @@ import { Box, Title } from '@mantine/core';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'クイズアート',
-  description: '４択クイズ'
+  title: '神話4択クイズ',
+  description: '４択クイズで絵画知識を学ぼう'
 };
 
 export default function PageLayout({ children }: { children: React.ReactNode }) {

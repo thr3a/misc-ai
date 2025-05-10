@@ -29,10 +29,10 @@ export default function StartScreen({ onStart, genre, setGenre }: Props) {
       </Box>
       <Group justify='center'>
         <Button size='lg' onClick={() => onStart(5, genre)} mr='md'>
-          5問で遊ぶ
+          5問で遊ぶ！
         </Button>
-        <Button size='lg' color='teal' onClick={() => onStart(0, genre)}>
-          全問で遊ぶ
+        <Button size='lg' variant={'outline'} onClick={() => onStart(0, genre)}>
+          全問で遊ぶ！
         </Button>
       </Group>
     </Box>

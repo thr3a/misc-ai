@@ -41,7 +41,7 @@ export default function QuizScreen({ question, current, total, score, selected, 
         </Stack>
         {selected && (
           <Text mt='md' ta='center' size='lg' fw='bold' c={selected === question.answer ? 'green' : 'red'}>
-            {selected === question.answer ? '正解！' : '不正解'}
+            {selected === question.answer ? '正解！😄' : '不正解… 😥'}
           </Text>
         )}
       </Paper>
