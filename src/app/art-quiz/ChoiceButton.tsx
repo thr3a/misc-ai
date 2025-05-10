@@ -12,16 +12,24 @@ type Props = {
 };
 
 export default function ChoiceButton({ choice, selected, answer, onSelect, disabled }: Props) {
-  const isCorrect = selected && choice === answer;
-  const isWrong = selected && choice === selected && choice !== answer;
+  // 正解ボタン判定
+  const showCorrect = selected && choice === answer;
+  // 不正解で自分が選んだボタン
+  const showWrong = selected && choice === selected && choice !== answer;
+
   return (
     <Button
       fullWidth
-      color={isCorrect ? 'green' : isWrong ? 'red' : selected ? 'gray' : 'blue'}
+      color={showCorrect ? 'green' : showWrong ? 'red' : selected ? 'gray' : 'blue'}
       variant={selected ? 'filled' : 'outline'}
       onClick={() => onSelect(choice)}
       disabled={disabled}
-      style={{ fontWeight: isCorrect ? 'bold' : undefined }}
+      style={{
+        fontWeight: showCorrect ? 'bold' : undefined,
+        // disabled時も色が分かるように背景色を強調
+        ...(showCorrect && { backgroundColor: 'var(--mantine-color-green-6)', color: 'white' }),
+        ...(showWrong && { backgroundColor: 'var(--mantine-color-red-6)', color: 'white' })
+      }}
     >
       {choice}
     </Button>

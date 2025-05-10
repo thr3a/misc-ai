@@ -82,17 +82,21 @@ export default function ArtQuizPage() {
   const handleSelect = (choice: string) => {
     if (selected) return;
     setSelected(choice);
-    if (choice === questions[current].answer) {
+    const isCorrect = choice === questions[current].answer;
+    if (isCorrect) {
       setScore((s) => s + 1);
     }
-    setTimeout(() => {
-      if (current + 1 < questions.length) {
-        setCurrent((c) => c + 1);
-        setSelected(null);
-      } else {
-        setShowResult(true);
-      }
-    }, 1000);
+    setTimeout(
+      () => {
+        if (current + 1 < questions.length) {
+          setCurrent((c) => c + 1);
+          setSelected(null);
+        } else {
+          setShowResult(true);
+        }
+      },
+      isCorrect ? 1000 : 3000
+    );
   };
 
   const handleReset = () => {
