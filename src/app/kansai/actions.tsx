@@ -1,6 +1,5 @@
 'use server';
 
-import { anthropic } from '@ai-sdk/anthropic';
 import { openai } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 import { schema, systemPrompt } from './util';
@@ -9,8 +8,7 @@ export async function Generate(input: string) {
   'use server';
 
   const { object } = await generateObject({
-    // model: openai('gpt-4o-mini'),
-    model: anthropic('claude-3-5-sonnet-20240620'),
+    model: openai('gpt-4.1'),
     system: systemPrompt,
     prompt: input,
     schema: schema,
