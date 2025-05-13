@@ -1,99 +1,113 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { initEpubFile } from '@lingo-reader/epub-parser';
-import type { EpubFile, NavPoint } from '@lingo-reader/epub-parser'; // EpubTocItem を NavPoint に変更
+import { type SpineItem, initEpubFile } from '@lingo-reader/epub-parser';
 import * as cheerio from 'cheerio';
 
-const epubFilePath = 'ruble.epub';
-const outputDir = 'texts';
+const epubPath = 'ruble.epub';
+const textsDir = path.join('texts');
 
+// ファイル名に使えない文字を置換
 const sanitizeFilename = (filename: string): string => {
-  // ファイル名に使えない文字をハイフンに置換 (必要に応じて他の文字も追加)
   return filename.replace(/[\\/:*?"<>|]/g, '-');
 };
 
-const extractTextFromHtml = (html: string): string => {
+// HTMLコンテンツをプレーンテキストに変換
+function htmlToText(html: string): string {
   const $ = cheerio.load(html);
-  // スクリプトやスタイルタグを除去
-  $('script, style').remove();
-  // body内のテキストを取得し、余分な空白や改行を整理
-  return $('body').text().replace(/\s+/g, ' ').trim();
-};
+  return $('body').text().trim();
+}
 
-const parseEpubToText = async () => {
-  let epub: EpubFile | undefined;
-  try {
-    epub = await initEpubFile(epubFilePath);
+// EPUBファイルの初期化と目次データの準備
+async function initializeEpubData(filePath: string): Promise<{
+  epub: Awaited<ReturnType<typeof initEpubFile>>;
+  spine: SpineItem[];
+  tocMap: Map<string, ReturnType<Awaited<ReturnType<typeof initEpubFile>>['getToc']>[number]>;
+}> {
+  const epub = await initEpubFile(filePath);
+  const spine = epub.getSpine();
+  const tocItems = epub.getToc();
+  const tocMap = new Map(tocItems.map((item) => [item.id, item])); // item.id が undefined でないことを期待
+  return { epub, spine, tocMap };
+}
 
-    const toc = epub.getToc();
-    const spine = epub.getSpine(); // Spineも取得しておく
+// 出力ディレクトリの確認と作成
+function ensureOutputDirectory(directoryPath: string): void {
+  if (!fs.existsSync(directoryPath)) {
+    fs.mkdirSync(directoryPath, { recursive: true });
+  }
+}
 
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
-    }
+// チャプターのタイトルを決定
+function determineChapterTitle(
+  spineItem: SpineItem,
+  tocMap: Map<string, ReturnType<Awaited<ReturnType<typeof initEpubFile>>['getToc']>[number]>
+): string | undefined {
+  const tocItem = tocMap.get(spineItem.id);
+  if (tocItem?.label && tocItem.label.trim() !== '表紙') {
+    return tocItem.label.trim();
+  }
+  return undefined;
+}
 
-    const epubFilenameBase = path.basename(epubFilePath, '.epub');
+// チャプターのHTMLからテキストを抽出
+async function extractTextFromChapterHtml(
+  epub: Awaited<ReturnType<typeof initEpubFile>>,
+  spineItem: SpineItem
+): Promise<string> {
+  const chapterData = await epub.loadChapter(spineItem.id);
+  const html = chapterData?.html;
+  if (!html) return '';
+  return htmlToText(html);
+}
 
-    // 目次情報を元に章を処理
-    const processTocItem = async (item: NavPoint, index: number) => {
-      // EpubTocItem を NavPoint に変更
-      console.log(`  処理中 (${index + 1}/${toc.length}): ${item.label}`);
+// チャプターテキストをファイルに保存
+function saveChapterToFile(title: string, content: string, baseFilename: string, outputDir: string): void {
+  if (content.trim().length === 0) return; // 内容が空なら保存しない
 
-      // hrefから章のIDを取得 (resolveHrefがundefinedを返す場合があるため注意)
-      const resolved = epub?.resolveHref(item.href);
-      if (!resolved) {
-        // console.warn(`    - hrefを解決できませんでした: ${item.href} (スキップします)`);
-        return; // 解決できない場合はスキップ
+  const safeTitle = sanitizeFilename(title);
+  const outPath = path.join(outputDir, `${baseFilename}-${safeTitle}.txt`);
+  fs.writeFileSync(outPath, content.trim(), 'utf-8');
+  console.log(`saved: ${outPath}`);
+}
+
+// EPUB全体の処理を実行
+async function processEpub(filePath: string, outputDir: string): Promise<void> {
+  const { epub, spine, tocMap } = await initializeEpubData(filePath);
+  const baseFilename = path.basename(filePath, path.extname(filePath));
+
+  ensureOutputDirectory(outputDir);
+
+  let currentChapterTitle: string | null = null;
+  let currentChapterText = '';
+
+  for (const spineItem of spine) {
+    const titleForThisSpineItem = determineChapterTitle(spineItem, tocMap);
+    const text = await extractTextFromChapterHtml(epub, spineItem);
+
+    if (titleForThisSpineItem && titleForThisSpineItem !== currentChapterTitle) {
+      if (currentChapterTitle) {
+        saveChapterToFile(currentChapterTitle, currentChapterText, baseFilename, outputDir);
       }
-      const chapterId = resolved.id;
-
-      // SpineにIDが存在するか確認 (念のため)
-      // const spineItem = spine.find((s) => s.id === chapterId);
-      // if (!spineItem) {
-      //   // console.warn(`    - SpineにIDが見つかりません: ${chapterId} (スキップします)`);
-      //   return; // Spineにない場合もスキップ
-      // }
-
-      try {
-        const chapter = await epub?.loadChapter(chapterId);
-
-        if (chapter?.html) {
-          const textContent = extractTextFromHtml(chapter.html);
-
-          // ファイル名を生成 (目次のラベルを使用)
-          const chapterTitle = sanitizeFilename(item.label || `chapter-${index + 1}`); // ラベルがない場合のフォールバック
-          const outputFilename = `${epubFilenameBase}-${chapterTitle}.txt`;
-          const outputPath = path.join(outputDir, outputFilename);
-
-          fs.writeFileSync(outputPath, textContent);
-          // console.log(`    - 保存しました: ${outputFilename}`);
-        } else {
-          // console.warn(`    - 章のコンテンツを取得できませんでした: ${chapterId}`);
-        }
-      } catch (error) {
-        // console.error(`    - 章の処理中にエラーが発生しました (${chapterId}):`, error);
+      currentChapterTitle = titleForThisSpineItem;
+      currentChapterText = text.length > 0 ? `${text}\n` : '';
+    } else {
+      if (text.length > 0) {
+        currentChapterText += `${text}\n`;
       }
-
-      // 子要素も再帰的に処理 (必要な場合)
-      // if (item.children) {
-      //   for (const child of item.children) {
-      //     await processTocItem(child, index); // indexの扱いは要検討
-      //   }
-      // }
-    };
-
-    // 目次の各項目を処理
-    for (let i = 0; i < toc.length; i++) {
-      await processTocItem(toc[i], i);
-    }
-  } catch (error) {
-    console.error('EPUBのパース中にエラーが発生しました:', error);
-  } finally {
-    if (epub) {
-      epub.destroy();
     }
   }
-};
 
-// スクリプトを実行
-parseEpubToText();
+  // 最後の章の内容を保存
+  if (currentChapterTitle) {
+    saveChapterToFile(currentChapterTitle, currentChapterText, baseFilename, outputDir);
+  }
+
+  epub.destroy();
+  console.log('Processing complete.');
+}
+
+async function main() {
+  await processEpub(epubPath, textsDir);
+}
+
+main();
