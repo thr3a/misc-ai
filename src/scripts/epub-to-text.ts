@@ -61,11 +61,19 @@ async function extractTextFromChapterHtml(
 }
 
 // チャプターテキストをファイルに保存
-function saveChapterToFile(title: string, content: string, baseFilename: string, outputDir: string): void {
+function saveChapterToFile(
+  title: string,
+  content: string,
+  baseFilename: string,
+  outputDir: string,
+  index: number
+): void {
   if (content.trim().length === 0) return; // 内容が空なら保存しない
 
   const safeTitle = sanitizeFilename(title);
-  const outPath = path.join(outputDir, `${baseFilename}-${safeTitle}.txt`);
+  // インデックスを2桁のゼロ埋めでフォーマット
+  const formattedIndex = index.toString().padStart(2, '0');
+  const outPath = path.join(outputDir, `${baseFilename}-${formattedIndex}-${safeTitle}.txt`);
   fs.writeFileSync(outPath, content.trim(), 'utf-8');
   console.log(`saved: ${outPath}`);
 }
@@ -79,6 +87,7 @@ async function processEpub(filePath: string, outputDir: string): Promise<void> {
 
   let currentChapterTitle: string | null = null;
   let currentChapterText = '';
+  let chapterIndex = 0;
 
   for (const spineItem of spine) {
     const titleForThisSpineItem = determineChapterTitle(spineItem, tocMap);
@@ -86,7 +95,8 @@ async function processEpub(filePath: string, outputDir: string): Promise<void> {
 
     if (titleForThisSpineItem && titleForThisSpineItem !== currentChapterTitle) {
       if (currentChapterTitle) {
-        saveChapterToFile(currentChapterTitle, currentChapterText, baseFilename, outputDir);
+        saveChapterToFile(currentChapterTitle, currentChapterText, baseFilename, outputDir, chapterIndex);
+        chapterIndex++;
       }
       currentChapterTitle = titleForThisSpineItem;
       currentChapterText = text.length > 0 ? `${text}\n` : '';
@@ -99,7 +109,7 @@ async function processEpub(filePath: string, outputDir: string): Promise<void> {
 
   // 最後の章の内容を保存
   if (currentChapterTitle) {
-    saveChapterToFile(currentChapterTitle, currentChapterText, baseFilename, outputDir);
+    saveChapterToFile(currentChapterTitle, currentChapterText, baseFilename, outputDir, chapterIndex);
   }
 
   epub.destroy();
