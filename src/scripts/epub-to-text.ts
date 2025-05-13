@@ -1,80 +1,99 @@
-// epubファイルを章ごとにテキスト化して保存するスクリプト
-// @lingo-reader/epub-parser, cheerio利用
-// 使い方: node --import tsx src/scripts/epub-to-text.ts
-
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
-import {
-  type EpubFile,
-  type EpubFileInfo,
-  type EpubProcessedChapter,
-  type EpubResolvedHref,
-  type NavPoint,
-  initEpubFile
-} from '@lingo-reader/epub-parser';
+import fs from 'node:fs';
+import path from 'node:path';
+import { initEpubFile } from '@lingo-reader/epub-parser';
+import type { EpubFile, NavPoint } from '@lingo-reader/epub-parser'; // EpubTocItem を NavPoint に変更
 import * as cheerio from 'cheerio';
 
-// サンプルepubファイルのパス
-const epubPath = 'ルーヴル美術館ブランディングの百年.epub';
-// 出力ディレクトリ
+const epubFilePath = 'ruble.epub';
 const outputDir = 'texts';
 
-// ファイル名として使えない文字を_に変換
-function sanitizeFileName(name: string): string {
-  return name.replace(/[\\/:*?"<>|]/g, '_').replace(/\s+/g, '_');
-}
+const sanitizeFilename = (filename: string): string => {
+  // ファイル名に使えない文字をハイフンに置換 (必要に応じて他の文字も追加)
+  return filename.replace(/[\\/:*?"<>|]/g, '-');
+};
 
-/**
- * tocのchildrenも含めて再帰的に処理
- * @param tocItems TocItem[]
- * @param epub EpubFile
- * @param fileBase string
- */
-async function processTocItems(tocItems: NavPoint[], epub: EpubFile, fileBase: string) {
-  for (const item of tocItems) {
-    const chapterLabel = item?.label || 'no-title';
-    const safeLabel = sanitizeFileName(chapterLabel);
-    // hrefからidを取得
-    const resolved: EpubResolvedHref | undefined = epub.resolveHref(item?.href);
-    if (resolved?.id) {
-      const chapter: EpubProcessedChapter | undefined = await epub.loadChapter(resolved.id);
-      if (chapter?.html) {
-        // cheerioでbody部のテキスト抽出
-        const $ = cheerio.load(chapter.html);
-        const text = $('body').text().trim();
-        if (text.length > 0) {
-          const outPath = path.join(outputDir, `${fileBase}-${safeLabel}.txt`);
-          await fs.writeFile(outPath, text, 'utf8');
-          console.log(`saved: ${outPath}`);
-        }
-      }
+const extractTextFromHtml = (html: string): string => {
+  const $ = cheerio.load(html);
+  // スクリプトやスタイルタグを除去
+  $('script, style').remove();
+  // body内のテキストを取得し、余分な空白や改行を整理
+  return $('body').text().replace(/\s+/g, ' ').trim();
+};
+
+const parseEpubToText = async () => {
+  let epub: EpubFile | undefined;
+  try {
+    epub = await initEpubFile(epubFilePath);
+
+    const toc = epub.getToc();
+    const spine = epub.getSpine(); // Spineも取得しておく
+
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
     }
-    // 子章があれば再帰
-    if (Array.isArray(item.children)) {
-      await processTocItems(item.children, epub, fileBase);
+
+    const epubFilenameBase = path.basename(epubFilePath, '.epub');
+
+    // 目次情報を元に章を処理
+    const processTocItem = async (item: NavPoint, index: number) => {
+      // EpubTocItem を NavPoint に変更
+      console.log(`  処理中 (${index + 1}/${toc.length}): ${item.label}`);
+
+      // hrefから章のIDを取得 (resolveHrefがundefinedを返す場合があるため注意)
+      const resolved = epub?.resolveHref(item.href);
+      if (!resolved) {
+        // console.warn(`    - hrefを解決できませんでした: ${item.href} (スキップします)`);
+        return; // 解決できない場合はスキップ
+      }
+      const chapterId = resolved.id;
+
+      // SpineにIDが存在するか確認 (念のため)
+      // const spineItem = spine.find((s) => s.id === chapterId);
+      // if (!spineItem) {
+      //   // console.warn(`    - SpineにIDが見つかりません: ${chapterId} (スキップします)`);
+      //   return; // Spineにない場合もスキップ
+      // }
+
+      try {
+        const chapter = await epub?.loadChapter(chapterId);
+
+        if (chapter?.html) {
+          const textContent = extractTextFromHtml(chapter.html);
+
+          // ファイル名を生成 (目次のラベルを使用)
+          const chapterTitle = sanitizeFilename(item.label || `chapter-${index + 1}`); // ラベルがない場合のフォールバック
+          const outputFilename = `${epubFilenameBase}-${chapterTitle}.txt`;
+          const outputPath = path.join(outputDir, outputFilename);
+
+          fs.writeFileSync(outputPath, textContent);
+          // console.log(`    - 保存しました: ${outputFilename}`);
+        } else {
+          // console.warn(`    - 章のコンテンツを取得できませんでした: ${chapterId}`);
+        }
+      } catch (error) {
+        // console.error(`    - 章の処理中にエラーが発生しました (${chapterId}):`, error);
+      }
+
+      // 子要素も再帰的に処理 (必要な場合)
+      // if (item.children) {
+      //   for (const child of item.children) {
+      //     await processTocItem(child, index); // indexの扱いは要検討
+      //   }
+      // }
+    };
+
+    // 目次の各項目を処理
+    for (let i = 0; i < toc.length; i++) {
+      await processTocItem(toc[i], i);
+    }
+  } catch (error) {
+    console.error('EPUBのパース中にエラーが発生しました:', error);
+  } finally {
+    if (epub) {
+      epub.destroy();
     }
   }
-}
+};
 
-async function main() {
-  // textsディレクトリ作成
-  await fs.mkdir(outputDir, { recursive: true });
-
-  // epubファイルをパース
-  const epub: EpubFile = await initEpubFile(epubPath);
-  const fileInfo: EpubFileInfo = epub.getFileInfo();
-  const fileBase = sanitizeFileName(fileInfo?.fileName?.replace(/\.epub$/i, '') || 'epub');
-
-  // 目次取得
-  const toc: NavPoint[] = epub.getToc();
-
-  // 章ごとにテキスト抽出・保存
-  await processTocItems(toc, epub, fileBase);
-
-  epub.destroy();
-}
-
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+// スクリプトを実行
+parseEpubToText();
