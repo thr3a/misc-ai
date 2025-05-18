@@ -1,0 +1,122 @@
+'use client';
+import { Box, Button, FileInput, Group, List, ListItem, Space, Text, Title } from '@mantine/core';
+import { createFormContext, zodResolver } from '@mantine/form';
+import { IconPhotoScan } from '@tabler/icons-react';
+import { readStreamableValue } from 'ai/rsc';
+import { z } from 'zod';
+import { generate } from './actions';
+import type { schema } from './util';
+
+// Force the page to be dynamic and allow streaming responses up to 30 seconds
+export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
+
+type FormValues = {
+  imageFile: File | null;
+  loading: boolean;
+  result: z.infer<typeof schema> | null;
+};
+
+const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
+
+export default function Page() {
+  const form = useForm({
+    initialValues: {
+      imageFile: null,
+      loading: false,
+      result: null
+    },
+    validate: zodResolver(
+      z.object({
+        imageFile: z.instanceof(File, { message: '画像ファイルをアップロードしてください。' })
+      })
+    )
+  });
+
+  const handleSubmit = async (values: FormValues): Promise<void> => {
+    if (!values.imageFile) return;
+    if (form.values.loading) return;
+
+    form.setValues({
+      result: null,
+      loading: true
+    });
+
+    const formData = new FormData();
+    formData.append('image', values.imageFile);
+
+    const { object } = await generate(formData);
+    for await (const partialObject of readStreamableValue(object)) {
+      if (partialObject) {
+        form.setValues({ result: partialObject as z.infer<typeof schema> });
+      }
+    }
+
+    form.setValues({ loading: false });
+  };
+
+  return (
+    <FormProvider form={form}>
+      <Box mx='auto' component='form' onSubmit={form.onSubmit(handleSubmit)}>
+        <FileInput
+          leftSection={<IconPhotoScan size={18} stroke={1.5} />}
+          label='メニュー画像を選択してください'
+          placeholder='10MB以内'
+          withAsterisk
+          {...form.getInputProps('imageFile')}
+          accept='image/*'
+          leftSectionPointerEvents='none'
+        />
+        <Group justify='center' mt={'sm'} mb={'sm'}>
+          <Button type='submit' loading={form.values.loading}>
+            AIに教えてもらう!
+          </Button>
+        </Group>
+      </Box>
+
+      {form.values.result && (
+        <Box mt={'md'}>
+          <Title order={4} mb='xs'>
+            メニュー解析結果
+          </Title>
+          <List>
+            {form.values.result.items.map((item, idx) => (
+              <ListItem key={idx}>
+                <Text fw='bold' component='span'>
+                  料理名:{' '}
+                </Text>
+                {item.originalName}
+                <br />
+                <Text fw='bold' component='span'>
+                  日本語訳:{' '}
+                </Text>
+                {item.TranslatedName}
+                <br />
+                <Text fw='bold' component='span'>
+                  カタカナ読み:{' '}
+                </Text>
+                {item.katanakaYomi}
+                <br />
+                <Text fw='bold' component='span'>
+                  元の価格:{' '}
+                </Text>
+                {item.priceOriginal}
+                <br />
+                <Text fw='bold' component='span'>
+                  日本円換算:{' '}
+                </Text>
+                {item.priceYen} 円
+                <br />
+                <Text fw='bold' component='span'>
+                  解説:{' '}
+                </Text>
+                {item.description}
+                <Space h='md' />
+              </ListItem>
+            ))}
+          </List>
+        </Box>
+      )}
+    </FormProvider>
+  );
+}
