@@ -1,4 +1,5 @@
 'use client';
+import { resizeAndCompressImage } from '@/app/lib/resizeAndCompressImage';
 import { Box, Button, FileInput, Group, List, ListItem, Space, Text, Title } from '@mantine/core';
 import { createFormContext, zodResolver } from '@mantine/form';
 import { IconPhotoScan } from '@tabler/icons-react';
@@ -61,9 +62,15 @@ export default function Page() {
         <FileInput
           leftSection={<IconPhotoScan size={18} stroke={1.5} />}
           label='メニュー画像を選択してください'
-          placeholder='10MB以内'
           withAsterisk
-          {...form.getInputProps('imageFile')}
+          onChange={async (file) => {
+            form.setFieldValue('imageFile', null);
+            if (!file) {
+              return;
+            }
+            const compressed = await resizeAndCompressImage(file, 1024, 0.8);
+            form.setFieldValue('imageFile', compressed);
+          }}
           accept='image/*'
           leftSectionPointerEvents='none'
         />
@@ -80,7 +87,7 @@ export default function Page() {
             メニュー解析結果
           </Title>
           <List>
-            {form.values.result.items.map((item, idx) => (
+            {(form.values.result.items ?? []).map((item, idx) => (
               <ListItem key={idx}>
                 <Text fw='bold' component='span'>
                   料理名:{' '}

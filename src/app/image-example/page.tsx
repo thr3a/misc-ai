@@ -65,24 +65,12 @@ export default function Page() {
           withAsterisk
           value={form.values.imageFile}
           onChange={async (file) => {
+            form.setFieldValue('imageFile', null);
             if (!file) {
-              form.setFieldValue('imageFile', null);
               return;
             }
-            form.setFieldValue('imageFile', null);
-            form.setFieldValue('loading', true);
-            try {
-              const compressed = await resizeAndCompressImage(file, 1024, 0.8);
-              console.log(compressed);
-
-              form.setFieldValue('imageFile', compressed);
-            } catch (e) {
-              console.log(e);
-
-              alert('画像のリサイズ・圧縮に失敗しました');
-              form.setFieldValue('imageFile', null);
-            }
-            form.setFieldValue('loading', false);
+            const compressed = await resizeAndCompressImage(file, 1024, 0.8);
+            form.setFieldValue('imageFile', compressed);
           }}
           accept='image/*'
           leftSectionPointerEvents='none'
