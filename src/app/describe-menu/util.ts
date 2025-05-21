@@ -14,6 +14,19 @@ export const schema = z.object({
   items: z.array(menuItemSchema).describe('メニューアイテムのリスト')
 });
 
+export const CURRENCY_LIST = [
+  { label: '米ドル', code: 'USD', rate: 145.87, symbol: '$' },
+  { label: 'ユーロ', code: 'EUR', rate: 163.04, symbol: '€' },
+  { label: '英ポンド', code: 'GBP', rate: 189.72, symbol: '£' },
+  { label: 'スイスフラン', code: 'CHF', rate: 176.63, symbol: 'CHF' },
+  { label: 'オーストラリアドル', code: 'AUD', rate: 91.52, symbol: 'A$' },
+  { label: 'ニュージーランドドル', code: 'NZD', rate: 84.91, symbol: 'NZ$' },
+  { label: 'カナダドル', code: 'CAD', rate: 107.23, symbol: 'C$' },
+  { label: 'シンガポールドル', code: 'SGD', rate: 108.91, symbol: 'S$' },
+  { label: '香港ドル', code: 'HKD', rate: 18.65, symbol: 'HK$' },
+  { label: '中国人民元', code: 'CNY', rate: 20.14, symbol: '元' }
+];
+
 export const systemPrompt = dedent`
 あなたは、レストランのメニュー画像を解析し、記載されている料理の情報を抽出、翻訳、解説する専門AIアシスタントです。
 ユーザーから提供される画像内のメニュー項目を正確に読み取り、スキーマに従って情報を整理してください。
