@@ -11,7 +11,9 @@ export const maxDuration = 30;
 
 // 関数名は変えないこと
 export default function Page() {
-  const [situation, setSituation] = useState('魔法学校の主人公(15)はクラスに男一人でハーレム');
+  const [situation, setSituation] = useState(
+    '中世ヨーロッパ風のファンタジー世界 魔法学校の入学式の直後、クラスでユーザーの主人公（男、15歳）とヒロインが初めて出会う'
+  );
   const { object, submit, isLoading, stop } = useObject({
     api: '/api/rp-prompt',
     schema: schema
