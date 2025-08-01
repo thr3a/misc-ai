@@ -1,6 +1,4 @@
-import type { InternalGoogleGenerativeAISettings } from '@ai-sdk/google/internal';
-
-export const geminiNoneFilters: InternalGoogleGenerativeAISettings = {
+export const geminiNoneFilters = {
   safetySettings: [
     {
       category: 'HARM_CATEGORY_HATE_SPEECH',

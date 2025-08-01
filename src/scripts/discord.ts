@@ -57,7 +57,7 @@ async function handleMessage(message: Message, prompt: string, channelId: string
     model: anthropic('claude-3-5-sonnet-20240620'),
     system: prompt,
     messages: chatHistory,
-    maxTokens: 256
+    maxOutputTokens: 256
   });
   await channel.send(text);
 
@@ -126,7 +126,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       model: anthropic('claude-3-5-sonnet-20240620'),
       system: tobariPrompt,
       messages: chatHistory,
-      maxTokens: 256
+      maxOutputTokens: 256
     });
     await interaction.editReply(text);
     chatHistory.push({ role: 'assistant', content: text });

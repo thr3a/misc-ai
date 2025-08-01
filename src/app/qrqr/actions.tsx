@@ -11,10 +11,10 @@ export async function generate(input: string) {
 
   (async () => {
     const { textStream } = await streamText({
-      model: openai('gpt-4o-mini'),
+      model: openai('gpt-4.1-nano'),
       prompt: input,
       temperature: 1,
-      maxTokens: 128
+      maxOutputTokens: 128
     });
 
     for await (const delta of textStream) {
