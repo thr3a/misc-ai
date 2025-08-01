@@ -16,6 +16,7 @@
     "@ai-sdk/google": "^2.0.0",
     "@ai-sdk/openai": "^2.0.0",
     "@ai-sdk/react": "^2.0.0",
+    "@ai-sdk/rsc": "^1.0.0",
     "@biomejs/biome": "^1.9.4",
     "@lingo-reader/epub-parser": "^0.2.5",
     "@mantine/core": "^7.17.7",
