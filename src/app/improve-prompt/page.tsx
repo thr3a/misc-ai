@@ -1,8 +1,8 @@
 'use client';
+import { readStreamableValue } from '@ai-sdk/rsc';
 import { ActionIcon, Box, Button, CopyButton, Group, List, Text, Textarea, Tooltip } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
 import { IconCheck, IconCopy } from '@tabler/icons-react';
-import { readStreamableValue } from 'ai/rsc';
 import type { z } from 'zod';
 import { generate } from './actions';
 import type { schema } from './util';

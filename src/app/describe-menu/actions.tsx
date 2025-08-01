@@ -1,8 +1,8 @@
 'use server';
 
 import { openai } from '@ai-sdk/openai';
+import { createStreamableValue } from '@ai-sdk/rsc';
 import { streamObject } from 'ai';
-import { createStreamableValue } from 'ai/rsc';
 import { schema, systemPrompt } from './util';
 
 // 関数名は汎用的にするために変更しないこと

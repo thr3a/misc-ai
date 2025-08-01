@@ -2,8 +2,8 @@
 
 import { anthropic } from '@ai-sdk/anthropic';
 import { openai } from '@ai-sdk/openai';
+import { createStreamableValue } from '@ai-sdk/rsc';
 import { streamText } from 'ai';
-import { createStreamableValue } from 'ai/rsc';
 import { type MessageProps, firstSystemPrompt, systemPrompt } from './util';
 
 export async function generate(topic: string, history: MessageProps[]) {

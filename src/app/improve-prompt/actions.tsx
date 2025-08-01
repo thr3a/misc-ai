@@ -4,8 +4,8 @@ import { geminiNoneFilters } from '@/lib/google';
 // import { anthropic } from '@ai-sdk/anthropic';
 import { google } from '@ai-sdk/google';
 import { openai } from '@ai-sdk/openai';
+import { createStreamableValue } from '@ai-sdk/rsc';
 import { streamObject } from 'ai';
-import { createStreamableValue } from 'ai/rsc';
 import { schema, systemPrompt } from './util';
 
 export async function generate(input: string) {

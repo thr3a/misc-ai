@@ -1,9 +1,9 @@
 'use client';
 import { resizeAndCompressImage } from '@/app/lib/resizeAndCompressImage';
+import { readStreamableValue } from '@ai-sdk/rsc';
 import { Box, Button, FileInput, Group, List, ListItem, Text, Title } from '@mantine/core';
 import { createFormContext, zodResolver } from '@mantine/form';
 import { IconPhotoScan } from '@tabler/icons-react';
-import { readStreamableValue } from 'ai/rsc';
 import { z } from 'zod';
 import { generate } from './actions';
 import type { schema } from './util';

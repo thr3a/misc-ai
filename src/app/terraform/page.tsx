@@ -1,7 +1,7 @@
 'use client';
+import { readStreamableValue } from '@ai-sdk/rsc';
 import { Box, Button, CopyButton, Group, List, Textarea } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
-import { readStreamableValue } from 'ai/rsc';
 import dedent from 'ts-dedent';
 import type { z } from 'zod';
 import { generate } from './actions';

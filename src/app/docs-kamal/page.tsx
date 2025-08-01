@@ -1,7 +1,7 @@
 'use client';
 
+import { readStreamableValue } from '@ai-sdk/rsc';
 import { Anchor, Box, Text } from '@mantine/core';
-import { readStreamableValue } from 'ai/rsc';
 import { useState } from 'react';
 import { MessageInput, type MessageProps, Messages } from './Chat';
 import { continueConversation } from './actions';

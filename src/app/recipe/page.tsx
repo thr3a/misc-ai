@@ -50,7 +50,7 @@ export default function Page() {
 
     const { object } = await Generate(prompt);
 
-    for await (const partialObject of (await import('ai/rsc')).readStreamableValue(object)) {
+    for await (const partialObject of (await import('@ai-sdk/rsc')).readStreamableValue(object)) {
       if (partialObject) {
         form.setValues({ result: partialObject });
       }

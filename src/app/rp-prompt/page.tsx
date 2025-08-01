@@ -62,7 +62,7 @@ export default function Page() {
       </Group>
       <Group mt='xl' mb='sm'>
         <Title order={3}>生成結果</Title>
-        <ButtonCopy content={markdown} disabled={isLoading} />
+        <ButtonCopy content={markdown} disabled={isLoading} label='コピー' />
       </Group>
       <Stack gap={4}>
         <Textarea

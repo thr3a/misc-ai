@@ -2,8 +2,8 @@
 
 import { geminiNoneFilters } from '@/lib/google';
 import { google } from '@ai-sdk/google';
+import { createStreamableValue } from '@ai-sdk/rsc';
 import { streamText } from 'ai';
-import { createStreamableValue } from 'ai/rsc';
 import type { MessageProps } from './Chat';
 import { systemPrompt } from './util';
 

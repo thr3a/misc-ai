@@ -1,8 +1,8 @@
 'use server';
 
 import { openai } from '@ai-sdk/openai';
+import { createStreamableValue } from '@ai-sdk/rsc';
 import { streamText } from 'ai';
-import { createStreamableValue } from 'ai/rsc';
 import type { MessageProps } from './Chat';
 import { systemPrompt } from './util';
 

@@ -2,8 +2,8 @@
 
 import type { MessageProps } from '@/features/chat/ChatBox';
 import { createOpenAI } from '@ai-sdk/openai';
+import { createStreamableValue } from '@ai-sdk/rsc';
 import { streamText } from 'ai';
-import { createStreamableValue } from 'ai/rsc';
 import { systemMessage } from './util';
 export async function continueConversation(history: MessageProps[]) {
   'use server';

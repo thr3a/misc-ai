@@ -2,11 +2,11 @@
 import { ChatBox } from '@/features/chat/ChatBox';
 import type { MessageProps } from '@/features/chat/ChatBox';
 import { TwitterButton } from '@/features/shareButton/Button';
+import { readStreamableValue } from '@ai-sdk/rsc';
 import { ActionIcon, Box, Center, Flex, Textarea } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
 import { getHotkeyHandler, useLocalStorage } from '@mantine/hooks';
 import { IconSend } from '@tabler/icons-react';
-import { readStreamableValue } from 'ai/rsc';
 import { Description } from './Description';
 import { continueConversation } from './actions';
 import { DummyMessages } from './util';

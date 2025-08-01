@@ -1,8 +1,8 @@
 'use server';
 
 import { openai } from '@ai-sdk/openai';
+import { createStreamableValue } from '@ai-sdk/rsc';
 import { streamText } from 'ai';
-import { createStreamableValue } from 'ai/rsc';
 
 export async function generate(input: string) {
   'use server';
