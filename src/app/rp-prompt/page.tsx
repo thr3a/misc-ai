@@ -19,43 +19,58 @@ export default function Page() {
     schema: schema
   });
 
-  const user = object?.userCharacterSetting;
-  const ai = object?.aiCharacterSetting;
-  const markdown =
-    !object || Object.keys(object).length === 0
-      ? ''
-      : [
-          `# 世界観の設定\n${object.worldSetting ?? ''}`,
-          `# 対話シーンの設定\n${object.dialogueSceneSetting ?? ''}`,
-          '# ユーザーがなりきる人物の設定',
-          `- 名前: ${user?.name ?? ''}`,
-          `- 性別: ${user?.gender ?? ''}`,
-          `- 年齢: ${user?.age ?? 0}`,
-          `- 一人称: ${user?.firstPersonPronoun ?? ''}`,
-          `- 二人称: ${user?.secondPersonPronoun ?? ''}`,
-          `- 性格: ${user?.personality ?? ''}`,
-          `- 背景設定: ${user?.background ?? ''}`,
-          '# あなたがなりきる人物の設定',
-          `- 名前: ${ai?.name ?? ''}`,
-          `- 性別: ${ai?.gender ?? ''}`,
-          `- 年齢: ${ai?.age ?? 0}`,
-          `- 一人称: ${ai?.firstPersonPronoun ?? ''}`,
-          `- 二人称: ${ai?.secondPersonPronoun ?? ''}`,
-          `- 性格: ${ai?.personality ?? ''}`,
-          `- 背景設定: ${ai?.background ?? ''}`,
-          `# 対話のトーン\n${object.dialogueTone ?? ''}`,
-          `# ユーザーとあなたがなりきる人物との関係性の設定\n${object.relationshipSetting ?? ''}`
-        ].join('\n');
+  const generateMarkdown = () => {
+    if (!object || Object.keys(object).length === 0) {
+      return '';
+    }
+
+    const user = object?.userCharacterSetting;
+    const ai = object?.aiCharacterSetting;
+    const sections = [
+      `今からロールプレイを行いましょう。"${ai?.name ?? ''}"というキャラとしてロールプレイしてください。以下に示す設定に従い、キャラに成りきって返答してください。`,
+      '# 世界観の設定',
+      object.worldSetting,
+      '# 対話シーンの設定',
+      object.dialogueSceneSetting,
+      '# ユーザーがなりきる人物の設定',
+      `- 名前: ${user?.name ?? ''}`,
+      `- 性別: ${user?.gender ?? ''}`,
+      `- 年齢: ${user?.age ?? 0}`,
+      `- 一人称: ${user?.firstPersonPronoun ?? ''}`,
+      `- 二人称: ${user?.secondPersonPronoun ?? ''}`,
+      `- 性格: ${user?.personality ?? ''}`,
+      `- 背景設定: ${user?.background ?? ''}`,
+      '# あなたがなりきる人物の設定',
+      `- 名前: ${ai?.name ?? ''}`,
+      `- 性別: ${ai?.gender ?? ''}`,
+      `- 年齢: ${ai?.age ?? 0}`,
+      `- 一人称: ${ai?.firstPersonPronoun ?? ''}`,
+      `- 二人称: ${ai?.secondPersonPronoun ?? ''}`,
+      `- 性格: ${ai?.personality ?? ''}`,
+      `- 背景設定: ${ai?.background ?? ''}`,
+      '# 対話のトーン',
+      object.dialogueTone,
+      '# ユーザーとあなたがなりきる人物との関係性の設定',
+      object.relationshipSetting,
+      '# 応答の形式\n発言+括弧書きで動作と状況描写',
+      '\nこれまで示した世界観や設定をもとに、ロールプレイを行ってください。ユーザー側のセリフやナレーションは書かないでください。',
+      '======='
+    ];
+
+    return sections.join('\n');
+  };
+
+  const markdown = generateMarkdown();
 
   return (
-    <Box maw={600} mx='auto' component='form'>
+    <Box maw={600} mx='auto' component='form' mb={'lg'}>
       <Textarea
         label='シチュエーションを記述してください'
         withAsterisk
-        placeholder='例: 放課後の教室で…'
-        minRows={3}
         value={situation}
+        rows={10}
         onChange={(e) => setSituation(e.currentTarget.value)}
+        styles={{ input: { fontFamily: 'monospace', fontSize: 14 } }}
       />
       <Group justify='center' mt='md'>
         <Button onClick={() => submit(situation)} disabled={isLoading} loading={isLoading}>
