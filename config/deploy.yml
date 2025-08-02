@@ -96,24 +96,23 @@ ssh:
 
 # Use accessory services (secrets come from .kamal/secrets).
 #
-# accessories:
-#   db:
-#     image: mysql:8.0
-#     host: 192.168.0.2
-#     port: 3306
-#     env:
-#       clear:
-#         MYSQL_ROOT_HOST: '%'
-#       secret:
-#         - MYSQL_ROOT_PASSWORD
-#     files:
-#       - config/mysql/production.cnf:/etc/mysql/my.cnf
-#       - db/production.sql:/docker-entrypoint-initdb.d/setup.sql
-#     directories:
-#       - data:/var/lib/mysql
-#   redis:
-#     image: valkey/valkey:8
-#     host: 192.168.0.2
-#     port: 6379
-#     directories:
-#       - data:/data
+accessories:
+  discord:
+    image: thr3a/misc-ai
+    dockerfile: Dockerfile.main
+    host: 192.168.16.12
+    cmd: node --import tsx /app/src/scripts/discord.ts
+    env:
+      secret:
+        - DISCORD_BOT_TOKEN
+        - DISCORD_CLIENT_ID
+        - DISCORD_GUILD_ID
+        - OPENAI_API_KEY
+        - GOOGLE_GENERATIVE_AI_API_KEY
+        - ANTHROPIC_API_KEY
+        - FIREBASE_KEY
+        - SECRET_KEY
+        - GOOGLE_SHEETS_API_KEY
+        - FIREBASE_PROJECT_ID
+        - FIREBASE_CLIENT_EMAIL
+        - FIREBASE_PRIVATE_KEY

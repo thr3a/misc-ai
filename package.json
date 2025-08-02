@@ -9,7 +9,7 @@
     "lint": "biome check --write --unsafe ./src",
     "serve": "python -m http.server -d out",
     "node-server": "node server.js",
-    "discord": "node --import tsx --env-file .env --watch ./src/scripts/discord.ts"
+    "discord": "node --import tsx --env-file .env ./src/scripts/discord.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.0",
