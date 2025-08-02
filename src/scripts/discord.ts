@@ -240,6 +240,11 @@ const slashCommands: RESTPostAPIChatInputApplicationCommandsJSONBody[] = [
     name: 'clear',
     description: '会話履歴を削除します（シチュエーションは保持）',
     type: ApplicationCommandType.ChatInput
+  },
+  {
+    name: 'show',
+    description: '現在登録されているシチュエーションを表示します',
+    type: ApplicationCommandType.ChatInput
   }
 ];
 
@@ -380,6 +385,24 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
       return;
     }
     await interaction.reply('過去の会話を削除しました。シチュエーションは維持されます。');
+    return;
+  }
+
+  if (name === 'show') {
+    // 現在のシチュエーションを表示
+    if (!firestore) {
+      await interaction.reply(FIREBASE_ERROR_MSG);
+      return;
+    }
+    const state = await getChannelState(channelId);
+    const situation = state?.situation?.trim();
+    if (!situation) {
+      await interaction.reply('現在登録されているシチュエーションはありません。/init で登録できます。');
+      return;
+    }
+    // 長文にも対応できるようにエンベッドで表示
+    const embed = new EmbedBuilder().setTitle('現在のシチュエーション').setDescription(situation).setColor(0x3b82f6);
+    await interaction.reply({ embeds: [embed] });
     return;
   }
 });
