@@ -1,4 +1,6 @@
-export const geminiNoneFilters = {
+import type { GoogleGenerativeAIProviderOptions } from '@ai-sdk/google';
+
+export const geminiNoneFilters: GoogleGenerativeAIProviderOptions = {
   safetySettings: [
     {
       category: 'HARM_CATEGORY_HATE_SPEECH',

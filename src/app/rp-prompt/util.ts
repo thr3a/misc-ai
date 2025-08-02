@@ -8,6 +8,7 @@ const CharacterSettingSchema = z.object({
   firstPersonPronoun: z.string().describe('一人称名 例:俺、わたし'),
   secondPersonPronoun: z.string().describe('二人称名 例: あなた、〇〇くん'),
   personality: z.string().describe('性格'),
+  clothes: z.string().describe('詳細な服装'),
   background: z.string().describe('背景設定')
 });
 
@@ -35,6 +36,7 @@ export const systemPrompt = dedent`
   - 一人称
   - 二人称
   - 性格
+  - 服装
   - 背景設定
 - あなたがなりきる人物の設定
   - 名前
@@ -43,6 +45,7 @@ export const systemPrompt = dedent`
   - 一人称
   - 二人称
   - 性格
+  - 服装
   - 背景設定
 - 対話のトーン
 - ユーザーとあなたがなりきる人物との関係性の設定
