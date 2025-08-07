@@ -6,20 +6,7 @@ const nextConfig = {
     unoptimized: true
   },
   poweredByHeader: false,
-  output: 'standalone', // k8sの場合の設定
-  async headers() {
-    return [
-      {
-        source: '/:path*{/}?', // 全てのパスと末尾スラッシュに対応
-        headers: [
-          {
-            key: 'X-Accel-Buffering',
-            value: 'no' // ストリーミングを有効化するためにバッファリングを無効化
-          }
-        ]
-      }
-    ];
-  }
+  output: 'standalone' // k8sの場合の設定
 };
 
 module.exports = nextConfig;

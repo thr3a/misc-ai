@@ -16,5 +16,9 @@ export async function POST(req: Request) {
     temperature: 0.3
   });
 
-  return result.toTextStreamResponse();
+  return result.toTextStreamResponse({
+    headers: {
+      'Content-Type': 'text/event-stream'
+    }
+  });
 }
