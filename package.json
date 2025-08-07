@@ -8,8 +8,7 @@
     "start": "next start",
     "lint": "biome check --write --unsafe ./src",
     "serve": "python -m http.server -d out",
-    "node-server": "node server.js",
-    "discord": "node --import tsx --env-file .env ./src/scripts/discord.ts"
+    "node-server": "node server.js"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.0",
@@ -29,7 +28,6 @@
     "ai": "^5.0.0",
     "cheerio": "^1.1.2",
     "dayjs": "^1.11.13",
-    "discord.js": "^14.21.0",
     "dotenv": "^17.2.1",
     "firebase": "^11.6.0",
     "firebase-admin": "^13.4.0",
