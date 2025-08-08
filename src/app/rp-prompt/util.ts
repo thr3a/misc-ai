@@ -23,6 +23,7 @@ export const schema = z.object({
   dialogueSceneSetting: z.string().describe('対話シーンの設定'),
   userCharacterSetting: CharacterSettingSchema.describe('ユーザーがなりきる人物の設定'),
   aiCharacterSetting: CharacterSettingSchema.describe('あなたがなりきる人物の設定'),
+  goal: z.string().describe('ロールプレイの最終目標'),
   dialogueTone: z.string().describe('対話のトーン'),
   relationshipSetting: z.string().describe('ユーザーとあなたがなりきる人物との関係性の設定')
 });
@@ -32,7 +33,7 @@ export const systemPrompt = dedent`
 あなたの任務は、入力されたシチュエーションを基に、ロールプレイの魅力を最大限に引き出すための詳細な世界観、キャラクター設定、プロットの骨子を構築することです。
 この設定は、クリエイター向けに創作のインスピレーションとなるアイデアを提供することを目的としています。
 入力されたシチュエーションから情報を一切抜け落としてはいけません。
-以下の出力形式を厳密に従って、深みのある設定を構築してください。
+以下の出力形式を厳密に従って、なるべく詳細に深みのある設定を構築してください。
 
 # 出力形式
 
@@ -56,6 +57,7 @@ export const systemPrompt = dedent`
   - 性格
   - 服装
   - 背景設定
+- このロールプレイの最終目標、終了条件
 - 対話のトーン
 - ユーザーとあなたがなりきる人物との関係性の設定
 `;
