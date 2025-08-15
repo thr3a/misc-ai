@@ -7,7 +7,7 @@ image: thr3a/misc-ai
 # Deploy to these servers.
 servers:
   web:
-    - 192.168.16.12
+    - ubuntu02.local
   # job:
   #   hosts:
   #     - 192.168.0.1
@@ -34,7 +34,7 @@ proxy:
 # Credentials for your image host.
 registry:
   # Specify the registry server, if you're not using Docker Hub
-  # server: registry.digitalocean.com / ghcr.io / ...
+  server: dockerhub.local.turai.work:9490
   username: thr3a
 
   # Always use an access token rather than real password (pulled from .kamal/secrets).
