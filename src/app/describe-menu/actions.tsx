@@ -23,7 +23,7 @@ export async function generate(formData: FormData) {
 
   (async () => {
     const { partialObjectStream } = await streamObject({
-      model: openai('gpt-5'),
+      model: openai('gpt-4.1'),
       system: systemPrompt,
       messages: [
         {
