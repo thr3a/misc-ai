@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { type Caption, Client } from 'youtubei';
+import { Client } from 'youtubei';
 import { z } from 'zod';
 import { getPageTitle, getYouTubeVideoId } from './util';
 
@@ -59,7 +59,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ status: 'ng', message: 'Internal Server Error' }, { status: 500 });
     }
     const video = await youtube.getVideo(videoId);
-    const transcribed = (await video?.captions?.get('ja')) || ([] as Caption[]);
+    const availableLanguageCodes = await video?.captions?.languages.map((l) => l.code);
+    const languageCode = availableLanguageCodes?.includes('ja')
+      ? 'ja'
+      : availableLanguageCodes?.includes('en')
+        ? 'en'
+        : availableLanguageCodes?.[0];
+    const transcribed = (await video?.captions?.get(languageCode)) || [];
     const transcribedText = transcribed
       .map((x) => x.text)
       .join('')
