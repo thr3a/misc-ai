@@ -12,7 +12,12 @@ export async function Generate(input: string) {
     system: systemPrompt,
     prompt: input,
     schema: schema,
-    temperature: 0.3
+    temperature: 0.3,
+    providerOptions: {
+      openai: {
+        reasoningEffort: 'minimal'
+      }
+    }
   });
 
   return { object };

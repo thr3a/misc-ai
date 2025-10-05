@@ -25,6 +25,11 @@ export async function generate(formData: FormData) {
     const { partialObjectStream } = await streamObject({
       model: openai('gpt-4.1'),
       system: systemPrompt,
+      providerOptions: {
+        openai: {
+          reasoningEffort: 'minimal'
+        }
+      },
       messages: [
         {
           role: 'user',
