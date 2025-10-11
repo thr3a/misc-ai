@@ -14,6 +14,7 @@ export const maxDuration = 30;
 // フォーム値の型
 type FormValues = {
   youtubeUrl: string;
+  title: string;
   transcript: string;
   messageInputValue: string;
   conversation: MessageProps[];
@@ -27,30 +28,31 @@ export default function Home() {
   const form = useForm({
     initialValues: {
       youtubeUrl: '',
+      title: '',
       transcript: '',
-      messageInputValue: '結論を述べてください',
+      messageInputValue: '動画のタイトルの質問に対する解答を教えて下さい。',
       conversation: [],
       isResponding: false,
-      isFetchingTranscript: false // 初期値
+      isFetchingTranscript: false
     }
   });
 
   // 字幕取得
   const handleFetchTranscript = async () => {
-    form.setFieldValue('isFetchingTranscript', true); // 取得開始
+    form.setFieldValue('isFetchingTranscript', true);
     try {
       const result = await fetchTranscript(form.values.youtubeUrl);
       if (result.status === 'ok') {
-        form.setFieldValue('transcript', result.title + result.transcribed);
+        form.setFieldValue('title', result.title);
+        form.setFieldValue('transcript', result.transcribed);
       } else {
         form.setFieldValue('transcript', '字幕の取得に失敗しました');
       }
     } finally {
-      form.setFieldValue('isFetchingTranscript', false); // 取得終了
+      form.setFieldValue('isFetchingTranscript', false);
     }
   };
 
-  // メッセージ送信
   const handleSubmit = async (input: string): Promise<void> => {
     const updatedConversation: MessageProps[] = [...form.values.conversation, { role: 'user', content: input }];
     form.setValues({
@@ -59,7 +61,11 @@ export default function Home() {
       isResponding: true
     });
 
-    const { messages, newMessage } = await continueConversation(form.values.transcript, updatedConversation);
+    const { messages, newMessage } = await continueConversation(
+      form.values.transcript,
+      form.values.title,
+      updatedConversation
+    );
 
     let textContent = '';
     for await (const delta of readStreamableValue(newMessage)) {
@@ -101,10 +107,13 @@ export default function Home() {
           onChange={(event) => form.setFieldValue('messageInputValue', event.currentTarget.value)}
         />
         <Group gap={'xs'}>
-          <Button variant='light' onClick={() => handleButtonClick('３行の箇条書きで要約して')}>
+          <Button
+            variant='light'
+            onClick={() => handleButtonClick('動画の内容を数値は省略せず箇条書きでまとめてください。')}
+          >
             要約
           </Button>
-          <Button variant='light' onClick={() => handleButtonClick('結論を述べてください')}>
+          <Button variant='light' onClick={() => handleButtonClick('動画のタイトルの質問に対する解答を教えて下さい。')}>
             結論
           </Button>
         </Group>

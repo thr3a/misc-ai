@@ -32,17 +32,22 @@ export async function fetchTranscript(
   }
 }
 
-export async function continueConversation(transcript: string, history: MessageProps[]) {
+export async function continueConversation(transcript: string, title: string, history: MessageProps[]) {
   'use server';
 
   const stream = createStreamableValue();
 
   (async () => {
     const { textStream } = streamText({
-      // model: openai('gpt-4o-mini'),
-      model: openai('gpt-4.1-nano'),
-      system: systemPrompt(transcript),
-      messages: history
+      model: openai('gpt-5-mini'),
+      temperature: 0,
+      system: systemPrompt({ title: title, transcript: transcript }),
+      messages: history,
+      providerOptions: {
+        openai: {
+          reasoningEffort: 'minimal'
+        }
+      }
     });
 
     for await (const text of textStream) {
