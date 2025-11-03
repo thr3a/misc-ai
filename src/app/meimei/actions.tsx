@@ -14,7 +14,7 @@ export async function SuggestNames(input: string, type: string, namingConvention
   `;
 
   const { object: candidates } = await generateObject({
-    model: openai('gpt-4o'),
+    model: openai('gpt-4.1'),
     prompt: prompt,
     schema: schema,
     temperature: 0
