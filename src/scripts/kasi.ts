@@ -1,6 +1,6 @@
 // import fetch from 'node-fetch';
 
-async function fetchLyric(url: string): Promise<any> {
+async function fetchLyric(url: string) {
   const encodedUrl = encodeURIComponent(url);
   const apiUrl = `https://franks543-lyric-get.vercel.app/api/lyric/get/${encodedUrl}`;
 

@@ -1,135 +1,266 @@
 'use client';
 
+import { MODEL_DEFINITIONS, MODEL_DEFINITION_MAP, type ModelDefinition, type ModelKey } from '@/app/magi/util';
+import { useChat } from '@ai-sdk/react';
 import { Badge, Box, Button, Divider, Group, Paper, Stack, Text, Textarea } from '@mantine/core';
 import { useDisclosure, useInputState, useListState } from '@mantine/hooks';
+import { DefaultChatTransport } from 'ai';
+import { useMemo, useState } from 'react';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
 
-type DialogueRole = 'user' | 'assistant';
-type ModelKey = 'gemini' | 'gpt5' | 'claude';
 type ModelStatus = '待機中' | '生成中' | '応答済み';
 
-type FollowUpMessage = {
+type FactCheckEntryStatus = 'idle' | 'loading' | 'success' | 'error';
+
+type FactCheckEntry = {
   id: string;
-  role: DialogueRole;
+  targetId: ModelKey;
+  reviewerId: ModelKey;
+  status: FactCheckEntryStatus;
   content: string;
+  error?: string;
 };
 
-type ModelResponse = {
-  id: ModelKey;
-  label: string;
-  status: ModelStatus;
-  answer: string;
-  chat: FollowUpMessage[];
-  reviewer: ModelKey;
+type TextPart = {
+  type: 'text';
+  text: string;
 };
 
-type FactCheckResult = {
-  id: string;
-  reviewerLabel: string;
-  content: string;
+type ModelChatInstance = ReturnType<typeof useModelChat>;
+
+const STATUS_COLORS: Record<ModelStatus, string> = {
+  待機中: 'gray',
+  生成中: 'blue',
+  応答済み: 'teal'
 };
 
-const MODEL_RESPONSES: ModelResponse[] = [
-  {
-    id: 'gemini',
-    label: 'Gemini',
-    status: '応答済み',
-    answer:
-      'アニメ放映期と電子版キャンペーンの重なりで、今後2四半期は部数を維持。その後は海外TRPG人気と連動した伸びが見込めます。',
-    chat: [
-      {
-        id: 'gemini-user-1',
-        role: 'user',
-        content: '若年層より社会人層の方が購買力高い？'
-      },
-      {
-        id: 'gemini-assistant-1',
-        role: 'assistant',
-        content: '電子版は社会人層の決済が6割。ただし高校生の体験会参加率が伸びています。'
-      }
-    ],
-    reviewer: 'gpt5'
-  },
-  {
-    id: 'gpt5',
-    label: 'GPT5',
-    status: '生成中',
-    answer: '予約率は伸びていますが、供給制約の影響で第4四半期に一度調整。アニメ2期発表が入れば再加速します。',
-    chat: [
-      {
-        id: 'gpt5-user-1',
-        role: 'user',
-        content: '供給制約ってどのラインで発生？'
-      },
-      {
-        id: 'gpt5-assistant-1',
-        role: 'assistant',
-        content: '印刷工程よりも配送リードタイムがボトルネックになっています。'
-      }
-    ],
-    reviewer: 'claude'
-  },
-  {
-    id: 'claude',
-    label: 'Claude',
-    status: '待機中',
-    answer:
-      'コミュニティ熱量は十分ですが、電子配信が遅れると熱が冷めるため、限定シナリオの先出しで維持する案を推奨します。',
-    chat: [
-      {
-        id: 'claude-user-1',
-        role: 'user',
-        content: '限定シナリオってどの媒体が合う？'
-      },
-      {
-        id: 'claude-assistant-1',
-        role: 'assistant',
-        content: '紙付録より、即日更新できる公式Discord配信の方が熱量を維持できます。'
-      }
-    ],
-    reviewer: 'gemini'
+const FACT_CHECK_STATUS_LABEL: Record<FactCheckEntryStatus, string> = {
+  idle: '待機中',
+  loading: '検証中',
+  success: '完了',
+  error: '失敗'
+};
+
+const FACT_CHECK_STATUS_COLOR: Record<FactCheckEntryStatus, string> = {
+  idle: 'gray',
+  loading: 'blue',
+  success: 'teal',
+  error: 'red'
+};
+
+const INITIAL_QUESTION = '今後ルルブの人気はどうなると思う？';
+
+const useModelChat = (modelId: ModelKey) => {
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: '/api/magi',
+        body: {
+          modelId,
+          operation: 'chat'
+        }
+      }),
+    [modelId]
+  );
+
+  return useChat({
+    id: `magi-${modelId}`,
+    transport
+  });
+};
+
+const getModelStatus = (status: ModelChatInstance['status'], hasAssistantReply: boolean): ModelStatus => {
+  if (status === 'submitted' || status === 'streaming') {
+    return '生成中';
   }
-];
-
-const FACT_CHECK_RESULTS: FactCheckResult[] = [
-  {
-    id: 'gemini-gpt5',
-    reviewerLabel: 'GPT5 → Gemini',
-    content:
-      '出版社決算と一致。増刷計画も原典のまま引用されています。一次情報: KADOKAWA 3Q決算 / SNS分析ダッシュボード。数値の時間差を注記済み。'
-  },
-  {
-    id: 'gpt5-claude',
-    reviewerLabel: 'Claude → GPT5',
-    content:
-      '配送リードタイムのデータが2023年のまま。直近の遅延率が確認できていません。出版流通協会レポートの最新版リンクを追加してください。推計モデルは妥当です。'
-  },
-  {
-    id: 'claude-gemini',
-    reviewerLabel: 'Gemini → Claude',
-    content:
-      'Discordでの限定配信実績が複数社で確認でき、再現性もあります。過去のイベント売上データ（2024年8月）と矛盾なし。指標に定量値を添付すると説得力が増します。'
+  if (hasAssistantReply) {
+    return '応答済み';
   }
-];
+  return '待機中';
+};
+
+const collectText = (parts: Array<TextPart | { type: string }>) =>
+  parts
+    .filter((part): part is TextPart => part.type === 'text')
+    .map((part) => part.text)
+    .join('\n')
+    .trim();
+
+const getLatestAssistantText = (messages: ModelChatInstance['messages']) => {
+  const assistantMessages = messages.filter((message) => message.role === 'assistant');
+  if (assistantMessages.length === 0) {
+    return '';
+  }
+  const latest = assistantMessages[assistantMessages.length - 1];
+  return collectText(latest.parts);
+};
+
+const createInitialFactChecks = (): FactCheckEntry[] =>
+  MODEL_DEFINITIONS.map(
+    (definition): FactCheckEntry => ({
+      id: `${definition.reviewer}-${definition.id}`,
+      reviewerId: definition.reviewer,
+      targetId: definition.id,
+      status: 'idle',
+      content: ''
+    })
+  );
+
+const FactCheckDescription = () => (
+  <Text size='xs' c='dimmed'>
+    Geminiの回答はGPT5が、GPT5はClaudeが、ClaudeはGeminiが検証します。
+  </Text>
+);
+
+const FactCheckEmptyState = () => (
+  <Text size='xs' c='dimmed'>
+    ボタンを押すと各AIが直前の回答をレビューし、正確性と妥当性をコメントします。
+  </Text>
+);
+
+const ModelSummary = ({ definition }: { definition: ModelDefinition }) => (
+  <Text size='xs' c='dimmed'>
+    {definition.description}
+  </Text>
+);
 
 // 関数名は変えないこと
 export default function Page() {
-  const [question, setQuestion] = useInputState('今後ルルブの人気はどうなると思う？');
-  const [factCheckVisible, { toggle: toggleFactCheck }] = useDisclosure(false);
-  const [followUpInputs, followUpHandlers] = useListState<string>(MODEL_RESPONSES.map(() => ''));
+  const [question, setQuestion] = useInputState(INITIAL_QUESTION);
+  const [factCheckVisible, { open: openFactCheck, close: closeFactCheck }] = useDisclosure(false);
+  const [followUpInputs, followUpHandlers] = useListState<string>(MODEL_DEFINITIONS.map(() => ''));
+  const [factCheckEntries, setFactCheckEntries] = useState<FactCheckEntry[]>(createInitialFactChecks);
+  const [factCheckLoading, setFactCheckLoading] = useState(false);
+
+  const chatMap: Record<ModelKey, ModelChatInstance> = {
+    gemini: useModelChat('gemini'),
+    gpt5: useModelChat('gpt5'),
+    claude: useModelChat('claude')
+  };
+
+  const modelSections = MODEL_DEFINITIONS.map((definition) => ({
+    definition,
+    chat: chatMap[definition.id]
+  }));
 
   const handleBroadcast = () => {
+    const trimmed = question.trim();
+    if (!trimmed) {
+      return;
+    }
     setQuestion('');
+    for (const { chat } of modelSections) {
+      void chat.sendMessage({
+        parts: [{ type: 'text', text: trimmed }]
+      });
+    }
   };
 
   const handleFollowUpChange = (index: number, value: string) => {
     followUpHandlers.setItem(index, value);
   };
 
-  const handleFollowUpSend = (index: number) => {
+  const handleFollowUpSend = (index: number, modelId: ModelKey) => {
+    const text = followUpInputs[index].trim();
+    if (!text) {
+      return;
+    }
     followUpHandlers.setItem(index, '');
+    const section = modelSections.find((item) => item.definition.id === modelId);
+    if (!section) {
+      return;
+    }
+    void section.chat.sendMessage({
+      parts: [{ type: 'text', text }]
+    });
+  };
+
+  const resetFactChecks = () =>
+    setFactCheckEntries((prev) =>
+      prev.map((entry) => ({
+        ...entry,
+        status: 'idle',
+        content: '',
+        error: undefined
+      }))
+    );
+
+  const runFactChecks = async () => {
+    setFactCheckLoading(true);
+    setFactCheckEntries((prev) =>
+      prev.map((entry) => ({
+        ...entry,
+        status: 'loading',
+        content: '',
+        error: undefined
+      }))
+    );
+
+    await Promise.all(
+      modelSections.map(async ({ definition, chat }) => {
+        const latestAnswer = getLatestAssistantText(chat.messages);
+        if (!latestAnswer) {
+          setFactCheckEntries((prev) =>
+            prev.map((entry) =>
+              entry.targetId === definition.id ? { ...entry, status: 'error', error: '回答がまだありません。' } : entry
+            )
+          );
+          return;
+        }
+
+        try {
+          const response = await fetch('/api/magi', {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+              operation: 'fact-check',
+              modelId: definition.reviewer,
+              targetModel: definition.id,
+              targetAnswer: latestAnswer
+            })
+          });
+          const payload = (await response.json()) as { content?: string; error?: string };
+          if (!response.ok || payload.error) {
+            throw new Error(payload.error ?? 'レビュアーが結果を返しませんでした。');
+          }
+          setFactCheckEntries((prev) =>
+            prev.map((entry) =>
+              entry.targetId === definition.id
+                ? { ...entry, status: 'success', content: payload.content ?? 'レビュー結果が空です。' }
+                : entry
+            )
+          );
+        } catch (error) {
+          setFactCheckEntries((prev) =>
+            prev.map((entry) =>
+              entry.targetId === definition.id
+                ? {
+                    ...entry,
+                    status: 'error',
+                    error: error instanceof Error ? error.message : '不明なエラーが発生しました。'
+                  }
+                : entry
+            )
+          );
+        }
+      })
+    );
+
+    setFactCheckLoading(false);
+  };
+
+  const handleFactCheckClick = () => {
+    if (factCheckVisible) {
+      closeFactCheck();
+      resetFactChecks();
+      return;
+    }
+    openFactCheck();
+    void runFactChecks();
   };
 
   return (
@@ -145,7 +276,7 @@ export default function Page() {
               maxRows={6}
               placeholder='例: 今後ルルブの人気はどうなると思う？'
             />
-            <Group justify='space-between'>
+            <Group justify='space-between' align='flex-end'>
               <Text size='xs' c='dimmed'>
                 3モデルに一括送信して、それぞれの視点を待ちます。
               </Text>
@@ -157,93 +288,139 @@ export default function Page() {
         </Paper>
 
         <Stack gap='md'>
-          {MODEL_RESPONSES.map((model, index) => (
-            <Paper key={model.id} withBorder p='md'>
-              <Stack gap='sm'>
-                <Group justify='space-between' align='flex-start'>
-                  <Stack gap={2}>
-                    <Group gap='xs'>
-                      <Text fw={600}>{model.label}</Text>
-                      <Badge
-                        variant='light'
-                        color={model.status === '応答済み' ? 'teal' : model.status === '生成中' ? 'blue' : 'gray'}
-                      >
-                        {model.status}
-                      </Badge>
-                    </Group>
-                  </Stack>
-                </Group>
+          {modelSections.map(({ definition, chat }, index) => {
+            const hasAssistantReply = chat.messages.some((message) => message.role === 'assistant');
+            const status = getModelStatus(chat.status, hasAssistantReply);
+            const latestAnswer = getLatestAssistantText(chat.messages);
+            const visibleMessages = chat.messages.filter((message) => message.role !== 'system');
 
-                <Text size='sm'>{model.answer}</Text>
-
-                <Divider label='チャットログ' labelPosition='left' />
+            return (
+              <Paper key={definition.id} withBorder p='md'>
                 <Stack gap='sm'>
-                  {model.chat.map((message) => (
-                    <Stack gap={2} key={message.id}>
-                      <Text size='xs' c='dimmed'>
-                        {message.role === 'user' ? '自分' : model.label}
-                      </Text>
-                      <Text size='sm'>{message.content}</Text>
+                  <Group justify='space-between' align='flex-start'>
+                    <Stack gap={2}>
+                      <Group gap='xs'>
+                        <Text fw={600}>{definition.label}</Text>
+                        <Badge variant='light' color={STATUS_COLORS[status]}>
+                          {status}
+                        </Badge>
+                      </Group>
+                      <ModelSummary definition={definition} />
                     </Stack>
-                  ))}
-                </Stack>
-
-                <Stack gap='xs'>
-                  <Textarea
-                    autosize
-                    minRows={1}
-                    maxRows={4}
-                    placeholder={`${model.label}に追撃の質問を書く`}
-                    value={followUpInputs[index]}
-                    onChange={(event) => handleFollowUpChange(index, event.currentTarget.value)}
-                  />
-                  <Group justify='flex-end'>
                     <Button
-                      size='sm'
-                      variant='light'
-                      disabled={followUpInputs[index].trim().length === 0}
-                      onClick={() => handleFollowUpSend(index)}
+                      size='xs'
+                      variant='subtle'
+                      onClick={() => chat.stop()}
+                      disabled={chat.status !== 'streaming' && chat.status !== 'submitted'}
                     >
-                      個別に送信
+                      停止
                     </Button>
                   </Group>
+
+                  <Text size='sm'>{latestAnswer || 'まだ回答はありません。'}</Text>
+
+                  {chat.error ? (
+                    <Text size='sm' c='red'>
+                      エラー: {chat.error.message}
+                    </Text>
+                  ) : null}
+
+                  <Divider label='チャットログ' labelPosition='left' />
+                  <Stack gap='sm'>
+                    {visibleMessages.length === 0 ? (
+                      <Text size='xs' c='dimmed'>
+                        ここに会話が表示されます。
+                      </Text>
+                    ) : (
+                      visibleMessages.map((message) => (
+                        <Stack gap={2} key={message.id ?? `${message.role}-${definition.id}`}>
+                          <Text size='xs' c='dimmed'>
+                            {message.role === 'user' ? '自分' : definition.label}
+                          </Text>
+                          <Text size='sm'>{collectText(message.parts)}</Text>
+                        </Stack>
+                      ))
+                    )}
+                    {(chat.status === 'streaming' || chat.status === 'submitted') && (
+                      <Text size='xs' c='dimmed'>
+                        生成中...
+                      </Text>
+                    )}
+                  </Stack>
+
+                  <Stack gap='xs'>
+                    <Textarea
+                      autosize
+                      minRows={1}
+                      maxRows={4}
+                      placeholder={`${definition.label}に追撃の質問を書く`}
+                      value={followUpInputs[index]}
+                      onChange={(event) => handleFollowUpChange(index, event.currentTarget.value)}
+                    />
+                    <Group justify='flex-end'>
+                      <Button
+                        size='sm'
+                        variant='light'
+                        disabled={followUpInputs[index].trim().length === 0}
+                        onClick={() => handleFollowUpSend(index, definition.id)}
+                      >
+                        個別に送信
+                      </Button>
+                    </Group>
+                  </Stack>
                 </Stack>
-              </Stack>
-            </Paper>
-          ))}
+              </Paper>
+            );
+          })}
         </Stack>
 
         <Paper withBorder p='md'>
           <Stack gap='sm'>
-            <Group justify='space-between'>
+            <Group justify='space-between' align='flex-start'>
               <Stack gap={2}>
                 <Text size='sm' fw={600}>
                   ファクトチェック
                 </Text>
-                <Text size='xs' c='dimmed'>
-                  Geminiの回答はGPT5が、GPT5はClaudeが、ClaudeはGeminiが検証します。
-                </Text>
+                <FactCheckDescription />
               </Stack>
-              <Button size='sm' variant='outline' onClick={toggleFactCheck}>
+              <Button size='sm' variant='outline' onClick={handleFactCheckClick} loading={factCheckLoading}>
                 {factCheckVisible ? '結果を閉じる' : 'チェック実行'}
               </Button>
             </Group>
 
             {factCheckVisible ? (
               <Stack gap='sm'>
-                {FACT_CHECK_RESULTS.map((result) => (
-                  <Stack key={result.id} gap={4} p='sm' style={{ border: '1px solid var(--mantine-color-gray-3)' }}>
-                    <Text size='sm' fw={500}>
-                      {result.reviewerLabel}
-                    </Text>
-                    <Text size='sm'>{result.content}</Text>
-                  </Stack>
-                ))}
+                {factCheckEntries.map((entry) => {
+                  const reviewerLabel = MODEL_DEFINITION_MAP[entry.reviewerId].label;
+                  const targetLabel = MODEL_DEFINITION_MAP[entry.targetId].label;
+                  return (
+                    <Stack
+                      key={entry.id}
+                      gap={6}
+                      p='sm'
+                      style={{ border: '1px solid var(--mantine-color-gray-3)', borderRadius: 8 }}
+                    >
+                      <Group justify='space-between'>
+                        <Text size='sm' fw={500}>
+                          {reviewerLabel} → {targetLabel}
+                        </Text>
+                        <Badge size='xs' color={FACT_CHECK_STATUS_COLOR[entry.status]} variant='light'>
+                          {FACT_CHECK_STATUS_LABEL[entry.status]}
+                        </Badge>
+                      </Group>
+                      <Text size='sm' c={entry.status === 'error' ? 'red' : undefined}>
+                        {entry.status === 'success'
+                          ? entry.content
+                          : entry.status === 'error'
+                            ? (entry.error ?? 'レビューに失敗しました。')
+                            : 'レビューを実行しています...'}
+                      </Text>
+                    </Stack>
+                  );
+                })}
               </Stack>
             ) : (
-              <Text size='xs' c='dimmed'>
-                ボタンを押すと各AIがお互いの回答を検証し、正確性・妥当性のコメントを一覧表示します。
-              </Text>
+              <FactCheckEmptyState />
             )}
           </Stack>
         </Paper>
