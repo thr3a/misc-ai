@@ -5,7 +5,7 @@ import { useChat } from '@ai-sdk/react';
 import { Badge, Box, Button, Group, Paper, Stack, Text, Textarea } from '@mantine/core';
 import { useDisclosure, useInputState, useListState } from '@mantine/hooks';
 import { DefaultChatTransport } from 'ai';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
@@ -51,6 +51,7 @@ const FACT_CHECK_STATUS_COLOR: Record<FactCheckEntryStatus, string> = {
 };
 
 const INITIAL_QUESTION = '今後LABUBU（ラブブ）の人気はどうなると思う？';
+const MULTILINE_TEXT_STYLE: CSSProperties = { whiteSpace: 'pre-wrap' };
 
 const useModelChat = (modelId: ModelKey) => {
   const transport = useMemo(
@@ -315,7 +316,9 @@ export default function Page() {
                           <Text size='xs' c='dimmed'>
                             {message.role === 'user' ? '自分' : definition.label}
                           </Text>
-                          <Text size='sm'>{collectText(message.parts)}</Text>
+                          <Text size='sm' style={MULTILINE_TEXT_STYLE}>
+                            {collectText(message.parts)}
+                          </Text>
                         </Stack>
                       ))}
                     {(chat.status === 'streaming' || chat.status === 'submitted') && (
@@ -387,7 +390,7 @@ export default function Page() {
                           {FACT_CHECK_STATUS_LABEL[entry.status]}
                         </Badge>
                       </Group>
-                      <Text size='sm' c={entry.status === 'error' ? 'red' : undefined}>
+                      <Text size='sm' c={entry.status === 'error' ? 'red' : undefined} style={MULTILINE_TEXT_STYLE}>
                         {entry.status === 'success'
                           ? entry.content
                           : entry.status === 'error'
