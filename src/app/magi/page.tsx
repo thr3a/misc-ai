@@ -1,7 +1,7 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import { Box, Button, Group, Paper, ScrollArea, Stack, Text, Textarea, Title } from '@mantine/core';
+import { Box, Button, Group, Paper, ScrollArea, Stack, Text, Textarea } from '@mantine/core';
 import { useInputState } from '@mantine/hooks';
 import { DefaultChatTransport } from 'ai';
 import { useEffect, useMemo, useRef } from 'react';
@@ -16,9 +16,7 @@ type TextPart = {
 
 const roleLabels: Record<string, string> = {
   user: 'あなた',
-  assistant: 'ハルヒ',
-  system: 'システム',
-  tool: 'ツール'
+  assistant: 'ハルヒ'
 };
 
 // 関数名は変えないこと
@@ -67,7 +65,7 @@ export default function Page() {
   const renderMessageContent = (textParts: TextPart[]) => textParts.map((part) => part.text).join('\n');
 
   return (
-    <Box component='section' mx='auto' maw={420} px='md' py='md'>
+    <Box mx='auto' maw={420}>
       <Stack gap='md'>
         <Paper shadow='xs' p='sm' withBorder>
           <ScrollArea h='60vh' offsetScrollbars viewportRef={viewportRef} type='always'>
@@ -85,18 +83,18 @@ export default function Page() {
                       message.parts.filter((part): part is TextPart => part.type === 'text')
                     );
                     return (
-                      <Stack gap={4} key={message.id ?? `${message.role}-${index}`}>
+                      <Stack gap='0' key={message.id ?? `${message.role}-${index}`}>
                         <Text size='xs' c='dimmed'>
                           {label}
                         </Text>
-                        <Text>{text}</Text>
+                        <Text size='sm'>{text}</Text>
                       </Stack>
                     );
                   })
               )}
               {isLoading ? (
                 <Text size='sm' c='dimmed'>
-                  ハルヒが考え中...
+                  考え中...
                 </Text>
               ) : null}
             </Stack>
@@ -109,7 +107,7 @@ export default function Page() {
           </Text>
         ) : null}
 
-        <Stack gap='xs'>
+        <Stack gap='0'>
           <Textarea
             placeholder='メッセージを入力'
             autosize
