@@ -44,17 +44,17 @@ export const MODEL_PROVIDER_MAP: Record<ModelKey, ProviderBinding> = {
   gemini: {
     provider: 'google',
     cheapModel: 'gemini-2.5-flash',
-    productionModel: 'gemini-2.5-flash'
+    productionModel: 'gemini-3-pro-preview'
   },
   gpt5: {
     provider: 'openai',
     cheapModel: 'gpt-4.1-mini',
-    productionModel: 'gpt-4.1-mini'
+    productionModel: 'o3'
   },
   claude: {
     provider: 'anthropic',
     cheapModel: 'claude-haiku-4.5',
-    productionModel: 'claude-haiku-4.5'
+    productionModel: 'claude-sonnet-4.5'
   }
 };
 

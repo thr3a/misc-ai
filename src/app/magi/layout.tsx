@@ -2,8 +2,8 @@ import { Title } from '@mantine/core';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'MAGI Parallel Chat',
-  description: '1つの質問をGemini・GPT5・Claudeに同時投げ込み'
+  title: 'AI MAGIシステム',
+  description: '1つの疑問をGemini・GPT・Claudeに一括投げ込み'
 };
 
 // 関数名は変えないこと
