@@ -256,24 +256,23 @@ export default function Page() {
   };
 
   return (
-    <Box mx='auto' maw={480} px='xs' py='xs'>
-      <Stack gap='lg'>
-        <Paper withBorder p='md'>
-          <Stack gap='sm'>
-            <Textarea value={question} onChange={setQuestion} autosize minRows={3} maxRows={6} />
-            <Group justify='center' align='center'>
-              <Button size='sm' disabled={question.trim().length === 0} onClick={handleBroadcast}>
-                一括リクエスト
-              </Button>
-            </Group>
-          </Stack>
-        </Paper>
+    <Box mx='auto'>
+      <Stack gap='md'>
+        {/* <Paper withBorder p='md'> */}
+        <Stack gap='xs'>
+          <Textarea label={'質問内容'} value={question} onChange={setQuestion} autosize minRows={5} maxRows={10} />
+          <Group justify='center' align='center'>
+            <Button size='sm' disabled={question.trim().length === 0} onClick={handleBroadcast}>
+              一括リクエスト
+            </Button>
+          </Group>
+        </Stack>
+        {/* </Paper> */}
 
         <Stack gap='md'>
           {modelSections.map(({ definition, chat }, index) => {
             const hasAssistantReply = chat.messages.some((message) => message.role === 'assistant');
             const status = getModelStatus(chat.status, hasAssistantReply);
-            const latestAnswer = getLatestAssistantText(chat.messages);
             const visibleMessages = chat.messages.filter((message) => message.role !== 'system');
             const firstUserMessageIndex = visibleMessages.findIndex((message) => message.role === 'user');
             const displayMessages =
@@ -282,7 +281,7 @@ export default function Page() {
                 : visibleMessages.filter((_, messageIndex) => messageIndex !== firstUserMessageIndex);
 
             return (
-              <Paper key={definition.id} withBorder p='md'>
+              <Paper key={definition.id} withBorder p='sm'>
                 <Stack gap='sm'>
                   <Group justify='space-between' align='flex-start'>
                     <Stack gap={2}>
@@ -331,7 +330,7 @@ export default function Page() {
                       autosize
                       minRows={1}
                       maxRows={4}
-                      placeholder={`${definition.label}に追撃の質問を書く`}
+                      placeholder={`${definition.label}に追加質問する`}
                       value={followUpInputs[index]}
                       onChange={(event) => handleFollowUpChange(index, event.currentTarget.value)}
                     />
@@ -352,7 +351,7 @@ export default function Page() {
           })}
         </Stack>
 
-        <Paper withBorder p='md'>
+        <Paper withBorder p='sm'>
           <Stack gap='sm'>
             <Stack gap='xs'>
               <Stack gap={2}>
