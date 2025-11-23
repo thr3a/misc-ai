@@ -5,9 +5,9 @@ import {
   factCheckPrompt,
   systemPrompt
 } from '@/app/magi/util';
-import { anthropic } from '@ai-sdk/anthropic';
 import { google } from '@ai-sdk/google';
 import { openai } from '@ai-sdk/openai';
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { type UIMessage, convertToModelMessages, generateText, streamText } from 'ai';
 import dedent from 'ts-dedent';
 
@@ -32,6 +32,14 @@ const jsonResponse = (payload: unknown, init?: ResponseInit) =>
     }
   });
 
+const openrouter = (() => {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    throw new Error('OPENROUTER_API_KEYが設定されていません。');
+  }
+  return createOpenRouter({ apiKey });
+})();
+
 const resolveModel = (modelId: ModelKey) => {
   const config = MODEL_PROVIDER_MAP[modelId];
   if (!config) {
@@ -43,7 +51,7 @@ const resolveModel = (modelId: ModelKey) => {
   if (config.provider === 'openai') {
     return openai(config.cheapModel);
   }
-  return anthropic(config.cheapModel);
+  return openrouter.chat(`anthropic/${config.cheapModel}`);
 };
 
 const ensureModelKey = (value: unknown): value is ModelKey => {
