@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'MAGI Parallel Chat',
-  description: '1つの質問をGemini・GPT5・Claudeに同時投げ込み。スマホでも指1本で深掘りできます。'
+  description: '1つの質問をGemini・GPT5・Claudeに同時投げ込み'
 };
 
 // 関数名は変えないこと

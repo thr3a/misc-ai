@@ -6,7 +6,6 @@ export type ModelDefinition = {
   id: ModelKey;
   label: string;
   reviewer: ModelKey;
-  description: string;
 };
 
 type ProviderBinding = {
@@ -19,20 +18,17 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
   {
     id: 'gemini',
     label: 'Gemini',
-    reviewer: 'gpt5',
-    description: '市場データを俯瞰してリスクとポジティブ要因を同時に整理する分析役'
+    reviewer: 'gpt5'
   },
   {
     id: 'gpt5',
     label: 'GPT5',
-    reviewer: 'claude',
-    description: '需要曲線や供給サイドの制約を数値前提付きで説明する戦略担当'
+    reviewer: 'claude'
   },
   {
     id: 'claude',
     label: 'Claude',
-    reviewer: 'gemini',
-    description: 'コミュニティ動向やUX面の示唆を整理するクリエイティブレビュー担当'
+    reviewer: 'gemini'
   }
 ];
 
@@ -47,18 +43,18 @@ export const MODEL_DEFINITION_MAP: Record<ModelKey, ModelDefinition> = MODEL_DEF
 export const MODEL_PROVIDER_MAP: Record<ModelKey, ProviderBinding> = {
   gemini: {
     provider: 'google',
-    cheapModel: 'gemini-2.0-flash-lite',
+    cheapModel: 'gemini-2.5-flash',
     productionModel: 'gemini-2.5-flash'
   },
   gpt5: {
     provider: 'openai',
-    cheapModel: 'gpt-4o-mini',
+    cheapModel: 'gpt-4.1-mini',
     productionModel: 'gpt-4.1-mini'
   },
   claude: {
     provider: 'anthropic',
-    cheapModel: 'claude-3-haiku-20240307',
-    productionModel: 'claude-haiku-4-5'
+    cheapModel: 'claude-haiku-4.5',
+    productionModel: 'claude-haiku-4.5'
   }
 };
 

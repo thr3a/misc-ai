@@ -50,16 +50,15 @@ const FACT_CHECK_STATUS_COLOR: Record<FactCheckEntryStatus, string> = {
   error: 'red'
 };
 
-const INITIAL_QUESTION = '今後ルルブの人気はどうなると思う？';
+const INITIAL_QUESTION = '今後LABUBU（ラブブ）の人気はどうなると思う？';
 
 const useModelChat = (modelId: ModelKey) => {
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
-        api: '/api/magi',
+        api: '/api/magi/chat',
         body: {
-          modelId,
-          operation: 'chat'
+          modelId
         }
       }),
     [modelId]
@@ -117,12 +116,6 @@ const FactCheckDescription = () => (
 const FactCheckEmptyState = () => (
   <Text size='xs' c='dimmed'>
     ボタンを押すと各AIが直前の回答をレビューし、正確性と妥当性をコメントします。
-  </Text>
-);
-
-const ModelSummary = ({ definition }: { definition: ModelDefinition }) => (
-  <Text size='xs' c='dimmed'>
-    {definition.description}
   </Text>
 );
 
@@ -211,13 +204,12 @@ export default function Page() {
         }
 
         try {
-          const response = await fetch('/api/magi', {
+          const response = await fetch('/api/magi/fact-check', {
             method: 'POST',
             headers: {
               'content-type': 'application/json'
             },
             body: JSON.stringify({
-              operation: 'fact-check',
               modelId: definition.reviewer,
               targetModel: definition.id,
               targetAnswer: latestAnswer
@@ -268,18 +260,8 @@ export default function Page() {
       <Stack gap='lg'>
         <Paper withBorder p='md'>
           <Stack gap='sm'>
-            <Textarea
-              value={question}
-              onChange={setQuestion}
-              autosize
-              minRows={3}
-              maxRows={6}
-              placeholder='例: 今後ルルブの人気はどうなると思う？'
-            />
-            <Group justify='space-between' align='flex-end'>
-              <Text size='xs' c='dimmed'>
-                3モデルに一括送信して、それぞれの視点を待ちます。
-              </Text>
+            <Textarea value={question} onChange={setQuestion} autosize minRows={3} maxRows={6} />
+            <Group justify='center' align='center'>
               <Button size='sm' disabled={question.trim().length === 0} onClick={handleBroadcast}>
                 一括リクエスト
               </Button>
@@ -293,6 +275,11 @@ export default function Page() {
             const status = getModelStatus(chat.status, hasAssistantReply);
             const latestAnswer = getLatestAssistantText(chat.messages);
             const visibleMessages = chat.messages.filter((message) => message.role !== 'system');
+            const firstUserMessageIndex = visibleMessages.findIndex((message) => message.role === 'user');
+            const displayMessages =
+              firstUserMessageIndex === -1
+                ? visibleMessages
+                : visibleMessages.filter((_, messageIndex) => messageIndex !== firstUserMessageIndex);
 
             return (
               <Paper key={definition.id} withBorder p='md'>
@@ -305,7 +292,6 @@ export default function Page() {
                           {status}
                         </Badge>
                       </Group>
-                      <ModelSummary definition={definition} />
                     </Stack>
                     <Button
                       size='xs'
@@ -317,30 +303,22 @@ export default function Page() {
                     </Button>
                   </Group>
 
-                  <Text size='sm'>{latestAnswer || 'まだ回答はありません。'}</Text>
-
                   {chat.error ? (
                     <Text size='sm' c='red'>
                       エラー: {chat.error.message}
                     </Text>
                   ) : null}
 
-                  <Divider label='チャットログ' labelPosition='left' />
                   <Stack gap='sm'>
-                    {visibleMessages.length === 0 ? (
-                      <Text size='xs' c='dimmed'>
-                        ここに会話が表示されます。
-                      </Text>
-                    ) : (
-                      visibleMessages.map((message) => (
+                    {displayMessages.length !== 0 &&
+                      displayMessages.map((message) => (
                         <Stack gap={2} key={message.id ?? `${message.role}-${definition.id}`}>
                           <Text size='xs' c='dimmed'>
                             {message.role === 'user' ? '自分' : definition.label}
                           </Text>
                           <Text size='sm'>{collectText(message.parts)}</Text>
                         </Stack>
-                      ))
-                    )}
+                      ))}
                     {(chat.status === 'streaming' || chat.status === 'submitted') && (
                       <Text size='xs' c='dimmed'>
                         生成中...
@@ -376,17 +354,19 @@ export default function Page() {
 
         <Paper withBorder p='md'>
           <Stack gap='sm'>
-            <Group justify='space-between' align='flex-start'>
+            <Stack gap='xs'>
               <Stack gap={2}>
                 <Text size='sm' fw={600}>
                   ファクトチェック
                 </Text>
                 <FactCheckDescription />
               </Stack>
-              <Button size='sm' variant='outline' onClick={handleFactCheckClick} loading={factCheckLoading}>
-                {factCheckVisible ? '結果を閉じる' : 'チェック実行'}
-              </Button>
-            </Group>
+              <Group justify='center'>
+                <Button size='sm' variant='outline' onClick={handleFactCheckClick} loading={factCheckLoading}>
+                  {factCheckVisible ? '結果を閉じる' : 'チェック実行'}
+                </Button>
+              </Group>
+            </Stack>
 
             {factCheckVisible ? (
               <Stack gap='sm'>
