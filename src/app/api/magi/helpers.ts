@@ -14,24 +14,16 @@ export const jsonResponse = (payload: unknown, init?: ResponseInit) =>
     }
   });
 
-const openrouter = (() => {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
-    throw new Error('OPENROUTER_API_KEYが設定されていません。');
-  }
-  return createOpenRouter({ apiKey });
-})();
-
 export const resolveModel = (modelId: ModelKey): LanguageModel => {
   const config = MODEL_PROVIDER_MAP[modelId];
   if (!config) {
     throw new Error(`モデル設定 (${modelId}) が見つかりません`);
   }
   if (config.provider === 'google') {
-    return google(config.productionModel);
+    return google(config.cheapModel);
   }
   if (config.provider === 'openai') {
-    return openai(config.productionModel);
+    return openai(config.cheapModel);
   }
   const key = process.env.OPENROUTER_API_KEY || 'null';
   return createOpenRouter({ apiKey: key }).chat(`anthropic/${config.cheapModel}`);
