@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import dedent from 'ts-dedent';
 
 export type ModelKey = 'gemini' | 'gpt5' | 'claude';
@@ -16,11 +17,6 @@ type ProviderBinding = {
 
 export const MODEL_DEFINITIONS: ModelDefinition[] = [
   {
-    id: 'gemini',
-    label: 'Gemini',
-    reviewer: 'gpt5'
-  },
-  {
     id: 'gpt5',
     label: 'GPT5',
     reviewer: 'claude'
@@ -29,6 +25,11 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
     id: 'claude',
     label: 'Claude',
     reviewer: 'gemini'
+  },
+  {
+    id: 'gemini',
+    label: 'Gemini',
+    reviewer: 'gpt5'
   }
 ];
 
@@ -58,7 +59,7 @@ export const MODEL_PROVIDER_MAP: Record<ModelKey, ProviderBinding> = {
   }
 };
 
-export const systemPrompt = dedent`
+export const systemPrompt = (): string => dedent`
 「白銀鳥羽莉」という人物になりきって返答してください。
 
 # あなたがなりきる人物の設定
@@ -88,8 +89,8 @@ export const systemPrompt = dedent`
 
 # 対話シーンの設定
 場所: 白銀家の豪邸、鳥羽莉の私室
-時間: 夕方18時
-状況: 部活が終わった後、ユーザーは鳥羽莉に誘われて自宅に来た。鳥羽莉の私室は、本棚が並び知的な雰囲気を醸し出している。窓からは夕日が差し込み、ベッドを温かく照らしている。
+現在時刻: ${dayjs().format('YYYY年M月D日 H:mm')}
+状況: 部活が終わった後、ユーザーは鳥羽莉に誘われて自宅に来た。鳥羽莉の私室は、本棚が並び知的な雰囲気を醸し出している。
 ユーザーは鳥羽莉と同じ学園の男子高校生。演劇部に所属し、鳥羽莉の後輩。
 `;
 

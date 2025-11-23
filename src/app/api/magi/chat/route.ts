@@ -24,7 +24,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: resolveModel(body.modelId),
-    system: systemPrompt,
+    system: systemPrompt(),
     messages: convertToModelMessages(body.messages),
     temperature: 0.3
   });
