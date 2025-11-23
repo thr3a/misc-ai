@@ -32,7 +32,7 @@ export const resolveModel = (modelId: ModelKey): LanguageModel => {
   if (config.provider === 'openai') {
     return openai(config.productionModel);
   }
-  return openrouter.chat(`anthropic/${config.productionModel}`);
+  return createOpenRouter({ apiKey: process.env.OPENROUTER_API_KEY ?? 'null' }).chat(`anthropic/${config.cheapModel}`);
 };
 
 export const ensureModelKey = (value: unknown): value is ModelKey => {
