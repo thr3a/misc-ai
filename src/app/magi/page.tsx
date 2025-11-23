@@ -5,7 +5,7 @@ import { useChat } from '@ai-sdk/react';
 import { Badge, Box, Button, Group, Paper, Stack, Text, Textarea } from '@mantine/core';
 import { useDisclosure, useInputState, useListState } from '@mantine/hooks';
 import { DefaultChatTransport } from 'ai';
-import { useMemo, useState, type CSSProperties } from 'react';
+import { type CSSProperties, useMemo, useState } from 'react';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
@@ -50,7 +50,7 @@ const FACT_CHECK_STATUS_COLOR: Record<FactCheckEntryStatus, string> = {
   error: 'red'
 };
 
-const INITIAL_QUESTION = '今後LABUBU（ラブブ）の人気はどうなると思う？';
+const INITIAL_QUESTION = '今後LABUBU（ラブブ）の人気はハローキティを超える？';
 const MULTILINE_TEXT_STYLE: CSSProperties = { whiteSpace: 'pre-wrap' };
 
 const useModelChat = (modelId: ModelKey) => {
