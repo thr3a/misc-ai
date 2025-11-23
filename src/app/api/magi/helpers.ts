@@ -20,13 +20,13 @@ export const resolveModel = (modelId: ModelKey): LanguageModel => {
     throw new Error(`モデル設定 (${modelId}) が見つかりません`);
   }
   if (config.provider === 'google') {
-    return google(config.cheapModel);
+    return google(config.productionModel);
   }
   if (config.provider === 'openai') {
-    return openai(config.cheapModel);
+    return openai(config.productionModel);
   }
   const key = process.env.OPENROUTER_API_KEY || 'null';
-  return createOpenRouter({ apiKey: key }).chat(`anthropic/${config.cheapModel}`);
+  return createOpenRouter({ apiKey: key }).chat(`anthropic/${config.productionModel}`);
 };
 
 export const ensureModelKey = (value: unknown): value is ModelKey => {
