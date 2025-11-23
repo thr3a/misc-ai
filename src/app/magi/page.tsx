@@ -1,8 +1,8 @@
 'use client';
 
-import { MODEL_DEFINITIONS, MODEL_DEFINITION_MAP, type ModelDefinition, type ModelKey } from '@/app/magi/util';
+import { MODEL_DEFINITIONS, MODEL_DEFINITION_MAP, type ModelKey } from '@/app/magi/util';
 import { useChat } from '@ai-sdk/react';
-import { Badge, Box, Button, Divider, Group, Paper, Stack, Text, Textarea } from '@mantine/core';
+import { Badge, Box, Button, Group, Paper, Stack, Text, Textarea } from '@mantine/core';
 import { useDisclosure, useInputState, useListState } from '@mantine/hooks';
 import { DefaultChatTransport } from 'ai';
 import { useMemo, useState } from 'react';
