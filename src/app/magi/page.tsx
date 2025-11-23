@@ -1,11 +1,18 @@
 'use client';
 
-import { MODEL_DEFINITIONS, MODEL_DEFINITION_MAP, type ModelKey } from '@/app/magi/util';
-import { useChat } from '@ai-sdk/react';
+import {
+  type IssueSchema,
+  MODEL_DEFINITIONS,
+  MODEL_DEFINITION_MAP,
+  type ModelKey,
+  factCheckSchema
+} from '@/app/magi/util';
+import { type Experimental_UseObjectHelpers, useChat, experimental_useObject as useObject } from '@ai-sdk/react';
 import { Badge, Box, Button, Group, Paper, Stack, Text, Textarea } from '@mantine/core';
 import { useDisclosure, useInputState, useListState } from '@mantine/hooks';
 import { DefaultChatTransport } from 'ai';
 import { type CSSProperties, useMemo, useState } from 'react';
+import type { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
@@ -14,12 +21,23 @@ type ModelStatus = '待機中' | '生成中' | '応答済み';
 
 type FactCheckEntryStatus = 'idle' | 'loading' | 'success' | 'error';
 
+type FactCheckPayload = {
+  modelId: ModelKey;
+  targetModel: ModelKey;
+  targetAnswer: string;
+};
+
+type FactCheckResult = z.infer<typeof factCheckSchema>;
+type FactCheckIssue = z.infer<typeof IssueSchema>;
+type FactCheckIssuePartial = Partial<FactCheckIssue>;
+type FactCheckStream = Experimental_UseObjectHelpers<FactCheckResult, FactCheckPayload>;
+
 type FactCheckEntry = {
   id: string;
   targetId: ModelKey;
   reviewerId: ModelKey;
   status: FactCheckEntryStatus;
-  content: string;
+  issues: FactCheckIssuePartial[];
   error?: string;
 };
 
@@ -71,6 +89,13 @@ const useModelChat = (modelId: ModelKey) => {
   });
 };
 
+const useFactCheckStream = (modelId: ModelKey): FactCheckStream =>
+  useObject<typeof factCheckSchema, FactCheckResult, FactCheckPayload>({
+    id: `magi-fact-check-${modelId}`,
+    api: '/api/magi/fact-check',
+    schema: factCheckSchema
+  });
+
 const getModelStatus = (status: ModelChatInstance['status'], hasAssistantReply: boolean): ModelStatus => {
   if (status === 'submitted' || status === 'streaming') {
     return '生成中';
@@ -97,17 +122,6 @@ const getLatestAssistantText = (messages: ModelChatInstance['messages']) => {
   return collectText(latest.parts);
 };
 
-const createInitialFactChecks = (): FactCheckEntry[] =>
-  MODEL_DEFINITIONS.map(
-    (definition): FactCheckEntry => ({
-      id: `${definition.reviewer}-${definition.id}`,
-      reviewerId: definition.reviewer,
-      targetId: definition.id,
-      status: 'idle',
-      content: ''
-    })
-  );
-
 const FactCheckDescription = () => (
   <Text size='xs' c='dimmed'>
     Geminiの回答はGPT5が、GPT5はClaudeが、ClaudeはGeminiが検証します。
@@ -125,19 +139,52 @@ export default function Page() {
   const [question, setQuestion] = useInputState(INITIAL_QUESTION);
   const [factCheckVisible, { open: openFactCheck, close: closeFactCheck }] = useDisclosure(false);
   const [followUpInputs, followUpHandlers] = useListState<string>(MODEL_DEFINITIONS.map(() => ''));
-  const [factCheckEntries, setFactCheckEntries] = useState<FactCheckEntry[]>(createInitialFactChecks);
-  const [factCheckLoading, setFactCheckLoading] = useState(false);
+  const [factCheckManualErrors, setFactCheckManualErrors] = useState<Partial<Record<ModelKey, string>>>({});
 
   const chatMap: Record<ModelKey, ModelChatInstance> = {
     gemini: useModelChat('gemini'),
     gpt5: useModelChat('gpt5'),
     claude: useModelChat('claude')
   };
+  const factCheckStreams: Record<ModelKey, FactCheckStream> = {
+    gemini: useFactCheckStream('gemini'),
+    gpt5: useFactCheckStream('gpt5'),
+    claude: useFactCheckStream('claude')
+  };
 
   const modelSections = MODEL_DEFINITIONS.map((definition) => ({
     definition,
     chat: chatMap[definition.id]
   }));
+  const factCheckEntries: FactCheckEntry[] = MODEL_DEFINITIONS.map((definition) => {
+    const stream = factCheckStreams[definition.id];
+    const manualError = factCheckManualErrors[definition.id];
+    const issues = (stream.object?.issues ?? []) as FactCheckIssuePartial[];
+
+    let status: FactCheckEntryStatus = 'idle';
+    let errorMessage = manualError;
+
+    if (manualError) {
+      status = 'error';
+    } else if (stream.isLoading) {
+      status = 'loading';
+    } else if (stream.error) {
+      status = 'error';
+      errorMessage = stream.error.message;
+    } else if (issues.length > 0) {
+      status = 'success';
+    }
+
+    return {
+      id: `${definition.reviewer}-${definition.id}`,
+      reviewerId: definition.reviewer,
+      targetId: definition.id,
+      status,
+      issues,
+      error: errorMessage
+    };
+  });
+  const factCheckLoading = factCheckEntries.some((entry) => entry.status === 'loading');
 
   const handleBroadcast = () => {
     const trimmed = question.trim();
@@ -171,79 +218,32 @@ export default function Page() {
     });
   };
 
-  const resetFactChecks = () =>
-    setFactCheckEntries((prev) =>
-      prev.map((entry) => ({
-        ...entry,
-        status: 'idle',
-        content: '',
-        error: undefined
-      }))
-    );
+  const resetFactChecks = () => {
+    setFactCheckManualErrors({});
+    for (const stream of Object.values(factCheckStreams)) {
+      stream.clear();
+    }
+  };
 
-  const runFactChecks = async () => {
-    setFactCheckLoading(true);
-    setFactCheckEntries((prev) =>
-      prev.map((entry) => ({
-        ...entry,
-        status: 'loading',
-        content: '',
-        error: undefined
-      }))
-    );
-
-    await Promise.all(
-      modelSections.map(async ({ definition, chat }) => {
-        const latestAnswer = getLatestAssistantText(chat.messages);
-        if (!latestAnswer) {
-          setFactCheckEntries((prev) =>
-            prev.map((entry) =>
-              entry.targetId === definition.id ? { ...entry, status: 'error', error: '回答がまだありません。' } : entry
-            )
-          );
-          return;
-        }
-
-        try {
-          const response = await fetch('/api/magi/fact-check', {
-            method: 'POST',
-            headers: {
-              'content-type': 'application/json'
-            },
-            body: JSON.stringify({
-              modelId: definition.reviewer,
-              targetModel: definition.id,
-              targetAnswer: latestAnswer
-            })
-          });
-          const payload = (await response.json()) as { content?: string; error?: string };
-          if (!response.ok || payload.error) {
-            throw new Error(payload.error ?? 'レビュアーが結果を返しませんでした。');
-          }
-          setFactCheckEntries((prev) =>
-            prev.map((entry) =>
-              entry.targetId === definition.id
-                ? { ...entry, status: 'success', content: payload.content ?? 'レビュー結果が空です。' }
-                : entry
-            )
-          );
-        } catch (error) {
-          setFactCheckEntries((prev) =>
-            prev.map((entry) =>
-              entry.targetId === definition.id
-                ? {
-                    ...entry,
-                    status: 'error',
-                    error: error instanceof Error ? error.message : '不明なエラーが発生しました。'
-                  }
-                : entry
-            )
-          );
-        }
-      })
-    );
-
-    setFactCheckLoading(false);
+  const runFactChecks = () => {
+    setFactCheckManualErrors({});
+    for (const { definition, chat } of modelSections) {
+      const latestAnswer = getLatestAssistantText(chat.messages);
+      if (!latestAnswer) {
+        factCheckStreams[definition.id].clear();
+        setFactCheckManualErrors((prev) => ({
+          ...prev,
+          [definition.id]: '回答がまだありません。'
+        }));
+        continue;
+      }
+      factCheckStreams[definition.id].stop();
+      void factCheckStreams[definition.id].submit({
+        modelId: definition.reviewer,
+        targetModel: definition.id,
+        targetAnswer: latestAnswer
+      });
+    }
   };
 
   const handleFactCheckClick = () => {
@@ -253,7 +253,7 @@ export default function Page() {
       return;
     }
     openFactCheck();
-    void runFactChecks();
+    runFactChecks();
   };
 
   return (
@@ -390,13 +390,47 @@ export default function Page() {
                           {FACT_CHECK_STATUS_LABEL[entry.status]}
                         </Badge>
                       </Group>
-                      <Text size='sm' c={entry.status === 'error' ? 'red' : undefined} style={MULTILINE_TEXT_STYLE}>
-                        {entry.status === 'success'
-                          ? entry.content
-                          : entry.status === 'error'
-                            ? (entry.error ?? 'レビューに失敗しました。')
-                            : 'レビューを実行しています...'}
-                      </Text>
+                      {entry.status === 'success' ? (
+                        entry.issues.length > 0 ? (
+                          <Stack gap='sm'>
+                            {entry.issues.map((issue, issueIndex) => (
+                              <Stack key={`${entry.id}-${issueIndex}`} gap={4}>
+                                <Text size='xs' c='dimmed'>
+                                  指摘{issueIndex + 1}
+                                </Text>
+                                <Stack gap={2}>
+                                  <Text size='xs' c='dimmed'>
+                                    誤っている記述
+                                  </Text>
+                                  <Text size='sm' style={MULTILINE_TEXT_STYLE}>
+                                    {issue.description ?? '生成中...'}
+                                  </Text>
+                                </Stack>
+                                <Stack gap={2}>
+                                  <Text size='xs' c='dimmed'>
+                                    訂正内容
+                                  </Text>
+                                  <Text size='sm' style={MULTILINE_TEXT_STYLE}>
+                                    {issue.correction ?? '生成中...'}
+                                  </Text>
+                                </Stack>
+                              </Stack>
+                            ))}
+                          </Stack>
+                        ) : (
+                          <Text size='sm' style={MULTILINE_TEXT_STYLE}>
+                            指摘事項は見つかりませんでした。
+                          </Text>
+                        )
+                      ) : entry.status === 'error' ? (
+                        <Text size='sm' c='red' style={MULTILINE_TEXT_STYLE}>
+                          {entry.error ?? 'レビューに失敗しました。'}
+                        </Text>
+                      ) : (
+                        <Text size='sm' c='dimmed'>
+                          レビューを実行しています...
+                        </Text>
+                      )}
                     </Stack>
                   );
                 })}

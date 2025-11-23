@@ -1,26 +1,11 @@
 import { ensureModelKey, jsonResponse, resolveModel } from '@/app/api/magi/helpers';
-import { MODEL_DEFINITION_MAP, type ModelKey, factCheckPrompt } from '@/app/magi/util';
-import { generateText } from 'ai';
-import dedent from 'ts-dedent';
+import { MODEL_DEFINITION_MAP, type ModelKey, factCheckPrompt, factCheckSchema } from '@/app/magi/util';
+import { streamObject } from 'ai';
 
 type FactCheckRequestBody = {
   modelId?: ModelKey;
   targetModel?: ModelKey;
   targetAnswer?: string;
-};
-
-const buildFactCheckPrompt = (targetModel: ModelKey, answer: string) => {
-  const target = MODEL_DEFINITION_MAP[targetModel];
-  return dedent`
-対象モデル: ${target.label}
-
-検証対象の回答:
-${answer}
-
-・論拠の正確性
-・定量的妥当性
-・追加の補足や一次情報
-を箇条書き中心でレビューしてください。`;
 };
 
 export async function POST(req: Request) {
@@ -44,17 +29,20 @@ export async function POST(req: Request) {
 
   const reviewer = MODEL_DEFINITION_MAP[body.modelId];
   const target = MODEL_DEFINITION_MAP[body.targetModel];
-  const prompt = buildFactCheckPrompt(body.targetModel, trimmedAnswer);
 
-  const { text } = await generateText({
+  const result = streamObject({
     model: resolveModel(body.modelId),
     system: factCheckPrompt,
-    prompt
+    prompt: trimmedAnswer,
+    schema: factCheckSchema,
+    temperature: 0
   });
 
-  return jsonResponse({
-    reviewer: reviewer.label,
-    target: target.label,
-    content: text.trim()
+  return result.toTextStreamResponse({
+    headers: {
+      'content-type': 'text/event-stream',
+      'x-reviewer-label': reviewer.label,
+      'x-target-label': target.label
+    }
   });
 }

@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import dedent from 'ts-dedent';
+import { z } from 'zod';
 
 export type ModelKey = 'gemini' | 'gpt5' | 'claude';
 
@@ -59,6 +60,14 @@ export const MODEL_PROVIDER_MAP: Record<ModelKey, ProviderBinding> = {
   }
 };
 
+export const IssueSchema = z.object({
+  description: z.string().describe('誤っている記述（元の回答からの引用）'),
+  correction: z.string().describe('訂正内容（正しい情報）')
+});
+export const factCheckSchema = z.object({
+  issues: z.array(IssueSchema).describe('指摘事項のリスト')
+});
+
 export const systemPrompt = (): string => dedent`
 「白銀鳥羽莉」という人物になりきって返答してください。
 
@@ -102,6 +111,5 @@ export const factCheckPrompt = dedent`
 明確に誤っている点があれば、その箇所を抜き出して理由付きで指摘してください。
 不確実だが可能性がある内容は「不確実」として扱い、推測はしないでください。
 元の回答の書き方や文体にはコメントせず、内容の正確性のみに集中してください。
-
-【重要】出力は誤っていた訂正箇所のみを箇条書きで出力してください。
+各指摘はIssueSchemaのdescription（元回答からの引用）とcorrection（正しい情報）を必ず埋めること
 `;
