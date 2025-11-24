@@ -293,7 +293,6 @@ export default function Page() {
   return (
     <Box mx='auto'>
       <Stack gap='md'>
-        {/* <Paper withBorder p='md'> */}
         <Stack gap='xs'>
           <Textarea
             label={'質問内容'}
@@ -327,7 +326,6 @@ export default function Page() {
             </Text>
           ) : null}
         </Stack>
-        {/* </Paper> */}
 
         <Stack gap='md'>
           {modelSections.map(({ definition, chat }, index) => {

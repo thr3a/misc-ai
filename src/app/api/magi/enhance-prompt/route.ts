@@ -1,10 +1,7 @@
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { jsonResponse } from '@/app/api/magi/helpers';
+import { promptEnhancerSystemPrompt } from '@/app/magi/util';
 import { openai } from '@ai-sdk/openai';
 import { streamText } from 'ai';
-
-const promptEnhancerSystemPrompt = readFileSync(join(process.cwd(), 'a.md'), 'utf-8').trim();
 
 type EnhancePromptRequestBody = {
   prompt?: string;
