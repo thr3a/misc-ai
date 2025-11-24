@@ -4,7 +4,6 @@ import { openai } from '@ai-sdk/openai';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import type { LanguageModel } from 'ai';
 
-export const dynamic = 'force-dynamic';
 export const jsonResponse = (payload: unknown, init?: ResponseInit) =>
   new Response(JSON.stringify(payload), {
     ...init,

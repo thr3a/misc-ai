@@ -1,5 +1,7 @@
 import { ensureModelKey, jsonResponse, resolveModel } from '@/app/api/magi/helpers';
 import { type ModelKey, systemPrompt } from '@/app/magi/util';
+import type { GoogleGenerativeAIProviderOptions } from '@ai-sdk/google';
+import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { type UIMessage, convertToModelMessages, streamText } from 'ai';
 
 type ChatRequestBody = {
@@ -26,7 +28,18 @@ export async function POST(req: Request) {
     model: resolveModel(body.modelId),
     system: systemPrompt(),
     messages: convertToModelMessages(body.messages),
-    temperature: 0.3
+    providerOptions: {
+      google: {
+        thinkingConfig: {
+          thinkingLevel: 'medium',
+          includeThoughts: false
+        }
+      } satisfies GoogleGenerativeAIProviderOptions,
+      openai: {
+        reasoningEffort: 'medium'
+      } satisfies OpenAIResponsesProviderOptions
+    },
+    temperature: body.modelId === 'gpt5' ? 1 : 0
   });
 
   return result.toUIMessageStreamResponse({
