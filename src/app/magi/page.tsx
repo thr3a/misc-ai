@@ -68,7 +68,6 @@ const FACT_CHECK_STATUS_COLOR: Record<FactCheckEntryStatus, string> = {
   error: 'red'
 };
 
-const INITIAL_QUESTION = '今後LABUBU（ラブブ）の人気はハローキティを超える？';
 const MULTILINE_TEXT_STYLE: CSSProperties = { whiteSpace: 'pre-wrap' };
 
 const useModelChat = (modelId: ModelKey) => {
@@ -136,7 +135,9 @@ const FactCheckEmptyState = () => (
 
 // 関数名は変えないこと
 export default function Page() {
-  const [question, setQuestion] = useInputState(INITIAL_QUESTION);
+  const [question, setQuestion] = useInputState('');
+  const [isEnhancing, setIsEnhancing] = useState(false);
+  const [enhanceError, setEnhanceError] = useState<string | null>(null);
   const [factCheckVisible, { open: openFactCheck, close: closeFactCheck }] = useDisclosure(false);
   const [followUpInputs, followUpHandlers] = useListState<string>(MODEL_DEFINITIONS.map(() => ''));
   const [factCheckManualErrors, setFactCheckManualErrors] = useState<Partial<Record<ModelKey, string>>>({});
@@ -185,17 +186,50 @@ export default function Page() {
     };
   });
   const factCheckLoading = factCheckEntries.some((entry) => entry.status === 'loading');
+  const isQuestionEmpty = question.trim().length === 0;
 
   const handleBroadcast = () => {
     const trimmed = question.trim();
     if (!trimmed) {
       return;
     }
+    setEnhanceError(null);
     setQuestion('');
     for (const { chat } of modelSections) {
       void chat.sendMessage({
         parts: [{ type: 'text', text: trimmed }]
       });
+    }
+  };
+
+  const handleEnhancePrompt = async () => {
+    const trimmed = question.trim();
+    if (!trimmed) {
+      return;
+    }
+    setEnhanceError(null);
+    setIsEnhancing(true);
+    try {
+      const response = await fetch('/api/magi/enhance-prompt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ prompt: trimmed })
+      });
+      const payload = (await response.json().catch(() => null)) as { enhancedPrompt?: string; error?: string } | null;
+      if (!response.ok || !payload) {
+        throw new Error(payload?.error ?? '強化リクエストに失敗しました。');
+      }
+      const enhanced = payload.enhancedPrompt?.trim();
+      if (enhanced) {
+        setQuestion(enhanced);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '強化リクエストに失敗しました。';
+      setEnhanceError(message);
+    } finally {
+      setIsEnhancing(false);
     }
   };
 
@@ -261,12 +295,37 @@ export default function Page() {
       <Stack gap='md'>
         {/* <Paper withBorder p='md'> */}
         <Stack gap='xs'>
-          <Textarea label={'質問内容'} value={question} onChange={setQuestion} autosize minRows={5} maxRows={10} />
+          <Textarea
+            label={'質問内容'}
+            value={question}
+            onChange={(event) => {
+              setEnhanceError(null);
+              setQuestion(event);
+            }}
+            autosize
+            minRows={5}
+            maxRows={10}
+            placeholder='今後LABUBU（ラブブ）の人気はハローキティを超えると思いますか？'
+          />
           <Group justify='center' align='center'>
-            <Button size='sm' disabled={question.trim().length === 0} onClick={handleBroadcast}>
+            <Button size='sm' disabled={isQuestionEmpty} onClick={handleBroadcast}>
               一括リクエスト
             </Button>
+            <Button
+              size='sm'
+              variant='light'
+              loading={isEnhancing}
+              disabled={isQuestionEmpty}
+              onClick={handleEnhancePrompt}
+            >
+              強化
+            </Button>
           </Group>
+          {enhanceError ? (
+            <Text size='xs' c='red' ta='center'>
+              {enhanceError}
+            </Text>
+          ) : null}
         </Stack>
         {/* </Paper> */}
 
