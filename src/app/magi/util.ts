@@ -1,6 +1,9 @@
+import { type OpenAIProvider, openai } from '@ai-sdk/openai';
 import dayjs from 'dayjs';
 import dedent from 'ts-dedent';
 import { z } from 'zod';
+
+type OpenAIResponsesModelId = Parameters<OpenAIProvider>[0];
 
 export type ModelKey = 'gemini' | 'gpt5' | 'claude';
 
@@ -41,7 +44,6 @@ export const MODEL_DEFINITION_MAP: Record<ModelKey, ModelDefinition> = MODEL_DEF
   },
   {} as Record<ModelKey, ModelDefinition>
 );
-
 export const MODEL_PROVIDER_MAP: Record<ModelKey, ProviderBinding> = {
   gemini: {
     provider: 'google',
@@ -50,8 +52,8 @@ export const MODEL_PROVIDER_MAP: Record<ModelKey, ProviderBinding> = {
   },
   gpt5: {
     provider: 'openai',
-    cheapModel: 'gpt-4.1-mini',
-    productionModel: 'o3'
+    cheapModel: 'gpt-4.1-mini' satisfies OpenAIResponsesModelId,
+    productionModel: 'gpt-5.1' satisfies OpenAIResponsesModelId
   },
   claude: {
     provider: 'anthropic',
