@@ -1,6 +1,7 @@
 'use server';
 
 import { openai } from '@ai-sdk/openai';
+import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { createStreamableValue } from '@ai-sdk/rsc';
 import { streamObject } from 'ai';
 import { schema, systemPrompt } from './util';
@@ -12,11 +13,15 @@ export async function generate(input: string) {
 
   (async () => {
     const { partialObjectStream } = await streamObject({
-      model: openai('gpt-4.1'),
+      model: openai('gpt-5.1'),
       system: systemPrompt,
       prompt: input,
       schema: schema,
-      temperature: 0
+      providerOptions: {
+        openai: {
+          reasoningEffort: 'none'
+        } satisfies OpenAIResponsesProviderOptions
+      }
     });
 
     for await (const partialObject of partialObjectStream) {
