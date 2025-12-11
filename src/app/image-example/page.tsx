@@ -2,9 +2,10 @@
 import { resizeAndCompressImage } from '@/app/lib/resizeAndCompressImage';
 import { readStreamableValue } from '@ai-sdk/rsc';
 import { Box, Button, FileInput, Group, List, ListItem, Text, Title } from '@mantine/core';
-import { createFormContext, zodResolver } from '@mantine/form';
+import { createFormContext } from '@mantine/form';
 import { IconPhotoScan } from '@tabler/icons-react';
-import { z } from 'zod';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
+import { z } from 'zod/v4';
 import { generate } from './actions';
 import type { schema } from './util';
 
@@ -27,7 +28,7 @@ export default function Page() {
       loading: false,
       result: null
     },
-    validate: zodResolver(
+    validate: zod4Resolver(
       z.object({
         imageFile: z.instanceof(File, { message: '画像ファイルをアップロードしてください。' })
       })

@@ -26,12 +26,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
   const schema = requestSchema.safeParse(body);
   if (!schema.success) {
-    const { errors } = schema.error;
+    const { issues } = schema.error;
     return NextResponse.json(
       {
         status: 'ng',
         errorMessage: 'Validation error',
-        errors
+        errors: issues
       },
       { status: 400 }
     );
