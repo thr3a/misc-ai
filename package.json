@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "biome check --write --unsafe ./src",
+    "lint": "biome check --write --unsafe ./src && npx tsc --noEmit",
     "serve": "python -m http.server -d out",
     "node-server": "node server.js"
   },

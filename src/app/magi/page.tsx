@@ -8,6 +8,7 @@ import {
   factCheckSchema
 } from '@/app/magi/util';
 import { type Experimental_UseObjectHelpers, useChat, experimental_useObject as useObject } from '@ai-sdk/react';
+import { Carousel } from '@mantine/carousel';
 import { Badge, Box, Button, Group, Paper, Stack, Text, Textarea } from '@mantine/core';
 import { useDisclosure, useInputState, useListState } from '@mantine/hooks';
 import { DefaultChatTransport } from 'ai';
@@ -327,7 +328,12 @@ export default function Page() {
           ) : null}
         </Stack>
 
-        <Stack gap='md'>
+        <Carousel
+          slideGap='md'
+          slideSize={{ base: '100%', sm: '50%', lg: '33.333333%' }}
+          withIndicators
+          emblaOptions={{ align: 'start' }}
+        >
           {modelSections.map(({ definition, chat }, index) => {
             const hasAssistantReply = chat.messages.some((message) => message.role === 'assistant');
             const status = getModelStatus(chat.status, hasAssistantReply);
@@ -339,77 +345,79 @@ export default function Page() {
                 : visibleMessages.filter((_, messageIndex) => messageIndex !== firstUserMessageIndex);
 
             return (
-              <Paper key={definition.id} withBorder p='sm'>
-                <Stack gap='sm'>
-                  <Group justify='space-between' align='flex-start'>
-                    <Stack gap={2}>
-                      <Group gap='xs'>
-                        <Text fw={600}>{definition.label}</Text>
-                        <Badge variant='light' color={STATUS_COLORS[status]}>
-                          {status}
-                        </Badge>
-                      </Group>
-                    </Stack>
-                    <Button
-                      size='xs'
-                      variant='subtle'
-                      onClick={() => chat.stop()}
-                      disabled={chat.status !== 'streaming' && chat.status !== 'submitted'}
-                    >
-                      停止
-                    </Button>
-                  </Group>
-
-                  {chat.error ? (
-                    <Text size='sm' c='red'>
-                      エラー: {chat.error.message}
-                    </Text>
-                  ) : null}
-
-                  <Stack gap='sm'>
-                    {displayMessages.length !== 0 &&
-                      displayMessages.map((message) => (
-                        <Stack gap={2} key={message.id ?? `${message.role}-${definition.id}`}>
-                          <Text size='xs' c='dimmed'>
-                            {message.role === 'user' ? '自分' : definition.label}
-                          </Text>
-                          <Text size='sm' style={MULTILINE_TEXT_STYLE}>
-                            {collectText(message.parts)}
-                          </Text>
-                        </Stack>
-                      ))}
-                    {(chat.status === 'streaming' || chat.status === 'submitted') && (
-                      <Text size='xs' c='dimmed'>
-                        生成中...
-                      </Text>
-                    )}
-                  </Stack>
-
-                  <Stack gap='xs'>
-                    <Textarea
-                      autosize
-                      minRows={1}
-                      maxRows={4}
-                      placeholder={`${definition.label}に追加質問する`}
-                      value={followUpInputs[index]}
-                      onChange={(event) => handleFollowUpChange(index, event.currentTarget.value)}
-                    />
-                    <Group justify='flex-end'>
+              <Carousel.Slide key={definition.id}>
+                <Paper withBorder p='sm' h='100%'>
+                  <Stack gap='sm' h='100%'>
+                    <Group justify='space-between' align='flex-start'>
+                      <Stack gap={2}>
+                        <Group gap='xs'>
+                          <Text fw={600}>{definition.label}</Text>
+                          <Badge variant='light' color={STATUS_COLORS[status]}>
+                            {status}
+                          </Badge>
+                        </Group>
+                      </Stack>
                       <Button
-                        size='sm'
-                        variant='light'
-                        disabled={followUpInputs[index].trim().length === 0}
-                        onClick={() => handleFollowUpSend(index, definition.id)}
+                        size='xs'
+                        variant='subtle'
+                        onClick={() => chat.stop()}
+                        disabled={chat.status !== 'streaming' && chat.status !== 'submitted'}
                       >
-                        個別に送信
+                        停止
                       </Button>
                     </Group>
+
+                    {chat.error ? (
+                      <Text size='sm' c='red'>
+                        エラー: {chat.error.message}
+                      </Text>
+                    ) : null}
+
+                    <Stack gap='sm' flex={1}>
+                      {displayMessages.length !== 0 &&
+                        displayMessages.map((message) => (
+                          <Stack gap={2} key={message.id ?? `${message.role}-${definition.id}`}>
+                            <Text size='xs' c='dimmed'>
+                              {message.role === 'user' ? '自分' : definition.label}
+                            </Text>
+                            <Text size='sm' style={MULTILINE_TEXT_STYLE}>
+                              {collectText(message.parts)}
+                            </Text>
+                          </Stack>
+                        ))}
+                      {(chat.status === 'streaming' || chat.status === 'submitted') && (
+                        <Text size='xs' c='dimmed'>
+                          生成中...
+                        </Text>
+                      )}
+                    </Stack>
+
+                    <Stack gap='xs'>
+                      <Textarea
+                        autosize
+                        minRows={1}
+                        maxRows={4}
+                        placeholder={`${definition.label}に追加質問する`}
+                        value={followUpInputs[index]}
+                        onChange={(event) => handleFollowUpChange(index, event.currentTarget.value)}
+                      />
+                      <Group justify='flex-end'>
+                        <Button
+                          size='sm'
+                          variant='light'
+                          disabled={followUpInputs[index].trim().length === 0}
+                          onClick={() => handleFollowUpSend(index, definition.id)}
+                        >
+                          個別に送信
+                        </Button>
+                      </Group>
+                    </Stack>
                   </Stack>
-                </Stack>
-              </Paper>
+                </Paper>
+              </Carousel.Slide>
             );
           })}
-        </Stack>
+        </Carousel>
 
         <Paper withBorder p='sm'>
           <Stack gap='sm'>

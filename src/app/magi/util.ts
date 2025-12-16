@@ -1,3 +1,4 @@
+import { anthropic } from '@ai-sdk/anthropic';
 import { type OpenAIProvider, openai } from '@ai-sdk/openai';
 import dayjs from 'dayjs';
 import dedent from 'ts-dedent';
