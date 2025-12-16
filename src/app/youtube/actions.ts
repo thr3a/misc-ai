@@ -39,8 +39,7 @@ export async function continueConversation(transcript: string, title: string, hi
 
   (async () => {
     const { textStream } = streamText({
-      model: openai('gpt-5.1'),
-      temperature: 0,
+      model: openai('gpt-5-mini'),
       system: systemPrompt({ title: title, transcript: transcript }),
       messages: history,
       providerOptions: {
