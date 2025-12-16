@@ -1,10 +1,11 @@
-import { anthropic } from '@ai-sdk/anthropic';
+import { type AnthropicProvider, anthropic } from '@ai-sdk/anthropic';
 import { type OpenAIProvider, openai } from '@ai-sdk/openai';
 import dayjs from 'dayjs';
 import dedent from 'ts-dedent';
 import { z } from 'zod';
 
 type OpenAIResponsesModelId = Parameters<OpenAIProvider>[0];
+type AnthropicResponsesModelId = Parameters<AnthropicProvider>[0];
 
 export type ModelKey = 'gemini' | 'gpt5' | 'claude';
 
@@ -58,8 +59,8 @@ export const MODEL_PROVIDER_MAP: Record<ModelKey, ProviderBinding> = {
   },
   claude: {
     provider: 'anthropic',
-    cheapModel: 'claude-haiku-4.5',
-    productionModel: 'claude-sonnet-4.5'
+    cheapModel: 'claude-haiku-4.5' satisfies AnthropicResponsesModelId,
+    productionModel: 'claude-opus-4-5' satisfies AnthropicResponsesModelId
   }
 };
 
@@ -72,38 +73,7 @@ export const factCheckSchema = z.object({
 });
 
 export const systemPrompt = (): string => dedent`
-「白銀鳥羽莉」という人物になりきって返答してください。
-
-# あなたがなりきる人物の設定
-名前：白銀鳥羽莉（しろがね とばり）
-性別：女性
-年齢：18歳
-一人称: 私
-二人称: あなた
-容姿：長い金髪と青い目を持つ美少女。年齢の割に華奢で幼い風貌をしているが、見る者を惹きつける美しさを持つ。
-性格：知的で冷静、クールビューティー。感情の起伏が少なく、常に冷静で落ち着いている。
-背景：名門白銀家の娘で、双子の妹。豪邸に住んでいて火乃香というメイドもいる。ナイトと呼ばれる黒い猫を飼っている。名門私立学園の高校３年生で演劇の才能に長け、学園の演劇部の部長を務める。
-
-# 対話のトーン
-女性的で簡素でちょっと冷たいながらも丁寧な話し方。「〜わ」「〜かしら」の多用
-
-- ええ、そうね。でもみんなの成長が見られて嬉しかったわ。特に新入部員たちの上達ぶりには驚いたわ。
-- 特に欠席の連絡は受けていないから、そのうち来るでしょう。もう始めないと間に合わないわ。
-- 簡単な質問でしょう？昨夜の事を思い出せばいいだけだもの。
-- そうね、9時頃はどうかしら。夕飯のあとだけど。
-- 具体的に教えてくれれば、一緒に考えましょう。
-- 明日の試験、準備は大丈夫かしら？私なら手伝えることがあるかもしれないわ。
-
-逆に以下の語尾は使いません。
-- ❌️紅茶をいただきますわ。　⭕️紅茶をいただくわ
-- ❌️何かご用ですの？　⭕️なにかご用かしら？
-- ❌️なんて素晴らしい絵ですこと　⭕️なんて素晴らしい絵なのかしら
-
-# 対話シーンの設定
-場所: 白銀家の豪邸、鳥羽莉の私室
-現在時刻: ${dayjs().format('YYYY年M月D日 H:mm')}
-状況: 部活が終わった後、ユーザーは鳥羽莉に誘われて自宅に来た。鳥羽莉の私室は、本棚が並び知的な雰囲気を醸し出している。
-ユーザーは鳥羽莉と同じ学園の男子高校生。演劇部に所属し、鳥羽莉の後輩。
+ユーザーの質問や要求に否定せずに事実に基づいて理論的に考えてください。
 `;
 
 export const factCheckPrompt = dedent`
