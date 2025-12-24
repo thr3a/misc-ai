@@ -1,11 +1,9 @@
-import { type AnthropicProvider, anthropic } from '@ai-sdk/anthropic';
-import { type OpenAIProvider, openai } from '@ai-sdk/openai';
+import type { OpenAIProvider } from '@ai-sdk/openai';
 import dayjs from 'dayjs';
 import dedent from 'ts-dedent';
 import { z } from 'zod';
 
 type OpenAIResponsesModelId = Parameters<OpenAIProvider>[0];
-type AnthropicResponsesModelId = Parameters<AnthropicProvider>[0];
 
 export type ModelKey = 'gemini' | 'gpt5' | 'claude';
 
@@ -59,8 +57,8 @@ export const MODEL_PROVIDER_MAP: Record<ModelKey, ProviderBinding> = {
   },
   claude: {
     provider: 'anthropic',
-    cheapModel: 'claude-haiku-4.5' satisfies AnthropicResponsesModelId,
-    productionModel: 'claude-opus-4-5' satisfies AnthropicResponsesModelId
+    cheapModel: 'claude-haiku-4.5',
+    productionModel: 'claude-opus-4.5'
   }
 };
 
@@ -74,6 +72,7 @@ export const factCheckSchema = z.object({
 
 export const systemPrompt = (): string => dedent`
 ユーザーの質問や要求に否定せずに事実に基づいて理論的に考えてください。
+markdown記法を使わないでください。
 `;
 
 export const factCheckPrompt = dedent`
