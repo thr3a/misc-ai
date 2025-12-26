@@ -5,7 +5,7 @@ import { Box, Button, Group, SegmentedControl, Stack, Textarea, Title } from '@m
 import { useState } from 'react';
 import dedent from 'ts-dedent';
 import { scenarioPromptSchema } from './type';
-import { buildSystemPromptFromScenario, buildUserPrompt } from './util';
+import { buildSystemPromptFromScenario } from './util';
 
 // Force the page to be dynamic and allow streaming responses up to 30 seconds
 export const dynamic = 'force-dynamic';
