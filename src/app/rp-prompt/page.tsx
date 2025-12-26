@@ -13,7 +13,6 @@ export const maxDuration = 30;
 
 // 関数名は変えないこと
 export default function Page() {
-  const [personaCount, setPersonaCount] = useState(1);
   const [situation, setSituation] = useState(
     dedent`
     中世ヨーロッパ風のファンタジー世界 魔法学校の入学式の直後
@@ -39,16 +38,6 @@ export default function Page() {
 
   return (
     <Box maw={600} mx='auto' component='form' mb={'lg'}>
-      <Group justify='flex-start' mb='md'>
-        <SegmentedControl
-          value={String(personaCount)}
-          onChange={(value) => setPersonaCount(Number(value))}
-          data={[
-            { label: '1人', value: '1' },
-            { label: '2人', value: '2' }
-          ]}
-        />
-      </Group>
       <Textarea
         label='シチュエーションを記述してください'
         withAsterisk
@@ -60,8 +49,7 @@ export default function Page() {
       <Group justify='center' mt='md'>
         <Button
           onClick={() => {
-            const prompt = buildUserPrompt(situation, personaCount);
-            submit(prompt);
+            submit(situation);
           }}
           disabled={isLoading}
           loading={isLoading}
