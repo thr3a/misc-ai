@@ -18,12 +18,12 @@ export const aiCharacterSchema = z.object({
   name: z.string().min(1).describe('名前'),
   gender: z.string().min(1).describe('性別'),
   age: z.number().describe('年齢'),
-  firstPerson: z.string().min(1).describe('一人称 例:俺、わたし'),
-  secondPerson: z.string().min(1).describe('二人称 例: あなた、〇〇くん'),
   personality: z.string().min(1).describe('性格'),
   outfit: z.string().min(1).describe('服装'),
   background: z.string().min(1).describe('背景'),
-  relationship: z.string().min(1).describe('HUMANとの関係性')
+  selfReference: z.string().min(1).describe('一人称 例:俺、わたし'),
+  nameForHuman: z.string().min(1).describe('二人称 例: あなた、〇〇くん'),
+  relationshipWithHuman: z.string().min(1).describe('HUMANとの関係性')
 });
 
 export const scenarioPromptSchema = z.object({
