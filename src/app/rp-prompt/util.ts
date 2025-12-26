@@ -1,4 +1,11 @@
 import dedent from 'ts-dedent';
+import type { AiCharacterSetting, HumanCharacterSetting, WorldSetting } from './type';
+
+type ScenarioPromptInput = {
+  worldSetting?: Partial<WorldSetting>;
+  humanCharacter?: Partial<HumanCharacterSetting>;
+  aiCharacters?: Array<Partial<AiCharacterSetting> | undefined>;
+};
 
 export const systemPrompt = dedent`
   あなたは、読者の想像力を掻き立て、深い没入感を与える物語を創り出すことに特化したプロの小説家です。
@@ -17,7 +24,7 @@ export const buildUserPrompt = (situation: string, personaCount: number): string
   `;
 };
 
-export const buildSystemPromptFromScenario = (scenario: any): string => {
+export const buildSystemPromptFromScenario = (scenario: ScenarioPromptInput): string => {
   const worldSetting = scenario?.worldSetting;
   const aiCharacterNames = scenario?.aiCharacters?.map((x) => x?.name ?? '').join('、') ?? '';
   const characterSettings =
