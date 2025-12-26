@@ -44,7 +44,7 @@ export async function continueConversation(transcript: string, title: string, hi
       messages: history,
       providerOptions: {
         openai: {
-          reasoningEffort: 'none'
+          reasoningEffort: 'minimal'
         }
       }
     });
