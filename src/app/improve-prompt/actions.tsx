@@ -21,7 +21,7 @@ export async function generate(input: string) {
       '=====プロンプトここまで====='
     ].join('\n');
     const { partialObjectStream } = await streamObject({
-      model: google('gemini-2.5-pro'),
+      model: google('gemini-3-flash-preview'),
       // model: anthropic('claude-3-5-sonnet-latest'),
       // model: openai('gpt-4o'),
       system: systemPrompt,
