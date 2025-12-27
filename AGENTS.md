@@ -21,4 +21,4 @@
 - hook: mantine hook
 - 日付ライブラリ: Day.js
 - lint: biome
-- AI SDK by Vercel v5
+- AI SDK by Vercel v6

@@ -24,10 +24,12 @@ export async function POST(req: Request) {
     return jsonResponse({ error: 'モデル指定が不正です。' }, { status: 400 });
   }
 
+  const modelMessages = await convertToModelMessages(body.messages);
+
   const result = streamText({
     model: resolveModel(body.modelId),
     system: systemPrompt(),
-    messages: convertToModelMessages(body.messages),
+    messages: modelMessages,
     providerOptions: {
       google: {
         thinkingConfig: {

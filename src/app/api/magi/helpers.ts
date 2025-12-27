@@ -1,7 +1,6 @@
 import { MODEL_PROVIDER_MAP, type ModelKey } from '@/app/magi/util';
 import { google } from '@ai-sdk/google';
-import { openai } from '@ai-sdk/openai';
-import { createOpenRouter } from '@openrouter/ai-sdk-provider';
+import { createOpenAI, openai } from '@ai-sdk/openai';
 import type { LanguageModel } from 'ai';
 
 export const jsonResponse = (payload: unknown, init?: ResponseInit) =>
@@ -24,8 +23,11 @@ export const resolveModel = (modelId: ModelKey): LanguageModel => {
   if (config.provider === 'openai') {
     return openai(config.productionModel);
   }
-  const key = process.env.OPENROUTER_API_KEY || 'null';
-  return createOpenRouter({ apiKey: key }).chat(`anthropic/${config.productionModel}`);
+  const openrouter = createOpenAI({
+    baseURL: 'https://openrouter.ai/api/v1',
+    apiKey: process.env.OPENROUTER_API_KEY || 'null'
+  });
+  return openrouter.chat(`anthropic/${config.productionModel}`);
 };
 
 export const ensureModelKey = (value: unknown): value is ModelKey => {
