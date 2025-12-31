@@ -15,8 +15,7 @@ export async function POST(req: Request) {
     return jsonResponse({ error: 'JSONのパースに失敗しました。' }, { status: 400 });
   }
 
-  const prompt = body.prompt?.trim();
-  if (!prompt) {
+  if (!body.prompt) {
     return jsonResponse({ error: '強化対象のプロンプトが必要です。' }, { status: 400 });
   }
 
@@ -24,7 +23,7 @@ export async function POST(req: Request) {
     const { textStream } = await streamText({
       model: openai('gpt-5.1'),
       system: promptEnhancerSystemPrompt,
-      prompt,
+      prompt: body.prompt,
       providerOptions: {
         openai: {
           reasoningEffort: 'none',
@@ -38,8 +37,7 @@ export async function POST(req: Request) {
       enhancedPrompt += delta;
     }
 
-    const finalizedPrompt = enhancedPrompt.trim();
-    return jsonResponse({ enhancedPrompt: finalizedPrompt.length > 0 ? finalizedPrompt : prompt });
+    return jsonResponse({ enhancedPrompt: enhancedPrompt });
   } catch (error) {
     console.error('Prompt enhancement failed', error);
     return jsonResponse({ error: 'プロンプト強化に失敗しました。' }, { status: 500 });

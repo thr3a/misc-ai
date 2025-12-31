@@ -17,17 +17,18 @@ export const resolveModel = (modelId: ModelKey): LanguageModel => {
   if (!config) {
     throw new Error(`モデル設定 (${modelId}) が見つかりません`);
   }
+  const modelName = process.env.NODE_ENV === 'production' ? config.productionModel : config.cheapModel;
   if (config.provider === 'google') {
-    return google(config.productionModel);
+    return google(modelName);
   }
   if (config.provider === 'openai') {
-    return openai(config.productionModel);
+    return openai(modelName);
   }
   const openrouter = createOpenAI({
     baseURL: 'https://openrouter.ai/api/v1',
     apiKey: process.env.OPENROUTER_API_KEY || 'null'
   });
-  return openrouter.chat(`anthropic/${config.productionModel}`);
+  return openrouter.chat(`anthropic/${modelName}`);
 };
 
 export const ensureModelKey = (value: unknown): value is ModelKey => {

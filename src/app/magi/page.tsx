@@ -1,5 +1,6 @@
 'use client';
 
+import { ButtonCopy } from '@/app/html-ui/ButtonCopy';
 import {
   type IssueSchema,
   MODEL_DEFINITIONS,
@@ -110,8 +111,7 @@ const collectText = (parts: Array<TextPart | { type: string }>) =>
   parts
     .filter((part): part is TextPart => part.type === 'text')
     .map((part) => part.text)
-    .join('\n')
-    .trim();
+    .join('\n');
 
 const getLatestAssistantText = (messages: ModelChatInstance['messages']) => {
   const assistantMessages = messages.filter((message) => message.role === 'assistant');
@@ -136,7 +136,7 @@ const FactCheckEmptyState = () => (
 
 // 関数名は変えないこと
 export default function Page() {
-  const [question, setQuestion] = useInputState('');
+  const [question, setQuestion] = useInputState('今後LABUBU（ラブブ）の人気はハローキティを超えると思いますか？');
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [enhanceError, setEnhanceError] = useState<string | null>(null);
   const [factCheckVisible, { open: openFactCheck, close: closeFactCheck }] = useDisclosure(false);
@@ -187,27 +187,19 @@ export default function Page() {
     };
   });
   const factCheckLoading = factCheckEntries.some((entry) => entry.status === 'loading');
-  const isQuestionEmpty = question.trim().length === 0;
+  const isQuestionEmpty = question.length === 0;
 
   const handleBroadcast = () => {
-    const trimmed = question.trim();
-    if (!trimmed) {
-      return;
-    }
     setEnhanceError(null);
     setQuestion('');
     for (const { chat } of modelSections) {
       void chat.sendMessage({
-        parts: [{ type: 'text', text: trimmed }]
+        parts: [{ type: 'text', text: question }]
       });
     }
   };
 
   const handleEnhancePrompt = async () => {
-    const trimmed = question.trim();
-    if (!trimmed) {
-      return;
-    }
     setEnhanceError(null);
     setIsEnhancing(true);
     try {
@@ -216,15 +208,14 @@ export default function Page() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ prompt: trimmed })
+        body: JSON.stringify({ prompt: question })
       });
       const payload = (await response.json().catch(() => null)) as { enhancedPrompt?: string; error?: string } | null;
       if (!response.ok || !payload) {
         throw new Error(payload?.error ?? '強化リクエストに失敗しました。');
       }
-      const enhanced = payload.enhancedPrompt?.trim();
-      if (enhanced) {
-        setQuestion(enhanced);
+      if (payload.enhancedPrompt) {
+        setQuestion(payload.enhancedPrompt);
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : '強化リクエストに失敗しました。';
@@ -239,7 +230,7 @@ export default function Page() {
   };
 
   const handleFollowUpSend = (index: number, modelId: ModelKey) => {
-    const text = followUpInputs[index].trim();
+    const text = followUpInputs[index];
     if (!text) {
       return;
     }
@@ -305,11 +296,10 @@ export default function Page() {
             autosize
             minRows={5}
             maxRows={10}
-            placeholder='今後LABUBU（ラブブ）の人気はハローキティを超えると思いますか？'
           />
           <Group justify='center' align='center'>
             <Button size='sm' disabled={isQuestionEmpty} onClick={handleBroadcast}>
-              一括リクエスト
+              送信
             </Button>
             <Button
               size='sm'
@@ -320,6 +310,7 @@ export default function Page() {
             >
               強化
             </Button>
+            <ButtonCopy content={question} disabled={isQuestionEmpty} />
           </Group>
           {enhanceError ? (
             <Text size='xs' c='red' ta='center'>
@@ -405,7 +396,7 @@ export default function Page() {
                         <Button
                           size='sm'
                           variant='light'
-                          disabled={followUpInputs[index].trim().length === 0}
+                          disabled={followUpInputs[index].length === 0}
                           onClick={() => handleFollowUpSend(index, definition.id)}
                         >
                           個別に送信
