@@ -2,7 +2,6 @@ import type { google } from '@ai-sdk/google';
 import type { OpenAIProvider } from '@ai-sdk/openai';
 import dayjs from 'dayjs';
 import dedent from 'ts-dedent';
-import { z } from 'zod';
 
 type GoogleResponsesModelId = Parameters<typeof google>[0];
 type OpenAIResponsesModelId = Parameters<OpenAIProvider>[0];
@@ -12,7 +11,6 @@ export type ModelKey = 'gemini' | 'gpt5' | 'claude';
 export type ModelDefinition = {
   id: ModelKey;
   label: string;
-  reviewer: ModelKey;
 };
 
 type ProviderBinding = {
@@ -24,18 +22,15 @@ type ProviderBinding = {
 export const MODEL_DEFINITIONS: ModelDefinition[] = [
   {
     id: 'gpt5',
-    label: 'GPT5',
-    reviewer: 'claude'
+    label: 'GPT5'
   },
   {
     id: 'claude',
-    label: 'Claude',
-    reviewer: 'gemini'
+    label: 'Claude'
   },
   {
     id: 'gemini',
-    label: 'Gemini',
-    reviewer: 'gpt5'
+    label: 'Gemini'
   }
 ];
 
@@ -64,28 +59,10 @@ export const MODEL_PROVIDER_MAP: Record<ModelKey, ProviderBinding> = {
   }
 };
 
-export const IssueSchema = z.object({
-  description: z.string().describe('誤っている記述（元の回答からの引用）'),
-  correction: z.string().describe('訂正内容（正しい情報）')
-});
-export const factCheckSchema = z.object({
-  issues: z.array(IssueSchema).describe('指摘事項のリスト')
-});
-
 export const systemPrompt = (): string => dedent`
 ユーザーの質問や要求に否定せずに事実に基づいて理論的に考えてください。
-markdown記法を使わないでください。
-`;
-
-export const factCheckPrompt = dedent`
-あなたは厳密な事実検証を行う専門家AIです。
-ユーザーが与える「他のAIの回答」についてのみ評価してください。
-主な観点は「事実が正しいか」「科学的に妥当か」「数値が正確か」です。
-可能な限り最新の一般的・学術的知見に基づいて判断してください。
-明確に誤っている点があれば、その箇所を抜き出して理由付きで指摘してください。
-不確実だが可能性がある内容は「不確実」として扱い、推測はしないでください。
-元の回答の書き方や文体にはコメントせず、内容の正確性のみに集中してください。
-各指摘はIssueSchemaのdescription（元回答からの引用）とcorrection（正しい情報）を必ず埋めること
+Markdown記法は使用せずプレーンテキストで出力してください。
+今日の日付: ${dayjs().format('YYYY年M月D日')}
 `;
 
 export const promptEnhancerSystemPrompt = dedent`
