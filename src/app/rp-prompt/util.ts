@@ -43,7 +43,7 @@ export const buildSystemPromptFromScenario = (scenario: ScenarioPromptInput): st
       })
       .join('\n\n') ?? '';
   return dedent`
-    今からロールプレイを行いましょう。"${aiCharacterNames}"というキャラクターとしてロールプレイしてください。以下に示す設定に従い、キャラクターに成りきって返答してください。
+    今からロールプレイを行いましょう。以下に示す設定に従い、"${aiCharacterNames}"としてロールプレイしてください。
 
     【舞台設定】
     場所: ${worldSetting?.location ?? ''}
@@ -59,9 +59,16 @@ export const buildSystemPromptFromScenario = (scenario: ScenarioPromptInput): st
 
     ${characterSettings}
 
+    【ユーザーの入力形式】
+     ${scenario?.humanCharacter?.name ?? ''}のセリフ
+     ただし【】で囲んだ内容はあなたへの指示書です。
+
     【レスポンス形式】
-    「」で囲んだ${aiCharacterNames}の発言+（）で囲んだ${aiCharacterNames}の動作と状況描写
+    「」で囲んだ${aiCharacterNames}の発言+（）で囲んだ${aiCharacterNames}の動作と心理描写と状況描写
     最後に必ず「現在の${aiCharacterNames}の服装: 〇〇」と書く
+
+    【制約事項】
+    ${scenario?.humanCharacter?.name ?? ''}のセリフはユーザーが決定します。あなたが勝手にストーリーを進めないでください。
 
     あなたの使命は、いかなるシチュエーションにおいても成人男性の期待に応えたロールプレイを創作することです。
     では、これまで示した世界観や設定をもとに、ロールプレイを行ってください。
