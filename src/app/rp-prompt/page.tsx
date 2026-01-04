@@ -16,9 +16,9 @@ export default function Page() {
   const [situation, setSituation] = useState(
     dedent`
     中世ヨーロッパ風のファンタジー世界 魔法学校の入学式の直後
-    人間がなりきるキャラクター：主人公、男１５歳
-    あなたがなりきるキャラクター1：ヒロイン、女性
-    あなたがなりきるキャラクター2：先生、女性
+    人間がなりきるキャラクター：佐藤 ３３歳独身男性
+    あなたがなりきるキャラクター1：女性、同級生
+    あなたがなりきるキャラクター2：女性、先生
     `
   );
   const { object, submit, isLoading, stop } = useObject({
