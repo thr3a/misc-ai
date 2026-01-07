@@ -2,6 +2,7 @@
 import { ButtonCopy } from '@/app/html-ui/ButtonCopy';
 import { experimental_useObject as useObject } from '@ai-sdk/react';
 import { Box, Button, Group, Select, Stack, Textarea, Title } from '@mantine/core';
+import { useLocalStorage } from '@mantine/hooks';
 import { useState } from 'react';
 import dedent from 'ts-dedent';
 import { scenarioPromptSchema } from './type';
@@ -13,14 +14,15 @@ export const maxDuration = 30;
 
 // 関数名は変えないこと
 export default function Page() {
-  const [situation, setSituation] = useState(
-    dedent`
+  const [situation, setSituation] = useLocalStorage<string>({
+    key: 'rp-prompt-situation',
+    defaultValue: dedent`
     中世ヨーロッパ風のファンタジー世界 魔法学校の入学式の直後
     人間がなりきるキャラクター：佐藤 ３３歳独身男性
     あなたがなりきるキャラクター1：女性、同級生
     あなたがなりきるキャラクター2：女性、先生
     `
-  );
+  });
   const [provider, setProvider] = useState<'local' | 'openrouter'>('local');
   const { object, submit, isLoading, stop } = useObject({
     api: '/api/rp-prompt',
