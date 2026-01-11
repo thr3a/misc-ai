@@ -32,13 +32,13 @@ export async function POST(req: NextRequest) {
     const { prompt } = validatedFields.data;
 
     const result = streamText({
-      model: openai('gpt-5-mini'),
+      model: openai('gpt-5.1'),
       system: systemPrompt,
       prompt,
       output: Output.object({ schema }),
       providerOptions: {
         openai: {
-          reasoningEffort: 'minimal'
+          reasoningEffort: 'low'
         } satisfies OpenAIResponsesProviderOptions
       }
     });

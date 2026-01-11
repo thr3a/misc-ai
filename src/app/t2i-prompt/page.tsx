@@ -39,12 +39,28 @@ export default function Page() {
         </Group>
         {expandedPrompt && (
           <Stack gap={'xs'}>
-            <Textarea label='拡張後のプロンプト' value={expandedPrompt} readOnly rows={6} />
-            <Box mx={'auto'}>
-              <ButtonCopy content={expandedPrompt} disabled={isLoading} label='コピー' />
-            </Box>
+            <Textarea
+              label={
+                <Group justify='space-between'>
+                  <Box>拡張後のプロンプト</Box>
+                  <ButtonCopy content={expandedPrompt} disabled={!expandedPromptJa} label='コピー' />
+                </Group>
+              }
+              value={expandedPrompt}
+              readOnly
+              rows={10}
+            />
 
-            <Textarea label='日本語訳' value={expandedPromptJa} readOnly rows={6} />
+            <Textarea
+              label={
+                <Group justify='space-between'>
+                  <Box>日本語訳</Box>
+                </Group>
+              }
+              value={expandedPromptJa}
+              readOnly
+              rows={10}
+            />
           </Stack>
         )}
       </Stack>
