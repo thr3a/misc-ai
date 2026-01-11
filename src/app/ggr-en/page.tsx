@@ -5,10 +5,6 @@ import { experimental_useObject as useObject } from '@ai-sdk/react';
 import { Box, Button, Group, Paper, Stack, Textarea } from '@mantine/core';
 import { useState } from 'react';
 
-// Force the page to be dynamic and allow streaming responses up to 30 seconds
-export const dynamic = 'force-dynamic';
-export const maxDuration = 30;
-
 export default function Page() {
   const [query, setQuery] = useState('css remとpxの違い');
   const { object, submit, isLoading } = useObject({
