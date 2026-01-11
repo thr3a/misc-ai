@@ -1,13 +1,14 @@
 import { schema } from '@/app/ggr-en/type';
 import { systemPrompt } from '@/app/ggr-en/util';
 import { openai } from '@ai-sdk/openai';
+import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { Output, streamText } from 'ai';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
 
 // リクエストボディのスキーマ定義
 const requestSchema = z.object({
-  query: z.string().min(1, 'query is required')
+  query: z.string().min(1)
 });
 
 export async function POST(req: NextRequest) {
@@ -31,11 +32,15 @@ export async function POST(req: NextRequest) {
     const { query } = validatedFields.data;
 
     const result = streamText({
-      model: openai('gpt-4o'),
+      model: openai('gpt-5.1'),
       system: systemPrompt,
       prompt: query,
       output: Output.object({ schema }),
-      temperature: 0.4
+      providerOptions: {
+        openai: {
+          reasoningEffort: 'none'
+        } satisfies OpenAIResponsesProviderOptions
+      }
     });
 
     return result.toTextStreamResponse();
