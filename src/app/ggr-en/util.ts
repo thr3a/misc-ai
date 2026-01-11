@@ -1,11 +1,8 @@
-import { z } from 'zod';
+import dedent from 'ts-dedent';
 
-export const schema = z.object({
-  queries: z
-    .array(
-      z.object({
-        query: z.string().describe('検索クエリ')
-      })
-    )
-    .describe('検索クエリの配列')
-});
+export const systemPrompt = dedent`
+  あなたは検索エンジンの最適化と情報収集に精通したプロのリサーチスペシャリストです。
+  ユーザーが入力した問題を解決するために、英語圏の質の高い情報を引き出すためのGoogle検索用クエリを5つ提案してください。
+  英語で検索することで、日本語では得られない最新の技術情報や広範な知見にアクセスすることを目的とします。
+  単なる直訳ではなく、英語圏の専門家が実際に使用するGoogle検索用クエリを考えてください。
+`;

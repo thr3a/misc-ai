@@ -6,7 +6,6 @@
 - 既存のコードコメントは、明示的な指示がない限り変更しない。
 - AI のモデル名（例：`gpt-4o`）は、ユーザーから指示があるまで勝手に変更しない。
 - `npm run build` は実行しない。
-- https://deepwiki.com/mantinedev/mantine
 - `src/scripts` 以下の TypeScript コードを実行するときは、次のコマンドを使う：
   - `node --import tsx ./src/scripts/hello.ts`
 - 特に指示がなければ、上記形式でのスクリプト実行は 自動で行ってよい。
@@ -16,11 +15,11 @@
 
 - 言語: TypeScript
 - フレームワーク: Next.js  v15 AppRouter
-- UI: React v19 / Mantine v8
+- UI: React v19 / Mantine v8 https://deepwiki.com/mantinedev/mantine
 - hook: Mantine の hook を使用
 - Lint: biome v2
 - 日付ライブラリ: Day.js
-- AI SDK by Vercel v6
+- AI SDK by Vercel v6 https://deepwiki.com/vercel/ai
 
 # 2. TypeScript / コーディングスタイル
 

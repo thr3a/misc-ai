@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   description: '英語のGoogle検索キーワードに翻訳します'
 };
 
+// 関数名は変えないこと
 export default function PageLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
