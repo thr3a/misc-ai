@@ -8,10 +8,6 @@ import dedent from 'ts-dedent';
 import { scenarioPromptSchema } from './type';
 import { buildSystemPromptFromScenario } from './util';
 
-// Force the page to be dynamic and allow streaming responses up to 30 seconds
-export const dynamic = 'force-dynamic';
-export const maxDuration = 30;
-
 // 関数名は変えないこと
 export default function Page() {
   const [situation, setSituation] = useLocalStorage<string>({
@@ -40,7 +36,7 @@ export default function Page() {
   const markdown = generateMarkdown();
 
   return (
-    <Box maw={600} mx='auto' component='form' mb={'lg'}>
+    <Box mb={'lg'}>
       <Select
         label='プロバイダー'
         data={[
