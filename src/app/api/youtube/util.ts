@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import dedent from 'ts-dedent';
+import { Client } from 'youtubei';
 
 export const systemPrompt = dedent`
 あなたは、YouTubeの動画内容を要約する専門家です。
@@ -37,3 +38,44 @@ export function getYouTubeVideoId(url: string): string | null {
   const match = url.match(regExp);
   return match ? match[1] : null;
 }
+
+export const getYouTubeTranscript = async (url: string): Promise<string> => {
+  const youtube = new Client({
+    youtubeClientOptions: {
+      hl: 'ja',
+      gl: 'ja'
+    }
+  });
+
+  const videoId = getYouTubeVideoId(url);
+  if (videoId === null) {
+    throw new Error('YouTubeのURLが不正です');
+  }
+
+  const video = await youtube.getVideo(videoId);
+
+  if (!video) {
+    throw new Error('動画情報を取得できませんでした');
+  }
+
+  if (!video.captions) {
+    throw new Error('字幕がありませんでした');
+  }
+
+  const availableLanguageCodes = video.captions.languages.map((language) => language.code) ?? [];
+
+  const languageCode = availableLanguageCodes.includes('ja')
+    ? 'ja'
+    : availableLanguageCodes.includes('en')
+      ? 'en'
+      : availableLanguageCodes[0];
+
+  const transcribed = (await video.captions?.get(languageCode)) ?? [];
+
+  const transcribedText = transcribed
+    .map((caption) => caption.text)
+    .join('')
+    .replaceAll(/[\n|,]/g, '');
+
+  return transcribedText;
+};

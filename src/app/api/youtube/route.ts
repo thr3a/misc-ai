@@ -1,7 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { Client } from 'youtubei';
 import { z } from 'zod';
-import { getPageTitle, getYouTubeVideoId } from './util';
+import { getPageTitle, getYouTubeTranscript } from './util';
 
 export type SuccessResponseSchema = {
   status: 'ok';
@@ -48,28 +47,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    const youtube = new Client({
-      youtubeClientOptions: {
-        hl: 'ja',
-        gl: 'ja'
-      }
-    });
-    const videoId = getYouTubeVideoId(schema.data.url);
-    if (videoId === null) {
-      return NextResponse.json({ status: 'ng', message: 'Internal Server Error' }, { status: 500 });
-    }
-    const video = await youtube.getVideo(videoId);
-    const availableLanguageCodes = await video?.captions?.languages.map((l) => l.code);
-    const languageCode = availableLanguageCodes?.includes('ja')
-      ? 'ja'
-      : availableLanguageCodes?.includes('en')
-        ? 'en'
-        : availableLanguageCodes?.[0];
-    const transcribed = (await video?.captions?.get(languageCode)) || [];
-    const transcribedText = transcribed
-      .map((x) => x.text)
-      .join('')
-      .replaceAll(/[\n|,]/g, '');
+    const transcribedText = await getYouTubeTranscript(schema.data.url);
     const title = await getPageTitle(schema.data.url);
 
     return NextResponse.json({ status: 'ok', title: title, transcribed: transcribedText } as SuccessResponseSchema);
