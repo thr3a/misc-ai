@@ -109,7 +109,7 @@ export default function Home() {
         <Group gap={'xs'}>
           <Button
             variant='light'
-            onClick={() => handleButtonClick('動画の内容を数値は省略せず箇条書きでまとめてください。')}
+            onClick={() => handleButtonClick('動画の核となる内容を数値は省略せず箇条書きで10つで要約してください。')}
           >
             要約
           </Button>

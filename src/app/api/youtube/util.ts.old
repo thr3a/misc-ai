@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import { fetchTranscript } from 'youtube-transcript-plus';
+import { Client } from 'youtubei';
 
 export async function getPageTitle(url: string): Promise<string> {
   const response = await fetch(url, {
@@ -28,14 +28,40 @@ export function getYouTubeVideoId(url: string): string | null {
 }
 
 export const getYouTubeTranscript = async (url: string): Promise<string> => {
-  const transcribed = await fetchTranscript(url, {
-    userAgent:
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    lang: 'ja'
+  const youtube = new Client({
+    youtubeClientOptions: {
+      hl: 'ja',
+      gl: 'ja'
+    }
   });
 
+  const videoId = getYouTubeVideoId(url);
+  if (videoId === null) {
+    throw new Error('YouTubeのURLが不正です');
+  }
+
+  const video = await youtube.getVideo(videoId);
+
+  if (!video) {
+    throw new Error('動画情報を取得できませんでした');
+  }
+
+  if (!video.captions) {
+    throw new Error('字幕がありませんでした');
+  }
+
+  const availableLanguageCodes = video.captions.languages.map((language) => language.code) ?? [];
+
+  const languageCode = availableLanguageCodes.includes('ja')
+    ? 'ja'
+    : availableLanguageCodes.includes('en')
+      ? 'en'
+      : availableLanguageCodes[0];
+
+  const transcribed = (await video.captions?.get(languageCode)) ?? [];
+
   const transcribedText = transcribed
-    .map((x) => x.text)
+    .map((caption) => caption.text)
     .join('')
     .replaceAll(/[\n|,]/g, '');
 
