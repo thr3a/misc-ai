@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       system: systemPrompt,
       prompt: situation,
       output: Output.object({ schema: scenarioPromptSchema }),
-      temperature: 0.3
+      temperature: 0.7
     });
 
     return result.toTextStreamResponse();
