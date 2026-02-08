@@ -1,7 +1,7 @@
 'use client';
 import { ButtonCopy } from '@/app/html-ui/ButtonCopy';
 import { experimental_useObject as useObject } from '@ai-sdk/react';
-import { Button, Group, Select, Stack, Textarea, Title } from '@mantine/core';
+import { Button, Group, Radio, Select, Stack, Textarea, Title } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
 import { useState } from 'react';
 import dedent from 'ts-dedent';
@@ -14,12 +14,13 @@ export default function Page() {
     key: 'rp-prompt-situation',
     defaultValue: dedent`
     中世ヨーロッパ風のファンタジー世界 魔法学校の入学式の直後
-    人間がなりきるキャラクター：佐藤（33歳・男性・独身）
-    あなたがなりきるキャラクター1：(24歳、女性、同級生)
-    あなたがなりきるキャラクター2：(24歳、女性、先生)
+    USERがなりきる人物：佐藤（33歳・男性・独身）
+    あなたがなりきる人物1：(24歳、女性、同級生)
+    あなたがなりきる人物2：(24歳、女性、先生)
     `
   });
   const [provider, setProvider] = useState<'local' | 'openrouter'>('local');
+  const [mode, setMode] = useState<'expansion' | 'creative'>('expansion');
   const { object, submit, isLoading, stop } = useObject({
     api: '/api/rp-prompt',
     schema: scenarioPromptSchema
@@ -54,10 +55,16 @@ export default function Page() {
         onChange={(e) => setSituation(e.currentTarget.value)}
         styles={{ input: { fontFamily: 'monospace', fontSize: 14 } }}
       />
+      <Radio.Group label='モード' value={mode} onChange={(value) => setMode(value as 'expansion' | 'creative')}>
+        <Group mt='xs'>
+          <Radio value='expansion' label='拡張' />
+          <Radio value='creative' label='創作' />
+        </Group>
+      </Radio.Group>
       <Group justify='center'>
         <Button
           onClick={() => {
-            submit({ situation, provider });
+            submit({ situation, provider, mode });
           }}
           disabled={isLoading}
           loading={isLoading}

@@ -1,5 +1,5 @@
 import { scenarioPromptSchema } from '@/app/rp-prompt/type';
-import { systemPrompt } from '@/app/rp-prompt/util';
+import { creativeSystemPrompt, systemPrompt } from '@/app/rp-prompt/util';
 import { createOpenAI } from '@ai-sdk/openai';
 import { Output, streamText } from 'ai';
 import type { NextRequest } from 'next/server';
@@ -8,7 +8,8 @@ import { z } from 'zod';
 // リクエストボディのスキーマ定義
 const requestSchema = z.object({
   situation: z.string().min(1, 'situation is required'),
-  provider: z.enum(['openrouter', 'local'])
+  provider: z.enum(['openrouter', 'local']),
+  mode: z.enum(['expansion', 'creative']).default('expansion')
 });
 
 const localOpenAI = createOpenAI({
@@ -38,13 +39,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { situation, provider } = validatedFields.data;
+    const { situation, provider, mode } = validatedFields.data;
 
     const model = provider === 'openrouter' ? openRouter.chat('qwen/qwen3-235b-a22b-2507') : localOpenAI.chat('main');
 
+    const selectedSystemPrompt = mode === 'creative' ? creativeSystemPrompt : systemPrompt;
+
     const result = streamText({
       model,
-      system: systemPrompt,
+      system: selectedSystemPrompt,
       prompt: situation,
       output: Output.object({ schema: scenarioPromptSchema }),
       temperature: 0.7
