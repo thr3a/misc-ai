@@ -1,7 +1,7 @@
 'use client';
 import { ButtonCopy } from '@/app/html-ui/ButtonCopy';
 import { experimental_useObject as useObject } from '@ai-sdk/react';
-import { Box, Button, Group, Select, Stack, Textarea, Title } from '@mantine/core';
+import { Button, Group, Select, Stack, Textarea, Title } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
 import { useState } from 'react';
 import dedent from 'ts-dedent';
@@ -14,9 +14,9 @@ export default function Page() {
     key: 'rp-prompt-situation',
     defaultValue: dedent`
     中世ヨーロッパ風のファンタジー世界 魔法学校の入学式の直後
-    人間がなりきるキャラクター：佐藤 ３３歳独身男性
-    あなたがなりきるキャラクター1：女性、同級生
-    あなたがなりきるキャラクター2：女性、先生
+    人間がなりきるキャラクター：佐藤（33歳・男性・独身）
+    あなたがなりきるキャラクター1：(24歳、女性、同級生)
+    あなたがなりきるキャラクター2：(24歳、女性、先生)
     `
   });
   const [provider, setProvider] = useState<'local' | 'openrouter'>('local');
@@ -36,7 +36,7 @@ export default function Page() {
   const markdown = generateMarkdown();
 
   return (
-    <Box mb={'lg'}>
+    <Stack gap='lg'>
       <Select
         label='プロバイダー'
         data={[
@@ -45,7 +45,6 @@ export default function Page() {
         ]}
         value={provider}
         onChange={(value) => setProvider(value as 'local' | 'openrouter')}
-        mb='md'
       />
       <Textarea
         label='シチュエーションを記述してください'
@@ -55,7 +54,7 @@ export default function Page() {
         onChange={(e) => setSituation(e.currentTarget.value)}
         styles={{ input: { fontFamily: 'monospace', fontSize: 14 } }}
       />
-      <Group justify='center' mt='md'>
+      <Group justify='center'>
         <Button
           onClick={() => {
             submit({ situation, provider });
@@ -66,19 +65,17 @@ export default function Page() {
           プロンプト生成
         </Button>
       </Group>
-      <Group mt='xl' mb='sm'>
+      <Group>
         <Title order={3}>生成結果</Title>
         <ButtonCopy content={markdown} disabled={isLoading} label='コピー' />
       </Group>
-      <Stack gap={4}>
-        <Textarea
-          readOnly
-          value={markdown}
-          minRows={18}
-          autosize
-          styles={{ input: { fontFamily: 'monospace', fontSize: 14 } }}
-        />
-      </Stack>
-    </Box>
+      <Textarea
+        readOnly
+        value={markdown}
+        minRows={18}
+        autosize
+        styles={{ input: { fontFamily: 'monospace', fontSize: 14 } }}
+      />
+    </Stack>
   );
 }
