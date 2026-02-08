@@ -8,7 +8,7 @@ export const worldSettingSchema = z.object({
 
 export const humanCharacterSchema = z.object({
   name: z.string().min(1),
-  gender: z.string().min(1).describe('性別 男or女'),
+  gender: z.string().min(1).describe('性別 男性or女性'),
   age: z.number().min(1),
   personality: z.string().min(1).describe('性格'),
   background: z.string().min(1).describe('背景')
@@ -23,7 +23,7 @@ export const aiCharacterSchema = z.object({
   background: z.string().min(1).describe('背景'),
   selfReference: z.string().min(1).describe('自分の呼び名、一人称 例:俺、わたし'),
   nameForHuman: z.string().min(1).describe('USERがなりきる人物を呼ぶ呼び名、二人称 例: あなた、〇〇くん、お客様'),
-  relationshipWithHuman: z.string().min(1).describe('との関係性')
+  relationshipWithHuman: z.string().min(1).describe('USERがなりきる人物との関係性')
 });
 
 export const scenarioPromptSchema = z.object({

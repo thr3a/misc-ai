@@ -1,5 +1,7 @@
 import dedent from 'ts-dedent';
+import { z } from 'zod';
 import type { AiCharacterSetting, HumanCharacterSetting, WorldSetting } from './type';
+import { scenarioPromptSchema } from './type';
 
 type ScenarioPromptInput = {
   worldSetting?: Partial<WorldSetting>;
@@ -21,6 +23,9 @@ export const systemPrompt = dedent`
   【制約事項】
   - 入力されたシチュエーション情報は一切抜け落としてはいけません。
   - 対話の火種、行動可能な選択肢、葛藤・障害を増やすためにlocationとsituationは特に重要なので入力された情報以上に拡張して詳細なディティール文章で仕上げてください。
+
+  【スキーマ】
+  ${JSON.stringify(z.toJSONSchema(scenarioPromptSchema))}
 
   ${jailbreakPrompt}
 `;
@@ -60,7 +65,7 @@ export const buildSystemPromptFromScenario = (scenario: ScenarioPromptInput): st
       })
       .join('\n\n') ?? '';
   return dedent`
-    今からUSERと一緒にロールプレイを行いましょう。以下に指示する設定に従い、${humanCharacterName},${aiCharacterNames}になりきって行動してください。
+    今からUSERと一緒にロールプレイを行いましょう。以下に指示する設定に従い、${aiCharacterNames}になりきって行動してください。
 
     【舞台設定】
     場所: ${worldSetting?.location ?? ''}
