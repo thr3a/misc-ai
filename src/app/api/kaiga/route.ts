@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
           content: [
             {
               type: 'text',
-              text: 'この画像の絵画（またはモチーフ）について、スキーマに従って情報を出力してください。'
+              text: 'この画像の絵画について、スキーマに従って情報を出力してください。'
             },
             { type: 'image', image: parsed.data, mediaType: parsed.mediaType }
           ]
