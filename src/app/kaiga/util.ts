@@ -9,7 +9,7 @@ export const systemPrompt = dedent`
 ${JSON.stringify(z.toJSONSchema(schema))}
 `;
 
-export const buildMarkdown = (value: KaigaResult): string => {
+export const buildMarkdown = (value: Partial<KaigaResult>): string => {
   return dedent`
   # 基本情報
   - タイトル: ${value?.title ?? ''}
