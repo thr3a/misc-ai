@@ -95,7 +95,7 @@ const Page = () => {
 
       <Group justify='center'>
         <Button onClick={handleSubmit} loading={isLoading} disabled={!imageDataUrl}>
-          解説してもらう
+          解説開始!
         </Button>
         <Button variant='light' onClick={stop} disabled={!isLoading}>
           停止
