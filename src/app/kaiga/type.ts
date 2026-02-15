@@ -1,5 +1,11 @@
 import { z } from 'zod';
 
+export const apiRequestSchema = z.object({
+  imageDataUrl: z.string().min(1)
+});
+
+export type ApiRequest = z.infer<typeof apiRequestSchema>;
+
 export const schema = z.object({
   title: z.string().describe('絵画の名称(日本語)'),
   artist: z.string().describe('絵画の作者(日本語)'),

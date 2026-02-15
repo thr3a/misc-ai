@@ -9,6 +9,22 @@ export const systemPrompt = dedent`
 ${JSON.stringify(z.toJSONSchema(schema))}
 `;
 
+export const fileToDataUrl = async (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('画像の読み込みに失敗しました。'));
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result !== 'string') {
+        reject(new Error('画像の読み込みに失敗しました。'));
+        return;
+      }
+      resolve(result);
+    };
+    reader.readAsDataURL(file);
+  });
+};
+
 export const buildMarkdown = (value: Partial<KaigaResult>): string => {
   return dedent`
   # 基本情報

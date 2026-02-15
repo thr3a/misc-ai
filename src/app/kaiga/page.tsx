@@ -6,28 +6,8 @@ import { experimental_useObject as useObject } from '@ai-sdk/react';
 import { Button, FileInput, Group, Image, Stack, Text, Textarea, Title } from '@mantine/core';
 import { IconPhotoScan } from '@tabler/icons-react';
 import { useState } from 'react';
-import { schema } from './type';
-import { buildMarkdown } from './util';
-
-type ApiRequest = {
-  imageDataUrl: string;
-};
-
-const fileToDataUrl = async (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error('画像の読み込みに失敗しました。'));
-    reader.onload = () => {
-      const result = reader.result;
-      if (typeof result !== 'string') {
-        reject(new Error('画像の読み込みに失敗しました。'));
-        return;
-      }
-      resolve(result);
-    };
-    reader.readAsDataURL(file);
-  });
-};
+import { type ApiRequest, schema } from './type';
+import { buildMarkdown, fileToDataUrl } from './util';
 
 const Page = () => {
   const [imageDataUrl, setImageDataUrl] = useState<string>('');
@@ -38,6 +18,8 @@ const Page = () => {
     schema
   });
 
+  const errorMessage = imageError ?? error?.message ?? null;
+
   const processMarkdown = (): string => {
     if (!object || Object.keys(object).length === 0) {
       return '';
@@ -47,6 +29,25 @@ const Page = () => {
   };
 
   const markdown = processMarkdown();
+
+  const handleFileChange = async (file: File | null) => {
+    stop();
+    setImageError(null);
+    setImageDataUrl('');
+
+    if (!file) {
+      return;
+    }
+
+    try {
+      const compressed = await resizeAndCompressImage(file, 1024, 0.8);
+      const dataUrl = await fileToDataUrl(compressed);
+      setImageDataUrl(dataUrl);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : '画像の処理に失敗しました。';
+      setImageError(message);
+    }
+  };
 
   const handleSubmit = () => {
     setImageError(null);
@@ -65,25 +66,12 @@ const Page = () => {
         label='解説してほしい絵画画像を選択'
         withAsterisk
         accept='image/*'
-        onChange={async (file) => {
-          stop();
-          setImageError(null);
-          setImageDataUrl('');
-          if (!file) return;
-          try {
-            const compressed = await resizeAndCompressImage(file, 1024, 0.8);
-            const dataUrl = await fileToDataUrl(compressed);
-            setImageDataUrl(dataUrl);
-          } catch (e: unknown) {
-            const message = e instanceof Error ? e.message : '画像の処理に失敗しました。';
-            setImageError(message);
-          }
-        }}
+        onChange={handleFileChange}
       />
 
-      {imageError && (
+      {errorMessage && (
         <Text size='sm' c='red'>
-          {imageError}
+          {errorMessage}
         </Text>
       )}
 
@@ -101,12 +89,6 @@ const Page = () => {
           停止
         </Button>
       </Group>
-
-      {error && (
-        <Text size='sm' c='red'>
-          {error.message}
-        </Text>
-      )}
 
       <Group>
         <Title order={3}>結果</Title>

@@ -1,4 +1,4 @@
-import { schema } from '@/app/kaiga/type';
+import { apiRequestSchema, schema } from '@/app/kaiga/type';
 import { systemPrompt } from '@/app/kaiga/util';
 import { openai } from '@ai-sdk/openai';
 import { Output, streamText } from 'ai';
@@ -6,10 +6,6 @@ import type { NextRequest } from 'next/server';
 import { z } from 'zod';
 
 export const maxDuration = 30;
-
-const requestSchema = z.object({
-  imageDataUrl: z.string().min(1)
-});
 
 const parseDataUrl = (dataUrl: string): { mediaType: string; data: Uint8Array } | null => {
   const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
@@ -24,7 +20,7 @@ const parseDataUrl = (dataUrl: string): { mediaType: string; data: Uint8Array } 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const validatedFields = requestSchema.safeParse(body);
+    const validatedFields = apiRequestSchema.safeParse(body);
 
     if (!validatedFields.success) {
       return Response.json(
