@@ -1,19 +1,16 @@
 # 1. 全体方針・コミュニケーション
 
-- ユーザーは日本人です。
-  - コード内コメント・最終出力メッセージ・ユーザーへの質問：日本語
+- ユーザーは日本人です。コード内コメント・最終出力メッセージ・ユーザーへの質問は日本語でお願いします。
 - 既存のコードコメントは、明示的な指示がない限り変更しない。
 - AI のモデル名（例：`gpt-4o`）は、ユーザーから指示があるまで勝手に変更しない。
 - `npm run build` は実行しない。
-- `src/scripts` 以下の TypeScript コードを実行するときは、次のコマンドを使う：
-  - `node --import tsx ./src/scripts/hello.ts`
-- 特に指示がなければ、上記形式でのスクリプト実行は 自動で行ってよい。
+- `src/scripts` 以下の TypeScript コードを実行するときは `node --import tsx ./src/scripts/hello.ts`
 - 指示されるまではAIのモデル名(gpt-4oなど)は勝手に変更しないこと
 
 ライブラリ概要
 
 - 言語: TypeScript
-- フレームワーク: Next.js  v15 AppRouter
+- フレームワーク: Next.js  v16 AppRouter
 - UI: React v19 / Mantine v8 https://deepwiki.com/mantinedev/mantine
 - hook: Mantine の hook を使用
 - Lint: biome v2
