@@ -41,16 +41,26 @@ export async function POST(req: NextRequest) {
 
     const { situation, provider, mode } = validatedFields.data;
 
-    const model = provider === 'openrouter' ? openRouter.chat('z-ai/glm-5') : localOpenAI.chat('main');
+    const isOpenRouter = provider === 'openrouter';
+
+    const model = isOpenRouter ? openRouter.chat('z-ai/glm-5') : localOpenAI.chat('main');
 
     const selectedSystemPrompt = mode === 'creative' ? creativeSystemPrompt : systemPrompt;
 
     const result = streamText({
       model,
       system: selectedSystemPrompt,
-      prompt: `<think></think>${situation}`,
+      prompt: situation,
       output: Output.object({ schema: scenarioPromptSchema }),
-      temperature: 0.7
+      temperature: 0.7,
+      providerOptions: isOpenRouter
+        ? {
+            openai: {
+              reasoningEffort: 'none',
+              forceReasoning: false
+            }
+          }
+        : undefined
     });
 
     return result.toTextStreamResponse();
