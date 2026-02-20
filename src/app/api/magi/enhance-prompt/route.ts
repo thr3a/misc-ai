@@ -1,45 +1,40 @@
-import { jsonResponse } from '@/app/api/magi/helpers';
 import { promptEnhancerSystemPrompt } from '@/app/magi/util';
-import { openai } from '@ai-sdk/openai';
-import { streamText } from 'ai';
+import { google } from '@ai-sdk/google';
+import { generateText } from 'ai';
+import type { NextRequest } from 'next/server';
+import { z } from 'zod';
 
-type EnhancePromptRequestBody = {
-  prompt?: string;
-};
+const requestSchema = z.object({
+  prompt: z.string().min(1, 'prompt is required')
+});
 
-export async function POST(req: Request) {
-  let body: EnhancePromptRequestBody;
+export async function POST(req: NextRequest) {
   try {
-    body = await req.json();
-  } catch {
-    return jsonResponse({ error: 'JSONのパースに失敗しました。' }, { status: 400 });
-  }
+    const body = await req.json();
 
-  if (!body.prompt) {
-    return jsonResponse({ error: '強化対象のプロンプトが必要です。' }, { status: 400 });
-  }
+    const validatedFields = requestSchema.safeParse(body);
 
-  try {
-    const { textStream } = await streamText({
-      model: openai('gpt-5.1'),
-      system: promptEnhancerSystemPrompt,
-      prompt: body.prompt,
-      providerOptions: {
-        openai: {
-          reasoningEffort: 'none',
-          textVerbosity: 'low'
-        }
-      }
-    });
-
-    let enhancedPrompt = '';
-    for await (const delta of textStream) {
-      enhancedPrompt += delta;
+    if (!validatedFields.success) {
+      return Response.json(
+        {
+          error: 'Invalid request body',
+          details: z.flattenError(validatedFields.error).fieldErrors
+        },
+        { status: 400 }
+      );
     }
 
-    return jsonResponse({ enhancedPrompt: enhancedPrompt });
+    const { prompt } = validatedFields.data;
+
+    const { text } = await generateText({
+      model: google('gemini-2.5-flash'),
+      system: promptEnhancerSystemPrompt,
+      prompt,
+      temperature: 0
+    });
+    return Response.json({ enhancedPrompt: text });
   } catch (error) {
-    console.error('Prompt enhancement failed', error);
-    return jsonResponse({ error: 'プロンプト強化に失敗しました。' }, { status: 500 });
+    console.log(error);
+    return Response.json({ error: 'error' }, { status: 500 });
   }
 }

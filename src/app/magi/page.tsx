@@ -1,16 +1,13 @@
 'use client';
 
 import { ButtonCopy } from '@/app/html-ui/ButtonCopy';
-import { MODEL_DEFINITIONS, MODEL_DEFINITION_MAP, type ModelKey } from '@/app/magi/util';
+import { MODEL_DEFINITIONS, type ModelKey } from '@/app/magi/util';
 import { useChat } from '@ai-sdk/react';
 import { Carousel } from '@mantine/carousel';
 import { Badge, Box, Button, Group, Paper, Stack, Text, Textarea } from '@mantine/core';
 import { useInputState, useListState } from '@mantine/hooks';
 import { DefaultChatTransport } from 'ai';
-import { type CSSProperties, useMemo, useState } from 'react';
-
-export const dynamic = 'force-dynamic';
-export const maxDuration = 60;
+import { useMemo, useState } from 'react';
 
 type ModelStatus = '待機中' | '生成中' | '応答済み';
 
@@ -120,6 +117,7 @@ export default function Page() {
         body: JSON.stringify({ prompt: question })
       });
       const payload = (await response.json().catch(() => null)) as { enhancedPrompt?: string; error?: string } | null;
+      console.log(payload);
       if (!response.ok || !payload) {
         throw new Error(payload?.error ?? '強化リクエストに失敗しました。');
       }
