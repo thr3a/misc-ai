@@ -22,7 +22,7 @@ type TextPart = {
 type ModelChatInstance = ReturnType<typeof useModelChat>;
 
 const STATUS_COLORS: Record<ModelStatus, string> = {
-  待機中: 'gray',
+  待機中: 'dark.8',
   生成中: 'blue',
   応答済み: 'teal'
 };
@@ -240,7 +240,8 @@ export default function Page() {
           slideGap='md'
           slideSize={{ base: '100%', sm: '50%', lg: '33.333333%' }}
           withIndicators
-          emblaOptions={{ align: 'start' }}
+          withControls={false}
+          emblaOptions={{ align: 'start', loop: false }}
         >
           {modelSections.map(({ definition, chat }, index) => {
             const hasAssistantReply = chat.messages.some((message) => message.role === 'assistant');
@@ -254,7 +255,7 @@ export default function Page() {
 
             return (
               <Carousel.Slide key={definition.id}>
-                <Paper withBorder p='sm' h='100%'>
+                <Paper withBorder p='sm' h='100%' bg={'gray.5'}>
                   <Stack gap='sm' h='100%'>
                     <Group justify='space-between' align='flex-start'>
                       <Stack gap={2}>
@@ -301,15 +302,15 @@ export default function Page() {
                     </Stack>
 
                     <Stack gap='xs'>
-                      <Textarea
+                      {/* <Textarea
                         autosize
                         minRows={1}
                         maxRows={4}
                         placeholder={`${definition.label}に追加質問する`}
                         value={followUpInputs[index]}
                         onChange={(event) => handleFollowUpChange(index, event.currentTarget.value)}
-                      />
-                      <Group justify='flex-end'>
+                      /> */}
+                      {/* <Group justify='flex-end'>
                         <Button
                           size='sm'
                           variant='light'
@@ -317,8 +318,8 @@ export default function Page() {
                           onClick={() => handleFollowUpSend(index, definition.id)}
                         >
                           個別に送信
-                        </Button>
-                      </Group>
+                        </Button> */}
+                      {/* </Group> */}
                     </Stack>
                   </Stack>
                 </Paper>
