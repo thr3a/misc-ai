@@ -35,6 +35,9 @@ export async function POST(req: NextRequest) {
     return Response.json({ enhancedPrompt: text });
   } catch (error) {
     console.log(error);
-    return Response.json({ error: 'error' }, { status: 500 });
+
+    const message = error instanceof Error ? error.message : String(error);
+    const stack = error instanceof Error ? error.stack : undefined;
+    return Response.json({ error: message, stack }, { status: 500 });
   }
 }
