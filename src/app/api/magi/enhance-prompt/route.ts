@@ -13,14 +13,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    const validatedFields = requestSchema.safeParse(body);
-
-    if (!validatedFields.success) {
-      console.error(validatedFields.error);
-      throw new Error('Invalid request body');
-    }
-
-    const { prompt } = validatedFields.data;
+    const { prompt } = requestSchema.parse(body);
 
     const { text } = await generateText({
       model: google('gemini-2.5-flash'),

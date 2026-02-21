@@ -62,11 +62,10 @@ const collectText = (parts: Array<TextPart | { type: string }>) =>
 export default function Page() {
   const [question, setQuestion] = useInputState('スプラトゥーンが流行った理由は？');
   const [isEnhancing, setIsEnhancing] = useState(false);
-  const [enhanceError, setEnhanceError] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [followUpInputs, followUpHandlers] = useListState<string>(MODEL_DEFINITIONS.map(() => ''));
   const [isSynthesizing, setIsSynthesizing] = useState(false);
   const [synthesizeResult, setSynthesizeResult] = useState('');
-  const [synthesizeError, setSynthesizeError] = useState<string | null>(null);
 
   const chatMap: Record<ModelKey, ModelChatInstance> = {
     gemini: useModelChat('gemini'),
@@ -96,7 +95,7 @@ export default function Page() {
   };
 
   const handleBroadcast = () => {
-    setEnhanceError(null);
+    setErrorMessage(null);
     // setQuestion('');
     for (const { chat } of modelSections) {
       void chat.sendMessage({
@@ -106,7 +105,7 @@ export default function Page() {
   };
 
   const handleEnhancePrompt = async () => {
-    setEnhanceError(null);
+    setErrorMessage(null);
     setIsEnhancing(true);
     try {
       const response = await fetch('/api/magi/enhance-prompt', {
@@ -117,7 +116,6 @@ export default function Page() {
         body: JSON.stringify({ prompt: question })
       });
       const payload = (await response.json().catch(() => null)) as { enhancedPrompt?: string; error?: string } | null;
-      console.log(payload);
       if (!response.ok || !payload) {
         throw new Error(payload?.error ?? '強化リクエストに失敗しました。');
       }
@@ -125,8 +123,8 @@ export default function Page() {
         setQuestion(payload.enhancedPrompt);
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : '強化リクエストに失敗しました。';
-      setEnhanceError(message);
+      const message = error instanceof Error ? error.message : String(error);
+      setErrorMessage(message);
     } finally {
       setIsEnhancing(false);
     }
@@ -152,7 +150,7 @@ export default function Page() {
   };
 
   const handleSynthesize = async () => {
-    setSynthesizeError(null);
+    setErrorMessage(null);
     setSynthesizeResult('');
     setIsSynthesizing(true);
 
@@ -191,7 +189,7 @@ export default function Page() {
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : '統合リクエストに失敗しました。';
-      setSynthesizeError(message);
+      setErrorMessage(message);
     } finally {
       setIsSynthesizing(false);
     }
@@ -205,7 +203,7 @@ export default function Page() {
             label={'質問内容'}
             value={question}
             onChange={(event) => {
-              setEnhanceError(null);
+              setErrorMessage(null);
               setQuestion(event);
             }}
             autosize
@@ -227,11 +225,12 @@ export default function Page() {
             </Button>
             <ButtonCopy content={question} disabled={isQuestionEmpty} />
           </Group>
-          {enhanceError ? (
+
+          {errorMessage && (
             <Text size='xs' c='red' ta='center'>
-              {enhanceError}
+              {errorMessage}
             </Text>
-          ) : null}
+          )}
         </Stack>
 
         <Carousel
@@ -332,11 +331,6 @@ export default function Page() {
               集合知を統合
             </Button>
           </Group>
-          {synthesizeError && (
-            <Text size='xs' c='red' ta='center'>
-              {synthesizeError}
-            </Text>
-          )}
           {synthesizeResult && (
             <Paper withBorder p='sm'>
               <Stack gap='xs'>

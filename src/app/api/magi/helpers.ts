@@ -3,7 +3,7 @@ import { google } from '@ai-sdk/google';
 import { createOpenAI, openai } from '@ai-sdk/openai';
 import type { LanguageModel } from 'ai';
 
-export const jsonResponse = (payload: unknown, init?: ResponseInit) =>
+export const jsonResponse = <T>(payload: T, init?: ResponseInit) =>
   new Response(JSON.stringify(payload), {
     ...init,
     headers: {
