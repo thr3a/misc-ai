@@ -1,3 +1,4 @@
+// jo 'prompt=スプラはなぜ面白い？'| curl 'localhost:3000/api/magi/enhance-prompt/' --json @-
 import { promptEnhancerSystemPrompt } from '@/app/magi/util';
 import { google } from '@ai-sdk/google';
 import { generateText } from 'ai';
@@ -5,7 +6,7 @@ import type { NextRequest } from 'next/server';
 import { z } from 'zod';
 
 const requestSchema = z.object({
-  prompt: z.string().min(1, 'prompt is required')
+  prompt: z.string().min(1)
 });
 
 export async function POST(req: NextRequest) {
@@ -15,13 +16,8 @@ export async function POST(req: NextRequest) {
     const validatedFields = requestSchema.safeParse(body);
 
     if (!validatedFields.success) {
-      return Response.json(
-        {
-          error: 'Invalid request body',
-          details: z.flattenError(validatedFields.error).fieldErrors
-        },
-        { status: 400 }
-      );
+      console.error(validatedFields.error);
+      throw new Error('Invalid request body');
     }
 
     const { prompt } = validatedFields.data;
@@ -34,10 +30,8 @@ export async function POST(req: NextRequest) {
     });
     return Response.json({ enhancedPrompt: text });
   } catch (error) {
-    console.log(error);
-
     const message = error instanceof Error ? error.message : String(error);
-    const stack = error instanceof Error ? error.stack : undefined;
-    return Response.json({ error: message, stack }, { status: 500 });
+    console.error(error);
+    return Response.json({ error: message }, { status: 500 });
   }
 }
