@@ -253,6 +253,7 @@ export default function Page() {
           {modelSections.map(({ definition, chat }, index) => {
             const hasAssistantReply = chat.messages.some((message) => message.role === 'assistant');
             const status = getModelStatus(chat.status, hasAssistantReply);
+            const isGenerating = chat.status === 'streaming' || chat.status === 'submitted';
             const visibleMessages = chat.messages.filter((message) => message.role !== 'system');
             const firstUserMessageIndex = visibleMessages.findIndex((message) => message.role === 'user');
             const displayMessages =
@@ -262,7 +263,7 @@ export default function Page() {
 
             return (
               <Carousel.Slide key={definition.id}>
-                <Paper withBorder p='sm' h='100%' mih={'300px'}>
+                <Paper withBorder p='sm' h='100%' mih={'200px'}>
                   <Stack gap='sm' h='100%'>
                     <Group justify='space-between' align='flex-start'>
                       <Stack gap={2}>
@@ -275,7 +276,7 @@ export default function Page() {
                       </Stack>
                       <Button
                         size='xs'
-                        variant='subtle'
+                        color='red'
                         onClick={() => chat.stop()}
                         disabled={chat.status !== 'streaming' && chat.status !== 'submitted'}
                       >
@@ -301,26 +302,28 @@ export default function Page() {
                         ))}
                     </Stack>
 
-                    <Stack gap='xs' pb={'lg'}>
-                      <Textarea
-                        autosize
-                        minRows={1}
-                        maxRows={4}
-                        placeholder={`${definition.label}に追加質問する`}
-                        value={followUpInputs[index]}
-                        onChange={(event) => handleFollowUpChange(index, event.currentTarget.value)}
-                      />
-                      <Group justify='flex-end'>
-                        <Button
-                          size='sm'
-                          variant='light'
-                          disabled={followUpInputs[index].length === 0}
-                          onClick={() => handleFollowUpSend(index, definition.id)}
-                        >
-                          個別に送信
-                        </Button>
-                      </Group>
-                    </Stack>
+                    {hasAssistantReply && (
+                      <Stack gap='xs' pb={'lg'}>
+                        <Textarea
+                          autosize
+                          minRows={1}
+                          maxRows={4}
+                          placeholder={`${definition.label}に追加質問する`}
+                          value={followUpInputs[index]}
+                          onChange={(event) => handleFollowUpChange(index, event.currentTarget.value)}
+                        />
+                        <Group justify='flex-end'>
+                          <Button
+                            size='sm'
+                            variant='light'
+                            disabled={followUpInputs[index].length === 0 || isGenerating}
+                            onClick={() => handleFollowUpSend(index, definition.id)}
+                          >
+                            個別に送信
+                          </Button>
+                        </Group>
+                      </Stack>
+                    )}
                   </Stack>
                 </Paper>
               </Carousel.Slide>
