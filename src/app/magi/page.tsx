@@ -299,11 +299,6 @@ export default function Page() {
                             <Divider />
                           </Stack>
                         ))}
-                      {(chat.status === 'streaming' || chat.status === 'submitted') && (
-                        <Text size='xs' c='dimmed'>
-                          生成中...
-                        </Text>
-                      )}
                     </Stack>
 
                     <Stack gap='xs' pb={'lg'}>
