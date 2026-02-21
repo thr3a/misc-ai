@@ -4,7 +4,7 @@ import { ButtonCopy } from '@/app/html-ui/ButtonCopy';
 import { MODEL_DEFINITIONS, type ModelKey } from '@/app/magi/util';
 import { useChat } from '@ai-sdk/react';
 import { Carousel } from '@mantine/carousel';
-import { Badge, Box, Button, Group, Paper, Stack, Text, Textarea } from '@mantine/core';
+import { Badge, Box, Button, Divider, Group, Paper, Stack, Text, Textarea } from '@mantine/core';
 import { useInputState, useListState } from '@mantine/hooks';
 import { DefaultChatTransport } from 'ai';
 import { useMemo, useState } from 'react';
@@ -96,7 +96,6 @@ export default function Page() {
 
   const handleBroadcast = () => {
     setErrorMessage(null);
-    // setQuestion('');
     for (const { chat } of modelSections) {
       void chat.sendMessage({
         parts: [{ type: 'text', text: question }]
@@ -239,6 +238,17 @@ export default function Page() {
           withIndicators
           withControls={false}
           emblaOptions={{ align: 'start', loop: false }}
+          styles={{
+            indicator: {
+              backgroundColor: 'var(--mantine-color-blue-2)',
+              border: '1px solid var(--mantine-color-blue-4)',
+              height: '12px',
+              '&[dataActive]': {
+                backgroundColor: 'var(--mantine-color-blue-8)',
+                borderColor: 'var(--mantine-color-blue-9)'
+              }
+            }
+          }}
         >
           {modelSections.map(({ definition, chat }, index) => {
             const hasAssistantReply = chat.messages.some((message) => message.role === 'assistant');
@@ -252,7 +262,7 @@ export default function Page() {
 
             return (
               <Carousel.Slide key={definition.id}>
-                <Paper withBorder p='sm' h='100%' bg={'gray.5'}>
+                <Paper withBorder p='sm' h='100%' mih={'300px'}>
                   <Stack gap='sm' h='100%'>
                     <Group justify='space-between' align='flex-start'>
                       <Stack gap={2}>
@@ -282,13 +292,11 @@ export default function Page() {
                     <Stack gap='sm' flex={1}>
                       {displayMessages.length !== 0 &&
                         displayMessages.map((message) => (
-                          <Stack gap={2} key={message.id ?? `${message.role}-${definition.id}`}>
-                            <Text size='xs' c='dimmed'>
-                              {message.role === 'user' ? '自分' : definition.label}
-                            </Text>
+                          <Stack key={message.id ?? `${message.role}-${definition.id}`}>
                             <Text size='sm' style={{ whiteSpace: 'pre-wrap' }}>
                               {collectText(message.parts)}
                             </Text>
+                            <Divider />
                           </Stack>
                         ))}
                       {(chat.status === 'streaming' || chat.status === 'submitted') && (
@@ -298,16 +306,16 @@ export default function Page() {
                       )}
                     </Stack>
 
-                    <Stack gap='xs'>
-                      {/* <Textarea
+                    <Stack gap='xs' pb={'lg'}>
+                      <Textarea
                         autosize
                         minRows={1}
                         maxRows={4}
                         placeholder={`${definition.label}に追加質問する`}
                         value={followUpInputs[index]}
                         onChange={(event) => handleFollowUpChange(index, event.currentTarget.value)}
-                      /> */}
-                      {/* <Group justify='flex-end'>
+                      />
+                      <Group justify='flex-end'>
                         <Button
                           size='sm'
                           variant='light'
@@ -315,8 +323,8 @@ export default function Page() {
                           onClick={() => handleFollowUpSend(index, definition.id)}
                         >
                           個別に送信
-                        </Button> */}
-                      {/* </Group> */}
+                        </Button>
+                      </Group>
                     </Stack>
                   </Stack>
                 </Paper>
