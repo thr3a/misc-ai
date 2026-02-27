@@ -3,15 +3,6 @@ import { google } from '@ai-sdk/google';
 import { createOpenAI, openai } from '@ai-sdk/openai';
 import type { LanguageModel } from 'ai';
 
-export const jsonResponse = <T>(payload: T, init?: ResponseInit) =>
-  new Response(JSON.stringify(payload), {
-    ...init,
-    headers: {
-      'content-type': 'application/json',
-      ...(init?.headers ?? {})
-    }
-  });
-
 export const resolveModel = (modelId: ModelKey): LanguageModel => {
   const config = MODEL_PROVIDER_MAP[modelId];
   if (!config) {

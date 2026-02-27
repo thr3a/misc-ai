@@ -1,11 +1,26 @@
 'use client';
 
 import { ButtonCopy } from '@/app/html-ui/ButtonCopy';
+import { synthesizeResultSchema } from '@/app/magi/type';
 import { MODEL_DEFINITIONS, type ModelKey } from '@/app/magi/util';
-import { useChat } from '@ai-sdk/react';
+import { useChat, experimental_useObject as useObject } from '@ai-sdk/react';
 import { Carousel } from '@mantine/carousel';
-import { Badge, Box, Button, Divider, Group, Paper, Stack, Text, Textarea } from '@mantine/core';
+import {
+  Badge,
+  Box,
+  Button,
+  Divider,
+  Group,
+  List,
+  Paper,
+  Stack,
+  Text,
+  Textarea,
+  ThemeIcon,
+  Title
+} from '@mantine/core';
 import { useInputState, useListState } from '@mantine/hooks';
+import { IconAlertTriangle, IconCheck } from '@tabler/icons-react';
 import { DefaultChatTransport } from 'ai';
 import { useMemo, useState } from 'react';
 
@@ -64,8 +79,16 @@ export default function Page() {
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [followUpInputs, followUpHandlers] = useListState<string>(MODEL_DEFINITIONS.map(() => ''));
-  const [isSynthesizing, setIsSynthesizing] = useState(false);
-  const [synthesizeResult, setSynthesizeResult] = useState('');
+
+  const {
+    object: synthesizeObject,
+    submit: submitSynthesize,
+    isLoading: isSynthesizing,
+    error: synthesizeError
+  } = useObject({
+    api: '/api/magi/synthesize',
+    schema: synthesizeResultSchema
+  });
 
   const chatMap: Record<ModelKey, ModelChatInstance> = {
     gemini: useModelChat('gemini'),
@@ -148,50 +171,10 @@ export default function Page() {
     });
   };
 
-  const handleSynthesize = async () => {
+  const handleSynthesize = () => {
     setErrorMessage(null);
-    setSynthesizeResult('');
-    setIsSynthesizing(true);
-
     const responses = modelSections.map(({ chat }) => getFirstAssistantResponse(chat));
-
-    try {
-      const response = await fetch('/api/magi/synthesize', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ responses })
-      });
-
-      if (!response.ok) {
-        const errorData = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(errorData?.error ?? '統合リクエストに失敗しました。');
-      }
-
-      const reader = response.body?.getReader();
-      if (!reader) {
-        throw new Error('レスポンスの読み取りに失敗しました。');
-      }
-
-      const decoder = new TextDecoder();
-      let accumulatedText = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) {
-          break;
-        }
-        const chunk = decoder.decode(value, { stream: true });
-        accumulatedText += chunk;
-        setSynthesizeResult(accumulatedText);
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : '統合リクエストに失敗しました。';
-      setErrorMessage(message);
-    } finally {
-      setIsSynthesizing(false);
-    }
+    submitSynthesize({ responses });
   };
 
   return (
@@ -337,20 +320,60 @@ export default function Page() {
               集合知を統合
             </Button>
           </Group>
-          {synthesizeResult && (
-            <Paper withBorder p='sm'>
-              <Stack gap='xs'>
-                <Group justify='space-between'>
-                  <Text fw={600} size='sm'>
-                    統合結果
-                  </Text>
-                  <ButtonCopy content={synthesizeResult} />
-                </Group>
-                <Text size='sm' style={{ whiteSpace: 'pre-wrap' }}>
-                  {synthesizeResult}
-                </Text>
-              </Stack>
-            </Paper>
+          {synthesizeError && (
+            <Text size='xs' c='red' ta='center'>
+              {synthesizeError.message}
+            </Text>
+          )}
+          {synthesizeObject && (
+            <Stack gap='sm'>
+              {synthesizeObject.commonOpinions && synthesizeObject.commonOpinions.length > 0 && (
+                <Paper withBorder p='sm'>
+                  <Stack gap='xs'>
+                    <Title order={5} c='teal'>
+                      共通している意見
+                    </Title>
+                    <List
+                      spacing='xs'
+                      icon={
+                        <ThemeIcon color='teal' size={20} radius='xl'>
+                          <IconCheck size={12} />
+                        </ThemeIcon>
+                      }
+                    >
+                      {synthesizeObject.commonOpinions.map((opinion, i) => (
+                        <List.Item key={i}>
+                          <Text size='sm'>{opinion}</Text>
+                        </List.Item>
+                      ))}
+                    </List>
+                  </Stack>
+                </Paper>
+              )}
+              {synthesizeObject.conflictingOpinions && synthesizeObject.conflictingOpinions.length > 0 && (
+                <Paper withBorder p='sm'>
+                  <Stack gap='xs'>
+                    <Title order={5} c='orange'>
+                      対立している意見
+                    </Title>
+                    <List
+                      spacing='xs'
+                      icon={
+                        <ThemeIcon color='orange' size={20} radius='xl'>
+                          <IconAlertTriangle size={12} />
+                        </ThemeIcon>
+                      }
+                    >
+                      {synthesizeObject.conflictingOpinions.map((opinion, i) => (
+                        <List.Item key={i}>
+                          <Text size='sm'>{opinion}</Text>
+                        </List.Item>
+                      ))}
+                    </List>
+                  </Stack>
+                </Paper>
+              )}
+            </Stack>
           )}
         </Stack>
       </Stack>
