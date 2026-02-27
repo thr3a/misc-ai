@@ -178,7 +178,7 @@ export default function Page() {
   };
 
   return (
-    <Box mx='auto'>
+    <Box mx='auto' mb={'xl'}>
       <Stack gap='md'>
         <Stack gap='xs'>
           <Textarea
