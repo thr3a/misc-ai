@@ -26,5 +26,5 @@ export const ensureModelKey = (value: unknown): value is ModelKey => {
   if (typeof value !== 'string') {
     return false;
   }
-  return (['gemini', 'gpt5', 'claude'] as const).includes(value as ModelKey);
+  return (Object.keys(MODEL_PROVIDER_MAP) as ModelKey[]).includes(value as ModelKey);
 };

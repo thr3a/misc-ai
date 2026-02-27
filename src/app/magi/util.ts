@@ -34,13 +34,6 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
   }
 ];
 
-export const MODEL_DEFINITION_MAP: Record<ModelKey, ModelDefinition> = MODEL_DEFINITIONS.reduce(
-  (acc, definition) => {
-    acc[definition.id] = definition;
-    return acc;
-  },
-  {} as Record<ModelKey, ModelDefinition>
-);
 export const MODEL_PROVIDER_MAP: Record<ModelKey, ProviderBinding> = {
   gemini: {
     provider: 'google',

@@ -26,11 +26,6 @@ import { useMemo, useState } from 'react';
 
 type ModelStatus = '待機中' | '生成中' | '応答済み';
 
-type TextPart = {
-  type: 'text';
-  text: string;
-};
-
 type ModelChatInstance = ReturnType<typeof useModelChat>;
 
 const STATUS_COLORS: Record<ModelStatus, string> = {
@@ -67,9 +62,9 @@ const getModelStatus = (status: ModelChatInstance['status'], hasAssistantReply: 
   return '待機中';
 };
 
-const collectText = (parts: Array<TextPart | { type: string }>) =>
+const collectText = (parts: Array<{ type: string; text?: string }>) =>
   parts
-    .filter((part): part is TextPart => part.type === 'text')
+    .filter((part): part is { type: 'text'; text: string } => part.type === 'text' && 'text' in part)
     .map((part) => part.text)
     .join('\n');
 
@@ -150,10 +145,6 @@ export default function Page() {
     } finally {
       setIsEnhancing(false);
     }
-  };
-
-  const handleFollowUpChange = (index: number, value: string) => {
-    followUpHandlers.setItem(index, value);
   };
 
   const handleFollowUpSend = (index: number, modelId: ModelKey) => {
@@ -238,25 +229,19 @@ export default function Page() {
             const status = getModelStatus(chat.status, hasAssistantReply);
             const isGenerating = chat.status === 'streaming' || chat.status === 'submitted';
             const visibleMessages = chat.messages.filter((message) => message.role !== 'system');
-            const firstUserMessageIndex = visibleMessages.findIndex((message) => message.role === 'user');
-            const displayMessages =
-              firstUserMessageIndex === -1
-                ? visibleMessages
-                : visibleMessages.filter((_, messageIndex) => messageIndex !== firstUserMessageIndex);
+            const displayMessages = visibleMessages.filter((_, i) => !(i === 0 && visibleMessages[0]?.role === 'user'));
 
             return (
               <Carousel.Slide key={definition.id}>
                 <Paper withBorder p='sm' h='100%' mih={'200px'}>
                   <Stack gap='sm' h='100%'>
                     <Group justify='space-between' align='flex-start'>
-                      <Stack gap={2}>
-                        <Group gap='xs'>
-                          <Text fw={600}>{definition.label}</Text>
-                          <Badge variant='light' color={STATUS_COLORS[status]}>
-                            {status}
-                          </Badge>
-                        </Group>
-                      </Stack>
+                      <Group gap='xs'>
+                        <Text fw={600}>{definition.label}</Text>
+                        <Badge variant='light' color={STATUS_COLORS[status]}>
+                          {status}
+                        </Badge>
+                      </Group>
                       <Button
                         size='xs'
                         color='red'
@@ -293,7 +278,7 @@ export default function Page() {
                           maxRows={4}
                           placeholder={`${definition.label}に追加質問する`}
                           value={followUpInputs[index]}
-                          onChange={(event) => handleFollowUpChange(index, event.currentTarget.value)}
+                          onChange={(event) => followUpHandlers.setItem(index, event.currentTarget.value)}
                         />
                         <Group justify='flex-end'>
                           <Button

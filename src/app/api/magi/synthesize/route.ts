@@ -1,12 +1,13 @@
 import { synthesizeResultSchema } from '@/app/magi/type';
 import { google } from '@ai-sdk/google';
 import { Output, streamText } from 'ai';
+import type { NextRequest } from 'next/server';
 import dedent from 'ts-dedent';
 import { z } from 'zod';
 
-type SynthesizeRequestBody = {
-  responses: string[];
-};
+const requestSchema = z.object({
+  responses: z.array(z.string().min(1)).length(3)
+});
 
 const synthesizeSystemPrompt = dedent`
 あなたは多角的な視点を統合し、最適な意思決定を支援する合意形成の専門家です。
@@ -25,41 +26,35 @@ const synthesizeSystemPrompt = dedent`
 ${JSON.stringify(z.toJSONSchema(synthesizeResultSchema))}
 `;
 
-export async function POST(req: Request) {
-  let body: SynthesizeRequestBody;
+export async function POST(req: NextRequest) {
   try {
-    body = await req.json();
-  } catch {
-    return Response.json({ error: 'JSONのパースに失敗しました。' }, { status: 400 });
+    const body = await req.json();
+    const { responses } = requestSchema.parse(body);
+
+    const userPrompt = dedent`
+    回答1:
+    ${responses[0]}
+
+    回答2:
+    ${responses[1]}
+
+    回答3:
+    ${responses[2]}
+    ---
+    `;
+
+    const result = streamText({
+      model: google('gemini-2.5-flash'),
+      system: synthesizeSystemPrompt,
+      prompt: userPrompt,
+      temperature: 0,
+      output: Output.object({ schema: synthesizeResultSchema })
+    });
+
+    return result.toTextStreamResponse();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(error);
+    return Response.json({ error: message }, { status: 500 });
   }
-
-  if (!body.responses || body.responses.length !== 3) {
-    return Response.json({ error: '3つの回答が必要です。' }, { status: 400 });
-  }
-
-  if (body.responses.some((response) => typeof response !== 'string' || response.length === 0)) {
-    return Response.json({ error: 'すべての回答が空でない文字列である必要があります。' }, { status: 400 });
-  }
-
-  const userPrompt = dedent`
-  回答1:
-  ${body.responses[0]}
-
-  回答2:
-  ${body.responses[1]}
-
-  回答3:
-  ${body.responses[2]}
-  ---
-  `;
-
-  const result = streamText({
-    model: google('gemini-2.5-flash'),
-    system: synthesizeSystemPrompt,
-    prompt: userPrompt,
-    temperature: 0,
-    output: Output.object({ schema: synthesizeResultSchema })
-  });
-
-  return result.toTextStreamResponse();
 }
