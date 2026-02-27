@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     `;
 
     const result = streamText({
-      model: google('gemini-2.5-flash'),
+      model: google('gemini-3-flash-preview'),
       system: synthesizeSystemPrompt,
       prompt: userPrompt,
       temperature: 0,

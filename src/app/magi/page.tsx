@@ -13,6 +13,7 @@ import {
   Group,
   List,
   Paper,
+  Skeleton,
   Stack,
   Text,
   Textarea,
@@ -230,6 +231,12 @@ export default function Page() {
             const isGenerating = chat.status === 'streaming' || chat.status === 'submitted';
             const visibleMessages = chat.messages.filter((message) => message.role !== 'system');
             const displayMessages = visibleMessages.filter((_, i) => !(i === 0 && visibleMessages[0]?.role === 'user'));
+            const lastMessage = chat.messages[chat.messages.length - 1];
+            const isWaitingForText =
+              isGenerating &&
+              (!lastMessage ||
+                lastMessage.role !== 'assistant' ||
+                collectText(lastMessage.parts).length === 0);
 
             return (
               <Carousel.Slide key={definition.id}>
@@ -259,7 +266,14 @@ export default function Page() {
                     ) : null}
 
                     <Stack gap='sm' flex={1}>
-                      {displayMessages.length !== 0 &&
+                      {isWaitingForText ? (
+                        <Stack gap='xs'>
+                          <Skeleton height={14} radius='sm' />
+                          <Skeleton height={14} radius='sm' width='85%' />
+                          <Skeleton height={14} radius='sm' width='70%' />
+                        </Stack>
+                      ) : (
+                        displayMessages.length !== 0 &&
                         displayMessages.map((message) => (
                           <Stack key={message.id ?? `${message.role}-${definition.id}`}>
                             <Text size='sm' style={{ whiteSpace: 'pre-wrap' }}>
@@ -267,7 +281,8 @@ export default function Page() {
                             </Text>
                             <Divider />
                           </Stack>
-                        ))}
+                        ))
+                      )}
                     </Stack>
 
                     {hasAssistantReply && (

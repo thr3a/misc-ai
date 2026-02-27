@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     const { prompt } = requestSchema.parse(body);
 
     const { text } = await generateText({
-      model: google('gemini-2.5-flash'),
+      model: google('gemini-3-flash-preview'),
       system: promptEnhancerSystemPrompt,
       prompt,
       temperature: 0
