@@ -1,4 +1,4 @@
-import { ActionIcon, Box, Group, Paper, ScrollArea, Space, Stack, Textarea } from '@mantine/core';
+import { ActionIcon, Box, Flex, Group, Paper, ScrollArea, Stack, Textarea } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
 import { cjk } from '@streamdown/cjk';
 import { IconSend } from '@tabler/icons-react';
@@ -11,38 +11,38 @@ export type MessageProps = {
 };
 
 const Message = ({ message }: { message: MessageProps }) => {
+  const isUser = message.role === 'user';
   return (
-    <Paper p={'xs'} radius='0' bg={message.role === 'user' ? 'red.1' : 'blue.1'} withBorder>
-      <Streamdown
-        plugins={{ cjk }}
-        components={{
-          p: ({ children }) => <Box style={{ margin: 0, padding: 0 }}>{children}</Box>,
-          ul: ({ children }) => <ul style={{ paddingLeft: '10px' }}>{children}</ul>,
-          ol: ({ children }) => <ol style={{ paddingLeft: '10px' }}>{children}</ol>,
-          strong: ({ children }) => <strong style={{ fontWeight: 'bold' }}>{children}</strong>
-        }}
+    <Flex justify={isUser ? 'flex-end' : 'flex-start'}>
+      <Paper
+        p='sm'
+        maw='90%'
+        bg={isUser ? 'blue.6' : 'gray.1'}
+        c={isUser ? 'white' : undefined}
+        withBorder={!isUser}
+        fz={'sm'}
       >
-        {message.content}
-      </Streamdown>
-    </Paper>
+        <Streamdown
+          plugins={{ cjk }}
+          components={{
+            p: ({ children }) => <Box style={{ margin: 0, padding: 0 }}>{children}</Box>,
+            ul: ({ children }) => <ul style={{ paddingLeft: '10px' }}>{children}</ul>,
+            ol: ({ children }) => <ol style={{ paddingLeft: '10px' }}>{children}</ol>,
+            strong: ({ children }) => <strong style={{ fontWeight: 'bold' }}>{children}</strong>
+          }}
+        >
+          {message.content}
+        </Streamdown>
+      </Paper>
+    </Flex>
   );
 };
 
 export const Messages = ({ messages }: { messages: MessageProps[] }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // メッセージが更新されたら、一番下までスクロールする
-  // useEffect(() => {
-  //   messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  // });
-
   return (
-    <ScrollArea
-      h='80dvh'
-      type='always'
-      // bd='1px solid red'
-      p={0}
-    >
+    <ScrollArea h='80dvh' type='always' p={0}>
       <Stack gap={'sm'}>
         {messages.map((message, index) => (
           <Message key={index} message={message} />
@@ -82,8 +82,8 @@ export const MessageInput = ({
         minRows={1}
         style={{ flex: 1, display: 'block' }}
       />
-      <ActionIcon size='input-sm' color='blue' onClick={handleSendMessage} loading={isResponding}>
-        <IconSend />
+      <ActionIcon size='input-sm' variant='filled' color='blue' onClick={handleSendMessage} loading={isResponding}>
+        <IconSend size={16} />
       </ActionIcon>
     </Group>
   );
