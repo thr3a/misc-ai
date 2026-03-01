@@ -1,8 +1,8 @@
 import { ActionIcon, Box, Group, Paper, ScrollArea, Space, Stack, Textarea } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
-import { IconSend } from '@tabler/icons-react';
-import { useEffect, useRef, useState } from 'react';
 import { cjk } from '@streamdown/cjk';
+import { IconSend } from '@tabler/icons-react';
+import { useRef } from 'react';
 import { Streamdown } from 'streamdown';
 
 export type MessageProps = {
@@ -17,7 +17,9 @@ const Message = ({ message }: { message: MessageProps }) => {
         plugins={{ cjk }}
         components={{
           p: ({ children }) => <Box style={{ margin: 0, padding: 0 }}>{children}</Box>,
-          ul: ({ children }) => <ul style={{ paddingLeft: '10px' }}>{children}</ul>
+          ul: ({ children }) => <ul style={{ paddingLeft: '10px' }}>{children}</ul>,
+          ol: ({ children }) => <ol style={{ paddingLeft: '10px' }}>{children}</ol>,
+          strong: ({ children }) => <strong style={{ fontWeight: 'bold' }}>{children}</strong>
         }}
       >
         {message.content}
@@ -41,11 +43,10 @@ export const Messages = ({ messages }: { messages: MessageProps[] }) => {
       // bd='1px solid red'
       p={0}
     >
-      <Stack>
+      <Stack gap={'sm'}>
         {messages.map((message, index) => (
           <Message key={index} message={message} />
         ))}
-        <Space h='md' />
       </Stack>
       <div ref={messagesEndRef} />
     </ScrollArea>
