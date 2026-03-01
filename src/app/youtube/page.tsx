@@ -31,7 +31,14 @@ export default function Home() {
       title: '',
       transcript: '',
       messageInputValue: '動画のタイトルの質問に対する解答を教えて下さい。',
-      conversation: [],
+      conversation: [
+        { role: 'user', content: 'この動画の要点を教えてください。' },
+        { role: 'assistant', content: 'この動画では主に3つのポイントが解説されています。\n\n1. **AIの基礎知識**: 機械学習とディープラーニングの違いについて詳しく説明されています。\n2. **実際の活用事例**: 医療・金融・製造業での具体的なAI活用例が紹介されています。\n3. **将来の展望**: 今後5〜10年でのAI技術の発展と社会への影響が予測されています。' },
+        { role: 'user', content: '医療分野での活用事例をもう少し詳しく教えてください。' },
+        { role: 'assistant', content: '医療分野でのAI活用について、動画では以下の事例が紹介されていました。\n\n- **画像診断の自動化**: X線やMRI画像からがんを高精度で検出するシステム\n- **創薬支援**: 新薬候補の分子構造をAIが予測し、開発期間を大幅に短縮\n- **電子カルテ解析**: 患者データから疾患リスクを事前に予測し、予防医療に活用\n\nこれらの技術により、医師の負担軽減と診断精度の向上が期待されています。' },
+        { role: 'user', content: 'ありがとうございました！とてもわかりやすかったです。' },
+        { role: 'assistant', content: 'お役に立てて嬉しいです！他にも気になる点があればお気軽にご質問ください。' },
+      ],
       isResponding: false,
       isFetchingTranscript: false
     }

@@ -89,10 +89,10 @@ export const buildSystemPromptFromScenario = (scenario: ScenarioPromptInput): st
      ただし【】で囲んだ内容はあなたへの指示書です。
 
     【レスポンス形式】
-    ${humanCharacterName},${aiCharacterNames}いずれかの名前: 「セリフ」(${humanCharacterName},${aiCharacterNames}いずれかの動作、心理描写、状況描写、オノマトペ)を5回重ねる。
+    ${humanCharacterName},${aiCharacterNames},周辺人物のいずれかの名前: 「セリフ」(${humanCharacterName},${aiCharacterNames},周辺人物のいずれかの動作、心理描写、状況描写、オノマトペ)を5回重ねる。
     最後に必ず「現在の${aiCharacterNames}の状態、服装: 〇〇」と書く
 
-    同じフレーズやパターンにならないように状況に応じた新しい展開や感情を出力してください。その場所にある物や人、環境を活用してください。
+    同じフレーズやパターンにならないようにその場所にある物や人、環境を活用して新しい展開や感情を出力してください。
     では、これまで指示した世界観や設定をもとに、USERと一緒に成人男性の期待に応えた魅力的なロールプレイを行ってください。
 
     ${jailbreakPrompt}

@@ -2,9 +2,8 @@ import { ActionIcon, Box, Group, Paper, ScrollArea, Space, Stack, Textarea } fro
 import { getHotkeyHandler } from '@mantine/hooks';
 import { IconSend } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkBreaks from 'remark-breaks';
-import remarkGfm from 'remark-gfm';
+import { cjk } from '@streamdown/cjk';
+import { Streamdown } from 'streamdown';
 
 export type MessageProps = {
   role: 'user' | 'assistant';
@@ -14,15 +13,15 @@ export type MessageProps = {
 const Message = ({ message }: { message: MessageProps }) => {
   return (
     <Paper p={'xs'} radius='0' bg={message.role === 'user' ? 'red.1' : 'blue.1'} withBorder>
-      <ReactMarkdown
+      <Streamdown
+        plugins={{ cjk }}
         components={{
           p: ({ children }) => <Box style={{ margin: 0, padding: 0 }}>{children}</Box>,
           ul: ({ children }) => <ul style={{ paddingLeft: '10px' }}>{children}</ul>
         }}
-        remarkPlugins={[remarkBreaks, remarkGfm]}
       >
         {message.content}
-      </ReactMarkdown>
+      </Streamdown>
     </Paper>
   );
 };
