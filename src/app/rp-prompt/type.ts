@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 export const worldSettingSchema = z.object({
-  location: z.string().min(1),
   time: z.string().min(1),
+  location: z.string().min(1),
   situation: z.string().min(1)
 });
 

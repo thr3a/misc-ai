@@ -71,8 +71,8 @@ export const buildSystemPromptFromScenario = (scenario: ScenarioPromptInput): st
     今からUSERと一緒にロールプレイを行いましょう。以下に指示する設定に従い、${aiCharacterNames}になりきって行動してください。
 
     【舞台設定】
-    場所: ${worldSetting?.location ?? ''}
     時期: ${worldSetting?.time ?? ''}
+    場所: ${worldSetting?.location ?? ''}
     状況: ${worldSetting?.situation ?? ''}
 
     【USERがなりきる人物】
