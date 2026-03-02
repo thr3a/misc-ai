@@ -2,9 +2,22 @@
 
 import { type LyricAnalysis, lyricAnalysisSchema } from '@/app/lyric/type';
 import { useChat, experimental_useObject as useObject } from '@ai-sdk/react';
-import { Badge, Box, Button, Card, Group, Paper, ScrollArea, Skeleton, Stack, Text, TextInput, Title } from '@mantine/core';
+import {
+  Badge,
+  Box,
+  Button,
+  Card,
+  Group,
+  Paper,
+  ScrollArea,
+  Skeleton,
+  Stack,
+  Text,
+  TextInput,
+  Title
+} from '@mantine/core';
 import { useInputState } from '@mantine/hooks';
-import { IconMicrophone, IconUser } from '@tabler/icons-react';
+import { IconMicrophone, IconTrash, IconUser } from '@tabler/icons-react';
 import { DefaultChatTransport } from 'ai';
 import { useMemo, useState } from 'react';
 import { MessageInput, Messages } from '../example-chat/Chat';
@@ -33,7 +46,7 @@ export default function Page() {
     []
   );
 
-  const { messages, sendMessage, status, stop } = useChat({ transport });
+  const { messages, sendMessage, status, stop, setMessages } = useChat({ transport });
 
   const isResponding = status === 'streaming' || status === 'submitted';
   const analysisReady = !isAnalyzing && analysis !== undefined;
@@ -67,28 +80,28 @@ export default function Page() {
   };
 
   return (
-    <Stack gap='md' p='md' maw={800} mx='auto'>
-      <Title order={2}>歌詞考察AI</Title>
-
-      <Stack gap='xs'>
-        <TextInput
-          label='歌詞ページのURLを入力してください'
-          placeholder='https://www.uta-net.com/song/...'
-          value={url}
-          onChange={setUrl}
-        />
-        <Group justify='center'>
-          <Button onClick={handleFetchLyric} loading={isFetching} disabled={!url.trim()}>
-            取得して分析
-          </Button>
-        </Group>
-      </Stack>
+    <Stack gap='md' mx='auto'>
+      <TextInput
+        label='歌詞ページのURLを入力してください'
+        placeholder='https://www.uta-net.com/song/252556/'
+        value={url}
+        onChange={setUrl}
+      />
+      <Group justify='center'>
+        <Button onClick={handleFetchLyric} loading={isFetching} disabled={!url.trim()}>
+          取得して分析
+        </Button>
+      </Group>
 
       {lyric && (
         <Stack gap='xs'>
-          <Text size='sm' fw='bold'>歌詞</Text>
+          <Text size='sm' fw='bold'>
+            歌詞
+          </Text>
           <ScrollArea h={200} type='auto'>
-            <Text size='xs' style={{ whiteSpace: 'pre-wrap' }}>{lyric}</Text>
+            <Text size='xs' style={{ whiteSpace: 'pre-wrap' }}>
+              {lyric}
+            </Text>
           </ScrollArea>
         </Stack>
       )}
@@ -189,7 +202,20 @@ export default function Page() {
       {analysisReady && (
         <Box>
           <Stack gap='sm'>
-            <Title order={4}>歌詞について考察する</Title>
+            <Group justify='space-between'>
+              <Title order={4}>歌詞について考察する</Title>
+              {messages.length > 0 && (
+                <Button
+                  variant='subtle'
+                  color='red'
+                  size='xs'
+                  leftSection={<IconTrash size={14} />}
+                  onClick={() => setMessages([])}
+                >
+                  チャットをリセット
+                </Button>
+              )}
+            </Group>
             <MessageInput
               onSendMessage={handleSubmit}
               onStop={stop}

@@ -234,9 +234,7 @@ export default function Page() {
             const lastMessage = chat.messages[chat.messages.length - 1];
             const isWaitingForText =
               isGenerating &&
-              (!lastMessage ||
-                lastMessage.role !== 'assistant' ||
-                collectText(lastMessage.parts).length === 0);
+              (!lastMessage || lastMessage.role !== 'assistant' || collectText(lastMessage.parts).length === 0);
 
             return (
               <Carousel.Slide key={definition.id}>

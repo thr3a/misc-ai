@@ -1,5 +1,6 @@
 import type { LyricAnalysis } from '@/app/lyric/type';
 import { openai } from '@ai-sdk/openai';
+import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { type UIMessage, convertToModelMessages, streamText, validateUIMessages } from 'ai';
 import type { NextRequest } from 'next/server';
 import dedent from 'ts-dedent';
@@ -52,7 +53,12 @@ export async function POST(req: NextRequest) {
     const result = streamText({
       model: openai('gpt-5.2'),
       system: buildSystemPrompt(lyric, analysis),
-      messages: await convertToModelMessages(validatedMessages)
+      messages: await convertToModelMessages(validatedMessages),
+      providerOptions: {
+        openai: {
+          reasoningEffort: 'high'
+        } satisfies OpenAIResponsesProviderOptions
+      }
     });
 
     return result.toUIMessageStreamResponse({
