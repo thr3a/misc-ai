@@ -36,7 +36,6 @@ export default function Home() {
         body: JSON.stringify({ url: youtubeUrl })
       });
       const data = await response.json();
-      console.log(data);
 
       if (data.status === 'ok') {
         setTitle(data.title);
@@ -50,10 +49,7 @@ export default function Home() {
   };
 
   const handleSubmit = (input: string) => {
-    sendMessage(
-      { parts: [{ type: 'text', text: input }] },
-      { body: { transcript, title } }
-    );
+    sendMessage({ parts: [{ type: 'text', text: input }] }, { body: { transcript, title } });
   };
 
   const handleButtonClick = (text: string) => {

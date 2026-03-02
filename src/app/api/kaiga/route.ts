@@ -1,5 +1,7 @@
 import { apiRequestSchema, schema } from '@/app/kaiga/type';
 import { systemPrompt } from '@/app/kaiga/util';
+import type { GoogleGenerativeAIProviderOptions } from '@ai-sdk/google';
+import { google } from '@ai-sdk/google';
 import { openai } from '@ai-sdk/openai';
 import { Output, streamText } from 'ai';
 import type { NextRequest } from 'next/server';
@@ -42,7 +44,8 @@ export async function POST(req: NextRequest) {
     }
 
     const result = streamText({
-      model: openai('gpt-4.1'),
+      // model: openai('gpt-4.1')
+      model: google('gemini-3-pro-preview'),
       system: systemPrompt,
       messages: [
         {
@@ -56,6 +59,17 @@ export async function POST(req: NextRequest) {
           ]
         }
       ],
+      providerOptions: {
+        google: {
+          thinkingConfig: {
+            thinkingLevel: 'high',
+            includeThoughts: false
+          }
+        } satisfies GoogleGenerativeAIProviderOptions
+        // openai: {
+        //   reasoningEffort: 'medium'
+        // } satisfies OpenAIResponsesProviderOptions
+      },
       output: Output.object({ schema }),
       temperature: 0
     });
