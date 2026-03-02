@@ -1,16 +1,18 @@
 import { ActionIcon, Box, Flex, Group, Paper, ScrollArea, Stack, Textarea } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
 import { cjk } from '@streamdown/cjk';
-import { IconSend } from '@tabler/icons-react';
+import { IconPlayerStop, IconSend } from '@tabler/icons-react';
+import type { UIMessage } from 'ai';
 import { useRef } from 'react';
 import { Streamdown } from 'streamdown';
 
-export type MessageProps = {
-  role: 'user' | 'assistant';
-  content: string;
-};
+const collectText = (parts: UIMessage['parts']) =>
+  parts
+    .filter((part): part is { type: 'text'; text: string } => part.type === 'text' && 'text' in part)
+    .map((part) => part.text)
+    .join('\n');
 
-const Message = ({ message }: { message: MessageProps }) => {
+const Message = ({ message }: { message: UIMessage }) => {
   const isUser = message.role === 'user';
   return (
     <Flex justify={isUser ? 'flex-end' : 'flex-start'}>
@@ -31,21 +33,21 @@ const Message = ({ message }: { message: MessageProps }) => {
             strong: ({ children }) => <strong style={{ fontWeight: 'bold' }}>{children}</strong>
           }}
         >
-          {message.content}
+          {collectText(message.parts)}
         </Streamdown>
       </Paper>
     </Flex>
   );
 };
 
-export const Messages = ({ messages }: { messages: MessageProps[] }) => {
+export const Messages = ({ messages }: { messages: UIMessage[] }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   return (
     <ScrollArea h='80dvh' type='always' p={0}>
       <Stack gap={'sm'}>
-        {messages.map((message, index) => (
-          <Message key={index} message={message} />
+        {messages.map((message) => (
+          <Message key={message.id} message={message} />
         ))}
       </Stack>
       <div ref={messagesEndRef} />
@@ -55,11 +57,13 @@ export const Messages = ({ messages }: { messages: MessageProps[] }) => {
 
 export const MessageInput = ({
   onSendMessage,
+  onStop,
   isResponding,
   value,
   onChange
 }: {
   onSendMessage: (message: string) => void;
+  onStop: () => void;
   isResponding: boolean;
   value: string;
   onChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
@@ -82,9 +86,15 @@ export const MessageInput = ({
         minRows={1}
         style={{ flex: 1, display: 'block' }}
       />
-      <ActionIcon size='input-sm' variant='filled' color='blue' onClick={handleSendMessage} loading={isResponding}>
-        <IconSend size={16} />
-      </ActionIcon>
+      {isResponding ? (
+        <ActionIcon size='input-sm' variant='filled' color='red' onClick={onStop}>
+          <IconPlayerStop size={16} />
+        </ActionIcon>
+      ) : (
+        <ActionIcon size='input-sm' variant='filled' color='blue' onClick={handleSendMessage}>
+          <IconSend size={16} />
+        </ActionIcon>
+      )}
     </Group>
   );
 };
