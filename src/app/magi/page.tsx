@@ -20,11 +20,11 @@ import {
   ThemeIcon,
   Title
 } from '@mantine/core';
-import { IconDownload } from '@tabler/icons-react';
 import { useInputState, useListState } from '@mantine/hooks';
+import { IconDownload } from '@tabler/icons-react';
 import { IconAlertTriangle, IconCheck } from '@tabler/icons-react';
 import { DefaultChatTransport } from 'ai';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 type ModelStatus = '待機中' | '生成中' | '応答済み';
 
@@ -75,6 +75,7 @@ export default function Page() {
   const [question, setQuestion] = useInputState('スプラトゥーンが流行った理由は？');
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const autoSynthesizeTriggered = useRef(false);
   const [followUpInputs, followUpHandlers] = useListState<string>(MODEL_DEFINITIONS.map(() => ''));
 
   const {
@@ -116,6 +117,7 @@ export default function Page() {
 
   const handleBroadcast = () => {
     setErrorMessage(null);
+    autoSynthesizeTriggered.current = false;
     for (const { chat } of modelSections) {
       void chat.sendMessage({
         parts: [{ type: 'text', text: question }]
@@ -163,6 +165,14 @@ export default function Page() {
       parts: [{ type: 'text', text }]
     });
   };
+
+  useEffect(() => {
+    if (allModelsCompleted && !autoSynthesizeTriggered.current) {
+      autoSynthesizeTriggered.current = true;
+      handleSynthesize();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allModelsCompleted]);
 
   const handleSynthesize = () => {
     setErrorMessage(null);
@@ -357,24 +367,33 @@ export default function Page() {
         </Carousel>
 
         <Stack gap='xs'>
-          <Group justify='center'>
-            <Button size='sm' loading={isSynthesizing} disabled={!allModelsCompleted} onClick={handleSynthesize}>
-              集合知を統合
-            </Button>
-          </Group>
           {synthesizeError && (
             <Text size='xs' c='red' ta='center'>
               {synthesizeError.message}
             </Text>
           )}
+          {isSynthesizing && (
+            <Stack gap='sm'>
+              <Paper withBorder p='sm'>
+                <Stack gap='xs'>
+                  <Skeleton height={20} width={150} />
+                  <Skeleton height={14} />
+                  <Skeleton height={14} width='80%' />
+                  <Skeleton height={14} width='65%' />
+                </Stack>
+              </Paper>
+              <Paper withBorder p='sm'>
+                <Stack gap='xs'>
+                  <Skeleton height={20} width={150} />
+                  <Skeleton height={14} />
+                  <Skeleton height={14} width='75%' />
+                </Stack>
+              </Paper>
+            </Stack>
+          )}
           {synthesizeObject && !isSynthesizing && (
             <Group justify='center'>
-              <Button
-                size='sm'
-                variant='light'
-                leftSection={<IconDownload size={16} />}
-                onClick={handleExport}
-              >
+              <Button size='sm' variant='light' leftSection={<IconDownload size={16} />} onClick={handleExport}>
                 エクスポート
               </Button>
             </Group>
