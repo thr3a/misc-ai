@@ -19,7 +19,7 @@ export default function Page() {
     あなたがなりきる人物2：(24歳、女性、先生)
     `
   });
-  const [provider, setProvider] = useState<'local' | 'openrouter'>('local');
+  const [provider, setProvider] = useState<'local' | 'openrouter'>('openrouter');
   const [mode, setMode] = useState<'expansion' | 'creative'>('expansion');
   const { object, submit, isLoading, stop } = useObject({
     api: '/api/rp-prompt',
