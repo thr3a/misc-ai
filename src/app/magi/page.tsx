@@ -20,6 +20,7 @@ import {
   ThemeIcon,
   Title
 } from '@mantine/core';
+import { IconDownload } from '@tabler/icons-react';
 import { useInputState, useListState } from '@mantine/hooks';
 import { IconAlertTriangle, IconCheck } from '@tabler/icons-react';
 import { DefaultChatTransport } from 'ai';
@@ -167,6 +168,49 @@ export default function Page() {
     setErrorMessage(null);
     const responses = modelSections.map(({ chat }) => getFirstAssistantResponse(chat));
     submitSynthesize({ responses });
+  };
+
+  const handleExport = () => {
+    if (!synthesizeObject) return;
+
+    const lines: string[] = [];
+
+    lines.push(`# 質問\n\n${question}\n`);
+
+    lines.push('## 各モデルの回答\n');
+    for (const { definition, chat } of modelSections) {
+      const response = getFirstAssistantResponse(chat);
+      if (response) {
+        lines.push(`### ${definition.label}\n\n${response}\n`);
+      }
+    }
+
+    lines.push('## 集合知の統合\n');
+
+    if (synthesizeObject.commonOpinions && synthesizeObject.commonOpinions.length > 0) {
+      lines.push('### 共通している意見\n');
+      for (const opinion of synthesizeObject.commonOpinions) {
+        lines.push(`- ${opinion}`);
+      }
+      lines.push('');
+    }
+
+    if (synthesizeObject.conflictingOpinions && synthesizeObject.conflictingOpinions.length > 0) {
+      lines.push('### 対立している意見\n');
+      for (const opinion of synthesizeObject.conflictingOpinions) {
+        lines.push(`- ${opinion}`);
+      }
+      lines.push('');
+    }
+
+    const content = lines.join('\n');
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'magi-result.txt';
+    anchor.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -322,6 +366,18 @@ export default function Page() {
             <Text size='xs' c='red' ta='center'>
               {synthesizeError.message}
             </Text>
+          )}
+          {synthesizeObject && !isSynthesizing && (
+            <Group justify='center'>
+              <Button
+                size='sm'
+                variant='light'
+                leftSection={<IconDownload size={16} />}
+                onClick={handleExport}
+              >
+                エクスポート
+              </Button>
+            </Group>
           )}
           {synthesizeObject && (
             <Stack gap='sm'>

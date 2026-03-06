@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: '歌詞考察AI',
-  description: '恋愛ソングの歌詞を分析して登場人物を考察できます'
+  description: '恋愛ソングの歌詞を分析して深掘り'
 };
 
 export default function PageLayout({ children }: { children: React.ReactNode }) {
