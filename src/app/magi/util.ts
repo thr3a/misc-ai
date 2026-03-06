@@ -37,13 +37,13 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
 export const MODEL_PROVIDER_MAP: Record<ModelKey, ProviderBinding> = {
   gemini: {
     provider: 'google',
-    cheapModel: 'gemini-3-flash-preview' satisfies GoogleResponsesModelId,
+    cheapModel: 'gemini-2.0-flash' satisfies GoogleResponsesModelId,
     productionModel: 'gemini-3.1-pro-preview' satisfies GoogleResponsesModelId
   },
   gpt5: {
     provider: 'openai',
     cheapModel: 'gpt-4.1-mini' satisfies OpenAIResponsesModelId,
-    productionModel: 'gpt-5.2' satisfies OpenAIResponsesModelId
+    productionModel: 'gpt-5.4' satisfies OpenAIResponsesModelId
   },
   claude: {
     provider: 'anthropic',
