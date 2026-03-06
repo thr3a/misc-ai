@@ -2,7 +2,7 @@
 
 import { ButtonCopy } from '@/app/html-ui/ButtonCopy';
 import { synthesizeResultSchema } from '@/app/magi/type';
-import { MODEL_DEFINITIONS, type ModelKey } from '@/app/magi/util';
+import { MODEL_DEFINITIONS, type ModelDefinition, type ModelKey } from '@/app/magi/util';
 import { useChat, experimental_useObject as useObject } from '@ai-sdk/react';
 import { Carousel } from '@mantine/carousel';
 import {
@@ -20,11 +20,11 @@ import {
   ThemeIcon,
   Title
 } from '@mantine/core';
-import { useInputState, useListState } from '@mantine/hooks';
+import { useInputState } from '@mantine/hooks';
 import { IconDownload } from '@tabler/icons-react';
 import { IconAlertTriangle, IconCheck } from '@tabler/icons-react';
 import { DefaultChatTransport } from 'ai';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 type ModelStatus = '待機中' | '生成中' | '応答済み';
 
@@ -70,13 +70,132 @@ const collectText = (parts: Array<{ type: string; text?: string }>) =>
     .map((part) => part.text)
     .join('\n');
 
+// broadcastのたびにidをインクリメントし、同じ質問文でも再送信できるようにする
+type BroadcastPayload = { text: string; id: number } | null;
+
+type ModelSlideProps = {
+  definition: ModelDefinition;
+  broadcast: BroadcastPayload;
+  onCompleted: (modelId: ModelKey, response: string) => void;
+};
+
+const ModelSlide = memo(({ definition, broadcast, onCompleted }: ModelSlideProps) => {
+  const chat = useModelChat(definition.id);
+  const [followUpInput, setFollowUpInput] = useState('');
+  const lastProcessedBroadcastId = useRef<number>(-1);
+
+  // broadcastが変化したらメッセージを送信
+  useEffect(() => {
+    if (broadcast && broadcast.id !== lastProcessedBroadcastId.current) {
+      lastProcessedBroadcastId.current = broadcast.id;
+      void chat.sendMessage({ parts: [{ type: 'text', text: broadcast.text }] });
+    }
+  }, [broadcast, chat]);
+
+  const hasAssistantReply = chat.messages.some((message) => message.role === 'assistant');
+  const isGenerating = chat.status === 'streaming' || chat.status === 'submitted';
+  const status = getModelStatus(chat.status, hasAssistantReply);
+  const visibleMessages = chat.messages.filter((message) => message.role !== 'system');
+  const displayMessages = visibleMessages.filter((_, i) => !(i === 0 && visibleMessages[0]?.role === 'user'));
+  const lastMessage = chat.messages[chat.messages.length - 1];
+  const isWaitingForText =
+    isGenerating && (!lastMessage || lastMessage.role !== 'assistant' || collectText(lastMessage.parts).length === 0);
+
+  // 完了時に親へ最初のアシスタント応答を通知
+  useEffect(() => {
+    if (hasAssistantReply && !isGenerating) {
+      const assistantMessage = chat.messages.find((m) => m.role === 'assistant');
+      const response = assistantMessage ? collectText(assistantMessage.parts) : '';
+      onCompleted(definition.id, response);
+    }
+  }, [hasAssistantReply, isGenerating, chat.messages, definition.id, onCompleted]);
+
+  const handleFollowUpSend = () => {
+    if (!followUpInput) return;
+    const text = followUpInput;
+    setFollowUpInput('');
+    void chat.sendMessage({ parts: [{ type: 'text', text }] });
+  };
+
+  return (
+    <Carousel.Slide>
+      <Paper withBorder p='sm' h='100%' mih={'200px'}>
+        <Stack gap='sm' h='100%'>
+          <Group justify='space-between' align='flex-start'>
+            <Group gap='xs'>
+              <Text fw='bold'>{definition.label}</Text>
+              <Badge variant='light' color={STATUS_COLORS[status]}>
+                {status}
+              </Badge>
+            </Group>
+            <Button size='xs' color='red' onClick={() => chat.stop()} disabled={!isGenerating}>
+              停止
+            </Button>
+          </Group>
+
+          {chat.error ? (
+            <Text size='sm' c='red'>
+              エラー: {chat.error.message}
+            </Text>
+          ) : null}
+
+          <Stack gap='sm' flex={1}>
+            {isWaitingForText ? (
+              <Stack gap='xs'>
+                <Skeleton height={14} radius='sm' />
+                <Skeleton height={14} radius='sm' width='85%' />
+                <Skeleton height={14} radius='sm' width='70%' />
+              </Stack>
+            ) : (
+              displayMessages.length !== 0 &&
+              displayMessages.map((message) => (
+                <Stack key={message.id ?? `${message.role}-${definition.id}`}>
+                  <Text size='sm' style={{ whiteSpace: 'pre-wrap' }}>
+                    {collectText(message.parts)}
+                  </Text>
+                  <Divider />
+                </Stack>
+              ))
+            )}
+          </Stack>
+
+          {hasAssistantReply && (
+            <Stack gap='xs' pb={'lg'}>
+              <Textarea
+                autosize
+                minRows={1}
+                maxRows={4}
+                placeholder={`${definition.label}に追加質問する`}
+                value={followUpInput}
+                onChange={(event) => setFollowUpInput(event.currentTarget.value)}
+              />
+              <Group justify='flex-end'>
+                <Button
+                  size='sm'
+                  variant='light'
+                  disabled={followUpInput.length === 0 || isGenerating}
+                  onClick={handleFollowUpSend}
+                >
+                  個別に送信
+                </Button>
+              </Group>
+            </Stack>
+          )}
+        </Stack>
+      </Paper>
+    </Carousel.Slide>
+  );
+});
+ModelSlide.displayName = 'ModelSlide';
+
 // 関数名は変えないこと
 export default function Page() {
   const [question, setQuestion] = useInputState('スプラトゥーンが流行った理由は？');
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [broadcast, setBroadcast] = useState<BroadcastPayload>(null);
+  const [completedResponses, setCompletedResponses] = useState<Partial<Record<ModelKey, string>>>({});
   const autoSynthesizeTriggered = useRef(false);
-  const [followUpInputs, followUpHandlers] = useListState<string>(MODEL_DEFINITIONS.map(() => ''));
 
   const {
     object: synthesizeObject,
@@ -88,41 +207,18 @@ export default function Page() {
     schema: synthesizeResultSchema
   });
 
-  const chatMap: Record<ModelKey, ModelChatInstance> = {
-    gemini: useModelChat('gemini'),
-    gpt5: useModelChat('gpt5'),
-    claude: useModelChat('claude')
-  };
-
-  const modelSections = MODEL_DEFINITIONS.map((definition) => ({
-    definition,
-    chat: chatMap[definition.id]
-  }));
-
   const isQuestionEmpty = question.length === 0;
 
-  const allModelsCompleted = modelSections.every(({ chat }) => {
-    const hasAssistantReply = chat.messages.some((message) => message.role === 'assistant');
-    const isNotStreaming = chat.status !== 'streaming' && chat.status !== 'submitted';
-    return hasAssistantReply && isNotStreaming;
-  });
-
-  const getFirstAssistantResponse = (chat: ModelChatInstance): string => {
-    const assistantMessage = chat.messages.find((message) => message.role === 'assistant');
-    if (!assistantMessage) {
-      return '';
-    }
-    return collectText(assistantMessage.parts);
-  };
+  const allModelsCompleted = useMemo(
+    () => MODEL_DEFINITIONS.every((d) => completedResponses[d.id] !== undefined),
+    [completedResponses]
+  );
 
   const handleBroadcast = () => {
     setErrorMessage(null);
     autoSynthesizeTriggered.current = false;
-    for (const { chat } of modelSections) {
-      void chat.sendMessage({
-        parts: [{ type: 'text', text: question }]
-      });
-    }
+    setCompletedResponses({});
+    setBroadcast((prev) => ({ text: question, id: (prev?.id ?? 0) + 1 }));
   };
 
   const handleEnhancePrompt = async () => {
@@ -151,34 +247,26 @@ export default function Page() {
     }
   };
 
-  const handleFollowUpSend = (index: number, modelId: ModelKey) => {
-    const text = followUpInputs[index];
-    if (!text) {
-      return;
-    }
-    followUpHandlers.setItem(index, '');
-    const section = modelSections.find((item) => item.definition.id === modelId);
-    if (!section) {
-      return;
-    }
-    void section.chat.sendMessage({
-      parts: [{ type: 'text', text }]
-    });
-  };
+  const handleOnCompleted = useCallback((modelId: ModelKey, response: string) => {
+    setCompletedResponses((prev) => ({ ...prev, [modelId]: response }));
+  }, []);
 
+  const handleSynthesize = useCallback(
+    (responses: Partial<Record<ModelKey, string>>) => {
+      setErrorMessage(null);
+      const responseList = MODEL_DEFINITIONS.map((d) => responses[d.id] ?? '');
+      submitSynthesize({ responses: responseList });
+    },
+    [submitSynthesize]
+  );
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: allModelsCompleted の変化時のみ実行したい
   useEffect(() => {
     if (allModelsCompleted && !autoSynthesizeTriggered.current) {
       autoSynthesizeTriggered.current = true;
-      handleSynthesize();
+      handleSynthesize(completedResponses);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allModelsCompleted]);
-
-  const handleSynthesize = () => {
-    setErrorMessage(null);
-    const responses = modelSections.map(({ chat }) => getFirstAssistantResponse(chat));
-    submitSynthesize({ responses });
-  };
 
   const handleExport = () => {
     if (!synthesizeObject) return;
@@ -188,8 +276,8 @@ export default function Page() {
     lines.push(`# 質問\n\n${question}\n`);
 
     lines.push('## 各モデルの回答\n');
-    for (const { definition, chat } of modelSections) {
-      const response = getFirstAssistantResponse(chat);
+    for (const definition of MODEL_DEFINITIONS) {
+      const response = completedResponses[definition.id];
       if (response) {
         lines.push(`### ${definition.label}\n\n${response}\n`);
       }
@@ -279,91 +367,14 @@ export default function Page() {
             }
           }}
         >
-          {modelSections.map(({ definition, chat }, index) => {
-            const hasAssistantReply = chat.messages.some((message) => message.role === 'assistant');
-            const status = getModelStatus(chat.status, hasAssistantReply);
-            const isGenerating = chat.status === 'streaming' || chat.status === 'submitted';
-            const visibleMessages = chat.messages.filter((message) => message.role !== 'system');
-            const displayMessages = visibleMessages.filter((_, i) => !(i === 0 && visibleMessages[0]?.role === 'user'));
-            const lastMessage = chat.messages[chat.messages.length - 1];
-            const isWaitingForText =
-              isGenerating &&
-              (!lastMessage || lastMessage.role !== 'assistant' || collectText(lastMessage.parts).length === 0);
-
-            return (
-              <Carousel.Slide key={definition.id}>
-                <Paper withBorder p='sm' h='100%' mih={'200px'}>
-                  <Stack gap='sm' h='100%'>
-                    <Group justify='space-between' align='flex-start'>
-                      <Group gap='xs'>
-                        <Text fw={600}>{definition.label}</Text>
-                        <Badge variant='light' color={STATUS_COLORS[status]}>
-                          {status}
-                        </Badge>
-                      </Group>
-                      <Button
-                        size='xs'
-                        color='red'
-                        onClick={() => chat.stop()}
-                        disabled={chat.status !== 'streaming' && chat.status !== 'submitted'}
-                      >
-                        停止
-                      </Button>
-                    </Group>
-
-                    {chat.error ? (
-                      <Text size='sm' c='red'>
-                        エラー: {chat.error.message}
-                      </Text>
-                    ) : null}
-
-                    <Stack gap='sm' flex={1}>
-                      {isWaitingForText ? (
-                        <Stack gap='xs'>
-                          <Skeleton height={14} radius='sm' />
-                          <Skeleton height={14} radius='sm' width='85%' />
-                          <Skeleton height={14} radius='sm' width='70%' />
-                        </Stack>
-                      ) : (
-                        displayMessages.length !== 0 &&
-                        displayMessages.map((message) => (
-                          <Stack key={message.id ?? `${message.role}-${definition.id}`}>
-                            <Text size='sm' style={{ whiteSpace: 'pre-wrap' }}>
-                              {collectText(message.parts)}
-                            </Text>
-                            <Divider />
-                          </Stack>
-                        ))
-                      )}
-                    </Stack>
-
-                    {hasAssistantReply && (
-                      <Stack gap='xs' pb={'lg'}>
-                        <Textarea
-                          autosize
-                          minRows={1}
-                          maxRows={4}
-                          placeholder={`${definition.label}に追加質問する`}
-                          value={followUpInputs[index]}
-                          onChange={(event) => followUpHandlers.setItem(index, event.currentTarget.value)}
-                        />
-                        <Group justify='flex-end'>
-                          <Button
-                            size='sm'
-                            variant='light'
-                            disabled={followUpInputs[index].length === 0 || isGenerating}
-                            onClick={() => handleFollowUpSend(index, definition.id)}
-                          >
-                            個別に送信
-                          </Button>
-                        </Group>
-                      </Stack>
-                    )}
-                  </Stack>
-                </Paper>
-              </Carousel.Slide>
-            );
-          })}
+          {MODEL_DEFINITIONS.map((definition) => (
+            <ModelSlide
+              key={definition.id}
+              definition={definition}
+              broadcast={broadcast}
+              onCompleted={handleOnCompleted}
+            />
+          ))}
         </Carousel>
 
         <Stack gap='xs'>
