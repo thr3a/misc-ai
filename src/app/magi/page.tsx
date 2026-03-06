@@ -81,8 +81,9 @@ type ModelSlideProps = {
 
 const ModelSlide = memo(({ definition, broadcast, onCompleted }: ModelSlideProps) => {
   const chat = useModelChat(definition.id);
-  const [followUpInput, setFollowUpInput] = useState('');
+  const [followUpInput, setFollowUpInput] = useInputState('');
   const lastProcessedBroadcastId = useRef<number>(-1);
+  const completionNotifiedRef = useRef(false);
 
   // broadcastが変化したらメッセージを送信
   useEffect(() => {
@@ -90,7 +91,7 @@ const ModelSlide = memo(({ definition, broadcast, onCompleted }: ModelSlideProps
       lastProcessedBroadcastId.current = broadcast.id;
       void chat.sendMessage({ parts: [{ type: 'text', text: broadcast.text }] });
     }
-  }, [broadcast, chat]);
+  }, [broadcast, chat.sendMessage]);
 
   const hasAssistantReply = chat.messages.some((message) => message.role === 'assistant');
   const isGenerating = chat.status === 'streaming' || chat.status === 'submitted';
@@ -101,14 +102,19 @@ const ModelSlide = memo(({ definition, broadcast, onCompleted }: ModelSlideProps
   const isWaitingForText =
     isGenerating && (!lastMessage || lastMessage.role !== 'assistant' || collectText(lastMessage.parts).length === 0);
 
-  // 完了時に親へ最初のアシスタント応答を通知
+  // 完了時に親へ最初のアシスタント応答を通知（1回のbroadcastにつき1回だけ実行）
   useEffect(() => {
-    if (hasAssistantReply && !isGenerating) {
+    if (!broadcast) {
+      completionNotifiedRef.current = false;
+      return;
+    }
+    if (hasAssistantReply && !isGenerating && !completionNotifiedRef.current) {
+      completionNotifiedRef.current = true;
       const assistantMessage = chat.messages.find((m) => m.role === 'assistant');
       const response = assistantMessage ? collectText(assistantMessage.parts) : '';
       onCompleted(definition.id, response);
     }
-  }, [hasAssistantReply, isGenerating, chat.messages, definition.id, onCompleted]);
+  }, [hasAssistantReply, isGenerating, broadcast, chat.messages, definition.id, onCompleted]);
 
   const handleFollowUpSend = () => {
     if (!followUpInput) return;
@@ -167,7 +173,7 @@ const ModelSlide = memo(({ definition, broadcast, onCompleted }: ModelSlideProps
                 maxRows={4}
                 placeholder={`${definition.label}に追加質問する`}
                 value={followUpInput}
-                onChange={(event) => setFollowUpInput(event.currentTarget.value)}
+                onChange={setFollowUpInput}
               />
               <Group justify='flex-end'>
                 <Button
@@ -260,13 +266,12 @@ export default function Page() {
     [submitSynthesize]
   );
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: allModelsCompleted の変化時のみ実行したい
   useEffect(() => {
     if (allModelsCompleted && !autoSynthesizeTriggered.current) {
       autoSynthesizeTriggered.current = true;
       handleSynthesize(completedResponses);
     }
-  }, [allModelsCompleted]);
+  }, [allModelsCompleted, completedResponses, handleSynthesize]);
 
   const handleExport = () => {
     if (!synthesizeObject) return;
