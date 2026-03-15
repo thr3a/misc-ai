@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, Box, Button, Group, Paper, Stack, Text, Textarea, Timeline } from '@mantine/core';
+import { Badge, Box, Button, Group, Paper, Select, Stack, Text, Textarea, Timeline } from '@mantine/core';
 import { useState } from 'react';
 import { IconHelpHexagon } from '@tabler/icons-react';
 
@@ -13,8 +13,6 @@ type GameEvent =
   | { type: 'student_early_exit'; turn: number }
   | { type: 'final_phase' }
   | { type: 'final_answer'; answer: string };
-
-const MAX_QUESTIONS = 5;
 
 const answerColor = (answer: string) => {
   if (answer === 'YES') return 'green';
@@ -29,6 +27,7 @@ export default function Page() {
   const [answer, setAnswer] = useState(
     '男女は雪山で遭難していました。低体温症で眠ってしまうと命を落とす危険があったため、互いに叩き起こして眠らせないようにして夜をしのいでいました。そんな中、捜索隊に発見して貰ったため、喜びました。'
   );
+  const [maxQuestions, setMaxQuestions] = useState('5');
   const [events, setEvents] = useState<GameEvent[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -38,6 +37,7 @@ export default function Page() {
     setIsLoading(true);
 
     const studentMessages: Message[] = [];
+    const MAX_QUESTIONS = Number(maxQuestions);
 
     for (let turn = 1; turn <= MAX_QUESTIONS; turn++) {
       const remaining = MAX_QUESTIONS - turn + 1;
@@ -122,6 +122,13 @@ export default function Page() {
           rows={5}
           value={answer}
           onChange={(e) => setAnswer(e.currentTarget.value)}
+        />
+        <Select
+          label='ターン数'
+          value={maxQuestions}
+          onChange={(v) => v && setMaxQuestions(v)}
+          data={['5', '6', '7', '8', '9', '10']}
+          w={120}
         />
         <Group justify='center'>
           <Button onClick={handleStart} loading={isLoading} disabled={!problem.trim() || !answer.trim()}>
