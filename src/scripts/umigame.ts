@@ -94,11 +94,13 @@ const main = async () => {
     const remaining = MAX_QUESTIONS - turn + 1;
     console.log(`--- ターン ${turn} / ${MAX_QUESTIONS} (残り${remaining}回) ---`);
 
-    // 生徒AIに質問させる
+    // 生徒AIに質問させる（初回は messages が空のため prompt を使用）
     const studentResult = await generateObject({
       model: openai('gpt-4o-mini'),
       system: buildStudentSystemPrompt(remaining),
-      messages: studentMessages,
+      ...(studentMessages.length > 0
+        ? { messages: studentMessages }
+        : { prompt: '問題を読んで最初の質問をしてください。' }),
       schema: StudentTurnSchema
     });
 
