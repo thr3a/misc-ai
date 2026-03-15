@@ -4,6 +4,8 @@ import { Badge, Box, Button, Group, Paper, Stack, Text, Textarea, Timeline } fro
 import { useState } from 'react';
 import { IconHelpHexagon } from '@tabler/icons-react';
 
+type Message = { role: 'user' | 'assistant'; content: string };
+
 type GameEvent =
   | { type: 'turn_start'; turn: number; maxTurns: number }
   | { type: 'student_question'; turn: number; question: string }
@@ -11,6 +13,8 @@ type GameEvent =
   | { type: 'student_early_exit'; turn: number }
   | { type: 'final_phase' }
   | { type: 'final_answer'; answer: string };
+
+const MAX_QUESTIONS = 5;
 
 const answerColor = (answer: string) => {
   if (answer === 'YES') return 'green';
@@ -33,40 +37,57 @@ export default function Page() {
     setEvents([]);
     setIsLoading(true);
 
-    const res = await fetch('/api/umigame', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ problem, answer })
-    });
+    const studentMessages: Message[] = [];
 
-    if (!res.ok || !res.body) {
-      setIsLoading(false);
-      return;
+    for (let turn = 1; turn <= MAX_QUESTIONS; turn++) {
+      const remaining = MAX_QUESTIONS - turn + 1;
+      setEvents((prev) => [...prev, { type: 'turn_start', turn, maxTurns: MAX_QUESTIONS }]);
+
+      // 生徒の質問を生成
+      const questionRes = await fetch('/api/umigame/question', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ problem, messages: studentMessages, remaining })
+      });
+
+      if (!questionRes.ok) break;
+      const studentTurn = await questionRes.json();
+
+      if (studentTurn.action === 'FINAL_ANSWER') {
+        setEvents((prev) => [...prev, { type: 'student_early_exit', turn }]);
+        break;
+      }
+
+      const question: string = studentTurn.question ?? '';
+      setEvents((prev) => [...prev, { type: 'student_question', turn, question }]);
+      studentMessages.push({ role: 'assistant', content: question });
+
+      // 先生の回答を取得
+      const answerRes = await fetch('/api/umigame/answer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ problem, answer, question })
+      });
+
+      if (!answerRes.ok) break;
+      const teacherData = await answerRes.json();
+
+      setEvents((prev) => [...prev, { type: 'teacher_answer', turn, answer: teacherData.answer }]);
+      studentMessages.push({ role: 'user', content: `出題者の回答: ${teacherData.answer}` });
     }
 
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
+    // 最終回答フェーズ
+    setEvents((prev) => [...prev, { type: 'final_phase' }]);
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
+    const finalRes = await fetch('/api/umigame/final', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ problem, messages: studentMessages })
+    });
 
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop() ?? '';
-
-      let currentEventType = '';
-      for (const line of lines) {
-        if (line.startsWith('event: ')) {
-          currentEventType = line.slice(7);
-        } else if (line.startsWith('data: ') && currentEventType) {
-          const data = JSON.parse(line.slice(6));
-          const event = { type: currentEventType, ...data } as GameEvent;
-          setEvents((prev) => [...prev, event]);
-          currentEventType = '';
-        }
-      }
+    if (finalRes.ok) {
+      const finalData = await finalRes.json();
+      setEvents((prev) => [...prev, { type: 'final_answer', answer: finalData.answer }]);
     }
 
     setIsLoading(false);
