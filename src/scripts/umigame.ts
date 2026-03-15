@@ -143,7 +143,7 @@ const main = async () => {
   // ── 最終回答フェーズ ──────────────────────────────
   console.log('=== 最終回答フェーズ ===\n');
 
-  const finalAnswer = await generateText({
+  const { text: finalAnswer } = await generateText({
     model: openai('gpt-5-mini'),
     system: dedent`
       あなたは水平思考問題（ウミガメのスープ）を解くプレイヤーです。
