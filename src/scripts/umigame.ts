@@ -12,11 +12,6 @@ const StudentTurnSchema = z.object({
   question: z.string().describe('YES/NO/IRRELEVANTのいずれかで答えられる質問。action が FINAL_ANSWER の場合は空文字列')
 });
 
-const StudentFinalAnswerSchema = z.object({
-  answer: z.string().describe('最終回答'),
-  reasoning: z.string().describe('答えに至った推理のまとめ')
-});
-
 const TeacherAnswerSchema = z.object({
   answer: z.enum(['YES', 'NO', 'IRRELEVANT'])
 });
@@ -92,7 +87,7 @@ const main = async () => {
     // 生徒AIに質問させる（初回は messages が空のため prompt を使用）
     const studentResult = await generateText({
       // model: openai('gpt-5.4'),
-      model: openai('gpt-5'),
+      model: openai('gpt-5-mini'),
       output: Output.object({ schema: StudentTurnSchema }),
       system: buildStudentSystemPrompt(remaining),
       ...(studentMessages.length > 0
@@ -148,9 +143,8 @@ const main = async () => {
   // ── 最終回答フェーズ ──────────────────────────────
   console.log('=== 最終回答フェーズ ===\n');
 
-  const finalResult = await generateText({
-    model: openai('gpt-4o-mini'),
-    output: Output.object({ schema: StudentFinalAnswerSchema }),
+  const finalAnswer = await generateText({
+    model: openai('gpt-5-mini'),
     system: dedent`
       あなたは水平思考問題（ウミガメのスープ）を解くプレイヤーです。
       出題される問題は、一見不可解だったり矛盾しているように見えますが、推理を重ねることで合理的な説明が導き出されます。
@@ -162,9 +156,7 @@ const main = async () => {
     messages: [...studentMessages, { role: 'user', content: 'これまでの情報を元に最終回答をしてください。' }]
   });
 
-  const finalAnswer = finalResult.output;
-  console.log(`【最終回答】${finalAnswer.answer}`);
-  console.log(`【推理まとめ】${finalAnswer.reasoning}\n`);
+  console.log(`【最終回答】${finalAnswer}`);
 
   // ── Markdownファイル保存 ──────────────────────────────
   const now = dayjs();
@@ -183,8 +175,7 @@ const main = async () => {
 
     ## 生徒AIの最終回答
 
-    回答: ${finalAnswer.answer}
-    推理まとめ: ${finalAnswer.reasoning}
+    ${finalAnswer}
   `;
 
   writeFileSync(fileName, `${markdown}\n`);
