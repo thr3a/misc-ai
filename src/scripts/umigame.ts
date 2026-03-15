@@ -2,20 +2,15 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { openai } from '@ai-sdk/openai';
-import { type ModelMessage, generateObject } from 'ai';
+import { Output, type ModelMessage, generateText } from 'ai';
 import dayjs from 'dayjs';
 import dedent from 'ts-dedent';
 import { z } from 'zod';
 
-const StudentTurnSchema = z.discriminatedUnion('action', [
-  z.object({
-    action: z.literal('ASK'),
-    question: z.string().describe('YES/NO/IRRELEVANTのいずれかで答えられる質問')
-  }),
-  z.object({
-    action: z.literal('FINAL_ANSWER')
-  })
-]);
+const StudentTurnSchema = z.object({
+  action: z.enum(['ASK', 'FINAL_ANSWER']),
+  question: z.string().describe('YES/NO/IRRELEVANTのいずれかで答えられる質問。action が FINAL_ANSWER の場合は空文字列')
+});
 
 const StudentFinalAnswerSchema = z.object({
   answer: z.string().describe('最終回答'),
@@ -95,16 +90,16 @@ const main = async () => {
     console.log(`--- ターン ${turn} / ${MAX_QUESTIONS} (残り${remaining}回) ---`);
 
     // 生徒AIに質問させる（初回は messages が空のため prompt を使用）
-    const studentResult = await generateObject({
+    const studentResult = await generateText({
       model: openai('gpt-4o-mini'),
+      output: Output.object({ schema: StudentTurnSchema }),
       system: buildStudentSystemPrompt(remaining),
       ...(studentMessages.length > 0
         ? { messages: studentMessages }
-        : { prompt: '問題を読んで最初の質問をしてください。' }),
-      schema: StudentTurnSchema
+        : { prompt: '問題を読んで最初の質問をしてください。' })
     });
 
-    const studentTurn = studentResult.object;
+    const studentTurn = studentResult.output;
 
     if (studentTurn.action === 'FINAL_ANSWER') {
       console.log('生徒AI: 最終回答に進みます\n');
@@ -114,17 +109,18 @@ const main = async () => {
       break;
     }
 
-    console.log(`生徒AI: ${studentTurn.question}`);
+    const question = studentTurn.question ?? '';
+    console.log(`生徒AI: ${question}`);
 
     // 生徒のassistantメッセージを履歴に追加
     studentMessages.push({ role: 'assistant', content: JSON.stringify(studentTurn) });
 
     // 先生AIに回答させる
-    const teacherResult = await generateObject({
+    const teacherResult = await generateText({
       model: openai('gpt-5.2'),
+      output: Output.object({ schema: TeacherAnswerSchema }),
       system: teacherSystemPrompt,
-      prompt: studentTurn.question,
-      schema: TeacherAnswerSchema,
+      prompt: question,
       providerOptions: {
         openai: {
           reasoningEffort: 'none'
@@ -132,7 +128,7 @@ const main = async () => {
       }
     });
 
-    const teacherAnswer = teacherResult.object.answer;
+    const teacherAnswer = teacherResult.output.answer;
     console.log(`先生AI: ${teacherAnswer}\n`);
 
     // 履歴に追加
@@ -140,7 +136,7 @@ const main = async () => {
 
     qaPairs.push({
       turnNumber: turn,
-      question: studentTurn.question,
+      question,
       teacherAnswer
     });
   }
@@ -148,8 +144,9 @@ const main = async () => {
   // ── 最終回答フェーズ ──────────────────────────────
   console.log('=== 最終回答フェーズ ===\n');
 
-  const finalResult = await generateObject({
+  const finalResult = await generateText({
     model: openai('gpt-4o-mini'),
+    output: Output.object({ schema: StudentFinalAnswerSchema }),
     system: dedent`
       あなたは水平思考問題（ウミガメのスープ）を解くプレイヤーです。
       出題される問題は、一見不可解だったり矛盾しているように見えますが、推理を重ねることで合理的な説明が導き出されます。
@@ -158,11 +155,10 @@ const main = async () => {
       【問題文】
       ${problemText}
     `,
-    messages: [...studentMessages, { role: 'user', content: 'これまでの情報を元に最終回答をしてください。' }],
-    schema: StudentFinalAnswerSchema
+    messages: [...studentMessages, { role: 'user', content: 'これまでの情報を元に最終回答をしてください。' }]
   });
 
-  const finalAnswer = finalResult.object;
+  const finalAnswer = finalResult.output;
   console.log(`【最終回答】${finalAnswer.answer}`);
   console.log(`【推理まとめ】${finalAnswer.reasoning}\n`);
 
