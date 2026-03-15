@@ -110,8 +110,6 @@ const main = async () => {
     if (studentTurn.action === 'FINAL_ANSWER') {
       console.log('生徒AI: 最終回答に進みます\n');
       endReason = 'STUDENT_EARLY_EXIT';
-      // 生徒のassistantメッセージを履歴に追加
-      studentMessages.push({ role: 'assistant', content: JSON.stringify(studentTurn) });
       break;
     }
 
@@ -119,7 +117,7 @@ const main = async () => {
     console.log(`生徒AI: ${question}`);
 
     // 生徒のassistantメッセージを履歴に追加
-    studentMessages.push({ role: 'assistant', content: JSON.stringify(studentTurn) });
+    studentMessages.push({ role: 'assistant', content: studentTurn.question });
 
     // 先生AIに回答させる
     const teacherResult = await generateText({
