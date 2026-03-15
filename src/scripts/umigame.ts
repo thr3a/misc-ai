@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { openai } from '@ai-sdk/openai';
-import { Output, type ModelMessage, generateText } from 'ai';
+import { type ModelMessage, Output, generateText } from 'ai';
 import dayjs from 'dayjs';
 import dedent from 'ts-dedent';
 import { z } from 'zod';
@@ -91,12 +91,18 @@ const main = async () => {
 
     // 生徒AIに質問させる（初回は messages が空のため prompt を使用）
     const studentResult = await generateText({
-      model: openai('gpt-4o-mini'),
+      // model: openai('gpt-5.4'),
+      model: openai('gpt-5'),
       output: Output.object({ schema: StudentTurnSchema }),
       system: buildStudentSystemPrompt(remaining),
       ...(studentMessages.length > 0
         ? { messages: studentMessages }
         : { prompt: '問題を読んで最初の質問をしてください。' })
+      // providerOptions: {
+      //   openai: {
+      //     reasoningEffort: 'high'
+      //   } satisfies OpenAIResponsesProviderOptions
+      // }
     });
 
     const studentTurn = studentResult.output;
@@ -117,13 +123,13 @@ const main = async () => {
 
     // 先生AIに回答させる
     const teacherResult = await generateText({
-      model: openai('gpt-5.2'),
+      model: openai('gpt-5.4'),
       output: Output.object({ schema: TeacherAnswerSchema }),
       system: teacherSystemPrompt,
       prompt: question,
       providerOptions: {
         openai: {
-          reasoningEffort: 'none'
+          reasoningEffort: 'low'
         } satisfies OpenAIResponsesProviderOptions
       }
     });
@@ -132,7 +138,7 @@ const main = async () => {
     console.log(`先生AI: ${teacherAnswer}\n`);
 
     // 履歴に追加
-    studentMessages.push({ role: 'user', content: `先生AIの回答: ${teacherAnswer}` });
+    studentMessages.push({ role: 'user', content: `出題者の回答: ${teacherAnswer}` });
 
     qaPairs.push({
       turnNumber: turn,
