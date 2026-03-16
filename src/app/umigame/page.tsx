@@ -1,6 +1,6 @@
 'use client';
 
-import { Avatar, Badge, Box, Button, Center, Group, Paper, Select, Stack, Text, Textarea } from '@mantine/core';
+import { Avatar, Badge, Box, Button, Center, Group, Loader, Paper, Select, Stack, Text, Textarea } from '@mantine/core';
 import { IconRobot } from '@tabler/icons-react';
 import { useState } from 'react';
 
@@ -129,6 +129,13 @@ export default function Page() {
   const finalAnswerEvent = events.find((e) => e.type === 'final_answer');
   const hasFinalPhase = events.some((e) => e.type === 'final_phase');
 
+  // 現在進行中のターン番号（最後の turn_start イベントから取得）
+  const currentTurn = events.reduceRight<number | null>((acc, e) => {
+    if (acc !== null) return acc;
+    if (e.type === 'turn_start') return e.turn;
+    return null;
+  }, null);
+
   return (
     <Box mb={'lg'}>
       <Stack>
@@ -144,7 +151,7 @@ export default function Page() {
           label='ターン数'
           value={maxQuestions}
           onChange={(v) => v && setMaxQuestions(v)}
-          data={['5', '6', '7', '8', '9', '10']}
+          data={['5', '10', '15', '20']}
           w={120}
         />
         <Group justify='center'>
@@ -153,8 +160,8 @@ export default function Page() {
           </Button>
         </Group>
 
-        {qaPairs.length > 0 && (
-          <Paper p='md' maw={600} bg={'gray.1'} mx='auto'>
+        {(isLoading || qaPairs.length > 0) && (
+          <Paper p='md' w='100%' maw={600} bg={'gray.1'} mx='auto'>
             <Text fw='bold' mb='sm'>
               AIの思考プロセス
             </Text>
@@ -166,11 +173,11 @@ export default function Page() {
                       ターン{qa.turn}
                     </Text>
                   </Center>
-                  <Group align='center' gap='xs'>
-                    <Avatar color='blue' radius='xl'>
+                  <Group align='flex-start' gap='xs' wrap='nowrap'>
+                    <Avatar color='blue' radius='xl' style={{ flexShrink: 0 }}>
                       <IconRobot size={20} />
                     </Avatar>
-                    <Paper px='sm' py='xs' bg='white'>
+                    <Paper px='sm' py='xs' bg='white' flex={1}>
                       <Text>{qa.question}</Text>
                     </Paper>
                   </Group>
@@ -183,6 +190,23 @@ export default function Page() {
                   )}
                 </Stack>
               ))}
+              {isLoading && !hasFinalPhase && (
+                <Stack gap='xs'>
+                  <Center>
+                    <Text size='xs' fw='bold' c='dimmed' lts={1}>
+                      ターン{currentTurn ?? 1}
+                    </Text>
+                  </Center>
+                  <Group align='flex-start' gap='xs' wrap='nowrap'>
+                    <Avatar color='blue' radius='xl' style={{ flexShrink: 0 }}>
+                      <IconRobot size={20} />
+                    </Avatar>
+                    <Paper px='sm' py='xs' bg='white' flex={1}>
+                      <Loader size='xs' />
+                    </Paper>
+                  </Group>
+                </Stack>
+              )}
             </Stack>
           </Paper>
         )}
