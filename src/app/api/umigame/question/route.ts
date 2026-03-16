@@ -13,7 +13,8 @@ const messageSchema = z.object({
 const requestSchema = z.object({
   problem: z.string().min(1),
   messages: z.array(messageSchema),
-  remaining: z.number().int().min(1)
+  remaining: z.number().int().min(1),
+  maxTurns: z.number().int().min(1)
 });
 
 const StudentTurnSchema = z.object({
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { problem, messages, remaining } = validatedFields.data;
+  const { problem, messages, remaining, maxTurns } = validatedFields.data;
 
   const systemPrompt = dedent`
     あなたは水平思考問題（ウミガメのスープ）を解くプレイヤーです。
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest) {
     質問は必ず「YES / NO / IRRELEVANT（関係ない）」で答えられる形式にしてください。
     質問は一度に1つずつ投げかけてください。
     答えに確信が持てたら、質問ではなく action: "FINAL_ANSWER" と解答を返してください。
-    最大5回質問できます（残り${remaining}回）。
+    最大${maxTurns}回質問できます（残り${remaining}回）。
 
     【問題文】
     ${problem}

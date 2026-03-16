@@ -47,7 +47,7 @@ export default function Page() {
       const questionRes = await fetch('/api/umigame/question', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ problem, messages: studentMessages, remaining })
+        body: JSON.stringify({ problem, messages: studentMessages, remaining, maxTurns: MAX_QUESTIONS })
       });
 
       if (!questionRes.ok) break;
