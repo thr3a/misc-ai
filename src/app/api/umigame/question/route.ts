@@ -43,8 +43,8 @@ export async function POST(req: NextRequest) {
     【ルール】
     質問は必ず「YES / NO / IRRELEVANT（関係ない）」で答えられる形式にしてください。
     質問は一度に1つずつ投げかけてください。
-    答えに確信が持てたら、質問ではなく action: "FINAL_ANSWER" と解答を返してください。
     最大${maxTurns}回質問できます（残り${remaining}回）。
+    回答が確定し他に選択肢の余地がないときのみ質問ではなく action: "FINAL_ANSWER" と解答を返してください。あなたに解答権は1回しかありません。慎重になってください。
 
     【問題文】
     ${problem}
@@ -57,9 +57,7 @@ export async function POST(req: NextRequest) {
     model: openai('gpt-5.4'),
     output: Output.object({ schema: StudentTurnSchema }),
     system: systemPrompt,
-    ...(messages.length > 0
-      ? { messages }
-      : { prompt: '問題を読んで最初の質問をしてください。' }),
+    ...(messages.length > 0 ? { messages } : { prompt: '問題を読んで最初の質問をしてください。' }),
     providerOptions: {
       openai: {
         reasoningEffort: 'high'
