@@ -1,8 +1,8 @@
 'use client';
 
-import { Badge, Box, Button, Group, Paper, Select, Stack, Text, Textarea, Timeline } from '@mantine/core';
+import { Avatar, Badge, Box, Button, Center, Group, Paper, Select, Stack, Text, Textarea } from '@mantine/core';
+import { IconRobot } from '@tabler/icons-react';
 import { useState } from 'react';
-import { IconHelpHexagon } from '@tabler/icons-react';
 
 type Message = { role: 'user' | 'assistant'; content: string };
 
@@ -28,7 +28,29 @@ export default function Page() {
     '男女は雪山で遭難していました。低体温症で眠ってしまうと命を落とす危険があったため、互いに叩き起こして眠らせないようにして夜をしのいでいました。そんな中、捜索隊に発見して貰ったため、喜びました。'
   );
   const [maxQuestions, setMaxQuestions] = useState('5');
-  const [events, setEvents] = useState<GameEvent[]>([]);
+  const [events, setEvents] = useState<GameEvent[]>([
+    { type: 'turn_start', turn: 1, maxTurns: 5 },
+    { type: 'student_question', turn: 1, question: '男女は屋外にいましたか？' },
+    { type: 'teacher_answer', turn: 1, answer: 'YES' },
+    { type: 'turn_start', turn: 2, maxTurns: 5 },
+    { type: 'student_question', turn: 2, question: 'お互いを叩いたのは意図的な行為でしたか？' },
+    { type: 'teacher_answer', turn: 2, answer: 'YES' },
+    { type: 'turn_start', turn: 3, maxTurns: 5 },
+    { type: 'student_question', turn: 3, question: '第三者に見られたことが二人の助けになりましたか？' },
+    { type: 'teacher_answer', turn: 3, answer: 'YES' },
+    { type: 'turn_start', turn: 4, maxTurns: 5 },
+    { type: 'student_question', turn: 4, question: '二人は危険な状況にいましたか？' },
+    { type: 'teacher_answer', turn: 4, answer: 'YES' },
+    { type: 'turn_start', turn: 5, maxTurns: 5 },
+    { type: 'student_question', turn: 5, question: '叩き合っていたのは眠らないようにするためでしたか？' },
+    { type: 'teacher_answer', turn: 5, answer: 'YES' },
+    { type: 'final_phase' },
+    {
+      type: 'final_answer',
+      answer:
+        '男女は雪山で遭難していました。低体温症で眠ってしまうと命を落とす危険があったため、互いに叩き起こして眠らせないようにして夜をしのいでいました。そんな中、捜索隊に発見してもらったため、二人は喜びました。'
+    }
+  ]);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleStart = async () => {
@@ -108,18 +130,13 @@ export default function Page() {
   const hasFinalPhase = events.some((e) => e.type === 'final_phase');
 
   return (
-    <Box>
+    <Box mb={'lg'}>
       <Stack>
+        <Textarea label='問題文' rows={3} value={problem} onChange={(e) => setProblem(e.currentTarget.value)} />
         <Textarea
-          label='ウミガメのスープの問題文を入力してください'
-          rows={5}
-          value={problem}
-          onChange={(e) => setProblem(e.currentTarget.value)}
-        />
-        <Textarea
-          label='正解と解説を入力してください'
+          label='正解と解説'
           placeholder=''
-          rows={5}
+          rows={3}
           value={answer}
           onChange={(e) => setAnswer(e.currentTarget.value)}
         />
@@ -137,22 +154,36 @@ export default function Page() {
         </Group>
 
         {qaPairs.length > 0 && (
-          <Paper p='md'>
+          <Paper p='md' maw={600} bg={'gray.1'} mx='auto'>
             <Text fw='bold' mb='sm'>
-              質問ログ
+              AIの思考プロセス
             </Text>
-            <Timeline radius={'sm'} active={qaPairs.length - 1} lineWidth={3} bulletSize={26}>
+            <Stack gap='lg'>
               {qaPairs.map((qa) => (
-                <Timeline.Item bullet={<IconHelpHexagon stroke={2} />} key={qa.turn} title={`ターン ${qa.turn}`}>
-                  <Text size='sm'>{qa.question}</Text>
+                <Stack key={qa.turn} gap='xs'>
+                  <Center>
+                    <Text size='xs' fw='bold' c='dimmed' lts={1}>
+                      ターン{qa.turn}
+                    </Text>
+                  </Center>
+                  <Group align='center' gap='xs'>
+                    <Avatar color='blue' radius='xl'>
+                      <IconRobot size={20} />
+                    </Avatar>
+                    <Paper px='sm' py='xs' bg='white'>
+                      <Text>{qa.question}</Text>
+                    </Paper>
+                  </Group>
                   {qa.answer && (
-                    <Badge mt='xs' color={answerColor(qa.answer)}>
-                      {qa.answer}
-                    </Badge>
+                    <Group justify='flex-end'>
+                      <Badge size='lg' color={answerColor(qa.answer)} radius='xl' px='md'>
+                        {qa.answer}
+                      </Badge>
+                    </Group>
                   )}
-                </Timeline.Item>
+                </Stack>
               ))}
-            </Timeline>
+            </Stack>
           </Paper>
         )}
 
