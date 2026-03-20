@@ -111,6 +111,14 @@ export default function Page() {
       lines.push('');
     }
 
+    if (synthesizeObject.uniqueOpinions && synthesizeObject.uniqueOpinions.length > 0) {
+      lines.push('### ユニークな意見\n');
+      for (const opinion of synthesizeObject.uniqueOpinions) {
+        lines.push(`- ${opinion}`);
+      }
+      lines.push('');
+    }
+
     if (synthesizeObject.conflictingOpinions && synthesizeObject.conflictingOpinions.length > 0) {
       lines.push('### 対立している意見\n');
       for (const opinion of synthesizeObject.conflictingOpinions) {
