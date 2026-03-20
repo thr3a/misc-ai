@@ -1,4 +1,4 @@
-import { google } from '@ai-sdk/google';
+import { openai } from '@ai-sdk/openai';
 import { Output, streamText } from 'ai';
 import type { NextRequest } from 'next/server';
 import dedent from 'ts-dedent';
@@ -48,11 +48,16 @@ export async function POST(req: NextRequest) {
     `;
 
     const result = streamText({
-      model: google('gemini-3-flash-preview'),
+      model: openai('gpt-5.4-mini-2026-03-17'),
       system: synthesizeSystemPrompt,
       prompt: userPrompt,
       temperature: 0,
-      output: Output.object({ schema: synthesizeResultSchema })
+      output: Output.object({ schema: synthesizeResultSchema }),
+      providerOptions: {
+        openai: {
+          reasoningEffort: 'minimal'
+        }
+      }
     });
 
     return result.toTextStreamResponse();
