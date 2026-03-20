@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import * as path from 'node:path';
 import dedent from 'ts-dedent';
+
 const now = new Date();
 const japanTime = now.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
 export const tobariPrompt = dedent`

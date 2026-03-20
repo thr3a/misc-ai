@@ -1,11 +1,11 @@
 'use client';
-import { resizeAndCompressImage } from '@/app/lib/resizeAndCompressImage';
 import { readStreamableValue } from '@ai-sdk/rsc';
 import { Box, Button, FileInput, Group, List, ListItem, Select, Space, Text, Title } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
 import { IconPhotoScan } from '@tabler/icons-react';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { z } from 'zod/v4';
+import { resizeAndCompressImage } from '@/app/lib/resizeAndCompressImage';
 import { generate } from './actions';
 import { CURRENCY_LIST, type schema } from './util';
 
@@ -20,7 +20,7 @@ type FormValues = {
   currencyCode: string;
 };
 
-const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
+const [FormProvider, _useFormContext, useForm] = createFormContext<FormValues>();
 
 export default function Page() {
   const form = useForm({

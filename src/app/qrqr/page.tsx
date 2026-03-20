@@ -1,6 +1,6 @@
 'use client';
 import { readStreamableValue } from '@ai-sdk/rsc';
-import { Box, Button, Group, Paper, TextInput, Textarea, Title } from '@mantine/core';
+import { Box, Button, Group, Textarea } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
 import { QRCodeSVG } from 'qrcode.react';
 import { generate } from './actions';
@@ -15,7 +15,7 @@ type FormValues = {
   result: string;
 };
 
-const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
+const [FormProvider, _useFormContext, useForm] = createFormContext<FormValues>();
 
 export default function Page() {
   const form = useForm({

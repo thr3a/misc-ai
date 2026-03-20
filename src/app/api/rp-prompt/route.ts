@@ -1,9 +1,9 @@
-import { scenarioPromptSchema } from '@/app/rp-prompt/type';
-import { creativeSystemPrompt, systemPrompt } from '@/app/rp-prompt/util';
 import { createOpenAI } from '@ai-sdk/openai';
 import { Output, streamText } from 'ai';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
+import { scenarioPromptSchema } from '@/app/rp-prompt/type';
+import { creativeSystemPrompt, systemPrompt } from '@/app/rp-prompt/util';
 
 // リクエストボディのスキーマ定義
 const requestSchema = z.object({
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     });
 
     return result.toTextStreamResponse();
-  } catch (error) {
+  } catch (_error) {
     return Response.json({ error: 'error' }, { status: 500 });
   }
 }

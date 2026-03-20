@@ -1,9 +1,9 @@
 'use server';
 
-import { schema } from '@/app/meimei/util';
 import { openai } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 import dedent from 'ts-dedent';
+import { schema } from '@/app/meimei/util';
 
 export async function SuggestNames(input: string, type: string, namingConvention: string) {
   'use server';

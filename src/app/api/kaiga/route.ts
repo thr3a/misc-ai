@@ -1,11 +1,10 @@
-import { apiRequestSchema, schema } from '@/app/kaiga/type';
-import { systemPrompt } from '@/app/kaiga/util';
 import type { GoogleGenerativeAIProviderOptions } from '@ai-sdk/google';
 import { google } from '@ai-sdk/google';
-import { openai } from '@ai-sdk/openai';
 import { Output, streamText } from 'ai';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
+import { apiRequestSchema, schema } from '@/app/kaiga/type';
+import { systemPrompt } from '@/app/kaiga/util';
 
 export const maxDuration = 30;
 

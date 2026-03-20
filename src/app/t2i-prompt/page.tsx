@@ -1,9 +1,9 @@
 'use client';
 
-import { ButtonCopy } from '@/app/html-ui/ButtonCopy';
 import { experimental_useObject as useObject } from '@ai-sdk/react';
-import { Box, Button, Group, Stack, Textarea, Title } from '@mantine/core';
+import { Box, Button, Group, Stack, Textarea } from '@mantine/core';
 import { useState } from 'react';
+import { ButtonCopy } from '@/app/html-ui/ButtonCopy';
 import { schema } from './type';
 
 // 関数名は変えないこと

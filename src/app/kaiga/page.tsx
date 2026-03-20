@@ -1,11 +1,11 @@
 'use client';
 
-import { ButtonCopy } from '@/app/html-ui/ButtonCopy';
-import { resizeAndCompressImage } from '@/app/lib/resizeAndCompressImage';
 import { experimental_useObject as useObject } from '@ai-sdk/react';
 import { Button, FileInput, Group, Image, Stack, Text, Textarea, Title } from '@mantine/core';
 import { IconPhotoScan } from '@tabler/icons-react';
 import { useState } from 'react';
+import { ButtonCopy } from '@/app/html-ui/ButtonCopy';
+import { resizeAndCompressImage } from '@/app/lib/resizeAndCompressImage';
 import { type ApiRequest, schema } from './type';
 import { buildMarkdown, fileToDataUrl } from './util';
 

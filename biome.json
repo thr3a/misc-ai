@@ -1,31 +1,29 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-	"organizeImports": {
-		"enabled": true
-	},
+	"$schema": "https://biomejs.dev/schemas/2.4.8/schema.json",
+	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"linter": {
 		"enabled": true,
 		"rules": {
 			"recommended": true,
-      "suspicious": {
-        "noImplicitAnyLet": "warn",
-        "noExplicitAny": "warn",
-        "noArrayIndexKey": "off"
-      },
-      "complexity": {
-        "noForEach":"info"
-      }
+			"suspicious": {
+				"noImplicitAnyLet": "warn",
+				"noExplicitAny": "warn",
+				"noArrayIndexKey": "off"
+			},
+			"complexity": {
+				"noForEach": "off"
+			}
 		}
 	},
-  "javascript": {
-    "formatter": {
-      "quoteStyle": "single",
-      "jsxQuoteStyle": "single",
-      "semicolons": "always",
-      "trailingCommas": "none",
-      "indentStyle": "space",
-      "indentWidth": 2,
-      "lineWidth": 120
-    }
-  }
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "single",
+			"jsxQuoteStyle": "single",
+			"semicolons": "always",
+			"trailingCommas": "none",
+			"indentStyle": "space",
+			"indentWidth": 2,
+			"lineWidth": 120
+		}
+	}
 }

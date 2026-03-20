@@ -1,7 +1,7 @@
-import { MODEL_PROVIDER_MAP, type ModelKey } from '@/app/magi/util';
 import { google } from '@ai-sdk/google';
 import { createOpenAI, openai } from '@ai-sdk/openai';
 import type { LanguageModel } from 'ai';
+import { MODEL_PROVIDER_MAP, type ModelKey } from '@/app/magi/util';
 
 export const resolveModel = (modelId: ModelKey): LanguageModel => {
   const config = MODEL_PROVIDER_MAP[modelId];

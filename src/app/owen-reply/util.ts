@@ -10,7 +10,7 @@ export const schema = z.object({
     .describe('3つの返信ツイートの配列')
 });
 
-const exampleReplies = [
+const _exampleReplies = [
   '主語決めつけ型: 国民の総意みたいに言わないで欲しい',
   '斜め上から型: 世の中には味覚を感じられない人もいるんだが？？',
   '一概には言えない型（〜かと。で終わる）:  砂糖にも色々あり、人が感じる甘みは糖度だけじゃなく形状にもよる。一概には言えないかと。',
@@ -32,7 +32,7 @@ export const systemPrompt = `
 自己肯定感が高まり幸福度が上がるリプライツイートを3つ作成してください。
 `;
 
-function getRandomElements<T>(arr: T[], count: number): T[] {
+function _getRandomElements<T>(arr: T[], count: number): T[] {
   if (count > arr.length) {
     throw new Error('Count is greater than the array length');
   }

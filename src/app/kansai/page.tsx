@@ -15,7 +15,7 @@ type FormValues = {
   result: z.infer<typeof schema>;
 };
 
-const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
+const [FormProvider, _useFormContext, useForm] = createFormContext<FormValues>();
 
 export default function Page() {
   const form = useForm({

@@ -1,9 +1,9 @@
-import type { LyricAnalysis } from '@/app/lyric/type';
-import { openai } from '@ai-sdk/openai';
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
-import { type UIMessage, convertToModelMessages, streamText, validateUIMessages } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { convertToModelMessages, streamText, type UIMessage, validateUIMessages } from 'ai';
 import type { NextRequest } from 'next/server';
 import dedent from 'ts-dedent';
+import type { LyricAnalysis } from '@/app/lyric/type';
 
 type ChatRequestBody = {
   messages: UIMessage[];

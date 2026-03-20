@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { openai } from '@ai-sdk/openai';
-import { type ModelMessage, Output, generateText } from 'ai';
+import { generateText, type ModelMessage, Output } from 'ai';
 import dayjs from 'dayjs';
 import dedent from 'ts-dedent';
 import { z } from 'zod';
@@ -77,7 +77,7 @@ const main = async () => {
   // 会話履歴
   const studentMessages: ModelMessage[] = [];
   const qaPairs: QAPair[] = [];
-  let endReason: 'MAX_QUESTIONS_REACHED' | 'STUDENT_EARLY_EXIT' = 'MAX_QUESTIONS_REACHED';
+  let _endReason: 'MAX_QUESTIONS_REACHED' | 'STUDENT_EARLY_EXIT' = 'MAX_QUESTIONS_REACHED';
 
   // 質問ループ
   for (let turn = 1; turn <= MAX_QUESTIONS; turn++) {
@@ -104,7 +104,7 @@ const main = async () => {
 
     if (studentTurn.action === 'FINAL_ANSWER') {
       console.log('生徒AI: 最終回答に進みます\n');
-      endReason = 'STUDENT_EARLY_EXIT';
+      _endReason = 'STUDENT_EARLY_EXIT';
       break;
     }
 

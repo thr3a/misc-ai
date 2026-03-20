@@ -16,7 +16,7 @@
     "@ai-sdk/openai": "^3.0.41",
     "@ai-sdk/react": "^3.0.118",
     "@ai-sdk/rsc": "^2.0.116",
-    "@biomejs/biome": "^1.9.4",
+    "@biomejs/biome": "^2.4.8",
     "@mantine/carousel": "^8.3.17",
     "@mantine/core": "^8.3.17",
     "@mantine/form": "^8.3.17",

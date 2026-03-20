@@ -1,9 +1,9 @@
 'use client';
-import { SearchButton } from '@/app/ggr-en/components/SearchButton';
-import { schema } from '@/app/ggr-en/type';
 import { experimental_useObject as useObject } from '@ai-sdk/react';
 import { Box, Button, Group, Paper, Stack, Textarea } from '@mantine/core';
 import { useState } from 'react';
+import { SearchButton } from '@/app/ggr-en/components/SearchButton';
+import { schema } from '@/app/ggr-en/type';
 
 export default function Page() {
   const [query, setQuery] = useState('css remとpxの違い');

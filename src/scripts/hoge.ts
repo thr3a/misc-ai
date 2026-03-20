@@ -1,7 +1,7 @@
-import { openai } from '@ai-sdk/openai';
 import { createOpenAI } from '@ai-sdk/openai';
-import { Output, generateText } from 'ai';
+import { generateText, Output } from 'ai';
 import { z } from 'zod';
+
 const localOpenAI = createOpenAI({
   baseURL: 'http://192.168.16.21:8000/v1'
 });

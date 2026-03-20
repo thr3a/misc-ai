@@ -1,8 +1,8 @@
-import { lyricAnalysisSchema } from '@/app/lyric/type';
 import { openai } from '@ai-sdk/openai';
 import { Output, streamText } from 'ai';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
+import { lyricAnalysisSchema } from '@/app/lyric/type';
 
 const requestSchema = z.object({
   lyric: z.string().min(1)

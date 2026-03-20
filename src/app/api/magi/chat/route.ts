@@ -1,9 +1,9 @@
-import { resolveModel } from '@/app/api/magi/helpers';
-import { type ModelKey, systemPrompt } from '@/app/magi/util';
 import type { GoogleGenerativeAIProviderOptions } from '@ai-sdk/google';
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
-import { type UIMessage, convertToModelMessages, streamText, validateUIMessages } from 'ai';
+import { convertToModelMessages, streamText, type UIMessage, validateUIMessages } from 'ai';
 import type { NextRequest } from 'next/server';
+import { resolveModel } from '@/app/api/magi/helpers';
+import { type ModelKey, systemPrompt } from '@/app/magi/util';
 
 type ChatRequestBody = {
   messages: UIMessage[];

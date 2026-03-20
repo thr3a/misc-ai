@@ -1,6 +1,6 @@
-import type { AnkiRow } from '@/app/art-quiz/util';
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { type NextRequest, NextResponse } from 'next/server';
+import type { AnkiRow } from '@/app/art-quiz/util';
 
 const SHEET_ID = '1AuPZohWbAXg-u9G9gNU7vnk1204iDFlk6eOtTDkzBrY';
 const SHEET_NAME = '暗記表';

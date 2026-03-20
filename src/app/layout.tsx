@@ -1,5 +1,5 @@
-import { theme } from '@/theme';
 import { ColorSchemeScript, Container, MantineProvider, mantineHtmlProps } from '@mantine/core';
+import { theme } from '@/theme';
 import '@mantine/core/styles.css';
 import '@mantine/carousel/styles.css';
 import type { Metadata } from 'next';

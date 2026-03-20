@@ -1,10 +1,10 @@
-import { schema } from '@/app/ggr-en/type';
-import { systemPrompt } from '@/app/ggr-en/util';
-import { openai } from '@ai-sdk/openai';
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
+import { openai } from '@ai-sdk/openai';
 import { Output, streamText } from 'ai';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
+import { schema } from '@/app/ggr-en/type';
+import { systemPrompt } from '@/app/ggr-en/util';
 
 // リクエストボディのスキーマ定義
 const requestSchema = z.object({
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     });
 
     return result.toTextStreamResponse();
-  } catch (error) {
+  } catch (_error) {
     return Response.json({ error: 'error' }, { status: 500 });
   }
 }

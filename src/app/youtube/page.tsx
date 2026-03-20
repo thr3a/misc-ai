@@ -1,7 +1,7 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import { Box, Button, Group, Stack, TextInput, Textarea } from '@mantine/core';
+import { Box, Button, Group, Stack, Textarea, TextInput } from '@mantine/core';
 import { useInputState } from '@mantine/hooks';
 import { DefaultChatTransport } from 'ai';
 import { useSearchParams } from 'next/navigation';

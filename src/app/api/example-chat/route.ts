@@ -1,8 +1,8 @@
-import { systemPrompt } from '@/app/example-chat/util';
-import { openai } from '@ai-sdk/openai';
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
-import { type UIMessage, convertToModelMessages, streamText, validateUIMessages } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { convertToModelMessages, streamText, type UIMessage, validateUIMessages } from 'ai';
 import type { NextRequest } from 'next/server';
+import { systemPrompt } from '@/app/example-chat/util';
 
 type ChatRequestBody = {
   messages: UIMessage[];

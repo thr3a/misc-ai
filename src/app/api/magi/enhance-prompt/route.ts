@@ -1,9 +1,10 @@
 // jo 'prompt=スプラはなぜ面白い？'| curl 'localhost:3000/api/magi/enhance-prompt/' --json @-
-import { promptEnhancerSystemPrompt } from '@/app/magi/util';
+
 import { google } from '@ai-sdk/google';
 import { generateText } from 'ai';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
+import { promptEnhancerSystemPrompt } from '@/app/magi/util';
 
 const requestSchema = z.object({
   prompt: z.string().min(1)

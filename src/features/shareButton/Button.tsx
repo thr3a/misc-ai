@@ -1,6 +1,7 @@
 import { Button } from '@mantine/core';
 import { IconBrandX } from '@tabler/icons-react';
 import Link from 'next/link';
+
 type Props = {
   url: string;
   description: string;

@@ -1,19 +1,6 @@
 'use client';
 import { readStreamableValue } from '@ai-sdk/rsc';
-import {
-  ActionIcon,
-  Avatar,
-  Box,
-  Button,
-  CopyButton,
-  Group,
-  List,
-  Paper,
-  Stack,
-  Text,
-  Textarea,
-  Tooltip
-} from '@mantine/core';
+import { Avatar, Box, Button, Group, Stack, Text, Textarea } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
 import type { z } from 'zod';
 import { generate } from './actions';
@@ -29,7 +16,7 @@ type FormValues = {
   result: z.infer<typeof schema>;
 };
 
-const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
+const [FormProvider, _useFormContext, useForm] = createFormContext<FormValues>();
 
 const Tweet = (props: { content: string }) => {
   return (

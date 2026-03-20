@@ -16,30 +16,28 @@ type FormValues = {
   result: z.infer<typeof schema>;
 };
 
-const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
+const [FormProvider, _useFormContext, useForm] = createFormContext<FormValues>();
 
 const Section = (props: { index: number; description: string; dialogues: string[] }) => {
   const array = ['起', '承', '転', '結'];
   return (
-    <>
-      <Flex gap={'sm'}>
-        <Text size='xl' fw={'bold'}>
-          {array[props.index]}
+    <Flex gap={'sm'}>
+      <Text size='xl' fw={'bold'}>
+        {array[props.index]}
+      </Text>
+      <div>
+        <Text size='sm' mb={'sm'}>
+          {props.description}
         </Text>
-        <div>
-          <Text size='sm' mb={'sm'}>
-            {props.description}
-          </Text>
-          {props.dialogues?.map((x, index) => {
-            return (
-              <Text size='sm' key={index}>
-                {x}
-              </Text>
-            );
-          })}
-        </div>
-      </Flex>
-    </>
+        {props.dialogues?.map((x, index) => {
+          return (
+            <Text size='sm' key={index}>
+              {x}
+            </Text>
+          );
+        })}
+      </div>
+    </Flex>
   );
 };
 

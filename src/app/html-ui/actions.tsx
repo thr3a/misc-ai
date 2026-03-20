@@ -1,7 +1,7 @@
 'use server';
 
-import { openai } from '@ai-sdk/openai';
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
+import { openai } from '@ai-sdk/openai';
 import { createStreamableValue } from '@ai-sdk/rsc';
 import { streamObject } from 'ai';
 import { schema, systemPrompt } from './util';

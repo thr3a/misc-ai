@@ -3,8 +3,8 @@
 import { readStreamableValue } from '@ai-sdk/rsc';
 import { Box } from '@mantine/core';
 import { useState } from 'react';
-import { MessageInput, type MessageProps, Messages } from './Chat';
 import { continueConversation } from './actions';
+import { MessageInput, type MessageProps, Messages } from './Chat';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;

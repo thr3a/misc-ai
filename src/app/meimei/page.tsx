@@ -1,10 +1,10 @@
 'use client';
-import { SuggestNames } from '@/app/meimei/actions';
-import { type schema, supportedNamingConventions } from '@/app/meimei/util';
 import { ActionIcon, Box, Button, CopyButton, Group, Radio, Stack, TextInput, Title, Tooltip } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
 import { IconCheck, IconCopy } from '@tabler/icons-react';
 import type { z } from 'zod';
+import { SuggestNames } from '@/app/meimei/actions';
+import { type schema, supportedNamingConventions } from '@/app/meimei/util';
 
 // Force the page to be dynamic and allow streaming responses up to 30 seconds
 export const dynamic = 'force-dynamic';
@@ -18,7 +18,7 @@ type FormValues = {
   namingConvention: 'camel case' | 'pascal case' | 'snake case' | 'kebab case';
 };
 
-const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
+const [FormProvider, _useFormContext, useForm] = createFormContext<FormValues>();
 
 export default function Page() {
   const form = useForm({

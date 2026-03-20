@@ -1,6 +1,6 @@
 'use client';
 
-import { type MantineTheme, createTheme } from '@mantine/core';
+import { createTheme } from '@mantine/core';
 
 export const theme = createTheme({
   scale: 1.0,

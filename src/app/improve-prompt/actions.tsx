@@ -2,7 +2,6 @@
 
 // import { anthropic } from '@ai-sdk/anthropic';
 import { google } from '@ai-sdk/google';
-import { openai } from '@ai-sdk/openai';
 import { createStreamableValue } from '@ai-sdk/rsc';
 import { streamObject } from 'ai';
 import { schema, systemPrompt } from './util';

@@ -1,9 +1,9 @@
-import { synthesizeResultSchema } from '@/app/magi/type';
 import { google } from '@ai-sdk/google';
 import { Output, streamText } from 'ai';
 import type { NextRequest } from 'next/server';
 import dedent from 'ts-dedent';
 import { z } from 'zod';
+import { synthesizeResultSchema } from '@/app/magi/type';
 
 const requestSchema = z.object({
   responses: z.array(z.string().min(1)).length(3)

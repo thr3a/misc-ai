@@ -1,11 +1,10 @@
-import { schema } from '@/app/t2i-prompt/type';
-import { systemPrompt } from '@/app/t2i-prompt/util';
-import { openai } from '@ai-sdk/openai';
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { createOpenAI } from '@ai-sdk/openai';
 import { Output, streamText } from 'ai';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
+import { schema } from '@/app/t2i-prompt/type';
+import { systemPrompt } from '@/app/t2i-prompt/util';
 
 const openRouter = createOpenAI({
   baseURL: 'https://openrouter.ai/api/v1',
@@ -50,7 +49,7 @@ export async function POST(req: NextRequest) {
     });
 
     return result.toTextStreamResponse();
-  } catch (error) {
+  } catch (_error) {
     return Response.json({ error: 'error' }, { status: 500 });
   }
 }

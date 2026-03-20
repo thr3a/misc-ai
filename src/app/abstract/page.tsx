@@ -1,20 +1,5 @@
 'use client';
-import {
-  ActionIcon,
-  Avatar,
-  Box,
-  Button,
-  Center,
-  CopyButton,
-  Group,
-  Input,
-  List,
-  Paper,
-  Stack,
-  Text,
-  Textarea,
-  Tooltip
-} from '@mantine/core';
+import { Box, Button, Group, Input } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
 import { generate } from './actions';
 
@@ -28,7 +13,7 @@ type FormValues = {
   // result: string;
 };
 
-const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
+const [FormProvider, _useFormContext, useForm] = createFormContext<FormValues>();
 
 export default function Page() {
   const form = useForm({

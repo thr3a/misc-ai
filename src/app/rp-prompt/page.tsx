@@ -1,10 +1,10 @@
 'use client';
-import { ButtonCopy } from '@/app/html-ui/ButtonCopy';
 import { experimental_useObject as useObject } from '@ai-sdk/react';
 import { Button, Group, Radio, Select, Stack, Textarea, Title } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
 import { useState } from 'react';
 import dedent from 'ts-dedent';
+import { ButtonCopy } from '@/app/html-ui/ButtonCopy';
 import { scenarioPromptSchema } from './type';
 import { buildSystemPromptFromScenario } from './util';
 
@@ -23,7 +23,7 @@ export default function Page() {
   });
   const [provider, setProvider] = useState<'local' | 'openrouter'>('openrouter');
   const [mode, setMode] = useState<'expansion' | 'creative'>('expansion');
-  const { object, submit, isLoading, stop } = useObject({
+  const { object, submit, isLoading } = useObject({
     api: '/api/rp-prompt',
     schema: scenarioPromptSchema
   });

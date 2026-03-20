@@ -1,5 +1,5 @@
 'use client';
-import { Box, Button, Group, Select, TextInput, Textarea, Title } from '@mantine/core';
+import { Box, Button, Group, Select, Textarea, TextInput, Title } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
 import dedent from 'ts-dedent';
 import type { z } from 'zod';
@@ -20,7 +20,7 @@ type FormValues = {
   result: z.infer<typeof schema> | null;
 };
 
-const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
+const [FormProvider, _useFormContext, useForm] = createFormContext<FormValues>();
 
 export default function Page() {
   const form = useForm({

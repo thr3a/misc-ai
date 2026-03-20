@@ -1,7 +1,7 @@
-import { systemPrompt } from '@/app/youtube/util';
 import { openai } from '@ai-sdk/openai';
-import { type UIMessage, convertToModelMessages, streamText, validateUIMessages } from 'ai';
+import { convertToModelMessages, streamText, type UIMessage, validateUIMessages } from 'ai';
 import type { NextRequest } from 'next/server';
+import { systemPrompt } from '@/app/youtube/util';
 
 type ChatRequestBody = {
   messages: UIMessage[];

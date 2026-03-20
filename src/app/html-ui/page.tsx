@@ -3,8 +3,8 @@ import { readStreamableValue } from '@ai-sdk/rsc';
 import { Box, Button, Group, Textarea, Title } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
 import type { z } from 'zod';
-import { ButtonCopy } from './ButtonCopy';
 import { generate } from './actions';
+import { ButtonCopy } from './ButtonCopy';
 import { examplePrompt, type schema } from './util';
 
 // Force the page to be dynamic and allow streaming responses up to 30 seconds
@@ -17,7 +17,7 @@ type FormValues = {
   result: z.infer<typeof schema>;
 };
 
-const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
+const [FormProvider, _useFormContext, useForm] = createFormContext<FormValues>();
 
 export default function Page() {
   const form = useForm({

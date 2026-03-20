@@ -1,6 +1,5 @@
 'use client';
 
-import { type LyricAnalysis, lyricAnalysisSchema } from '@/app/lyric/type';
 import { useChat, experimental_useObject as useObject } from '@ai-sdk/react';
 import {
   Badge,
@@ -20,6 +19,7 @@ import { useInputState } from '@mantine/hooks';
 import { IconMicrophone, IconTrash, IconUser } from '@tabler/icons-react';
 import { DefaultChatTransport } from 'ai';
 import { useMemo, useState } from 'react';
+import { type LyricAnalysis, lyricAnalysisSchema } from '@/app/lyric/type';
 import { MessageInput, Messages } from '../example-chat/Chat';
 
 // 関数名は変えないこと

@@ -1,15 +1,14 @@
 'use client';
-import { ChatBox } from '@/features/chat/ChatBox';
-import type { MessageProps } from '@/features/chat/ChatBox';
-import { TwitterButton } from '@/features/shareButton/Button';
 import { readStreamableValue } from '@ai-sdk/rsc';
 import { ActionIcon, Box, Center, Flex, Textarea } from '@mantine/core';
 import { createFormContext } from '@mantine/form';
-import { getHotkeyHandler, useLocalStorage } from '@mantine/hooks';
+import { getHotkeyHandler } from '@mantine/hooks';
 import { IconSend } from '@tabler/icons-react';
-import { Description } from './Description';
+import type { MessageProps } from '@/features/chat/ChatBox';
+import { ChatBox } from '@/features/chat/ChatBox';
+import { TwitterButton } from '@/features/shareButton/Button';
 import { continueConversation } from './actions';
-import { DummyMessages } from './util';
+import { Description } from './Description';
 
 // Force the page to be dynamic and allow streaming responses up to 30 seconds
 export const dynamic = 'force-dynamic';
@@ -22,7 +21,7 @@ type FormValues = {
   count: number;
 };
 
-const [FormProvider, useFormContext, useForm] = createFormContext<FormValues>();
+const [FormProvider, _useFormContext, useForm] = createFormContext<FormValues>();
 
 export default function Page() {
   const form = useForm({
