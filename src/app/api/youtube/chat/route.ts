@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     const validatedMessages = await validateUIMessages({ messages });
 
     const result = streamText({
-      model: openai('gpt-5-mini'),
+      model: openai('gpt-5.4-mini-2026-03-17'),
       system: systemPrompt({ title, transcript }),
       messages: await convertToModelMessages(validatedMessages),
       providerOptions: {
