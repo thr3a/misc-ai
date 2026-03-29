@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
       messages: await convertToModelMessages(validatedMessages),
       providerOptions: {
         openai: {
-          reasoningEffort: 'minimal'
+          reasoningEffort: 'none'
         }
       }
     });

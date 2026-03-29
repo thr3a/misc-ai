@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import { fetchTranscript } from 'youtube-transcript-plus';
+import { fetchTranscript, toPlainText } from 'youtube-transcript-plus';
 
 export async function getPageTitle(url: string): Promise<string> {
   const response = await fetch(url, {
@@ -34,10 +34,5 @@ export const getYouTubeTranscript = async (url: string): Promise<string> => {
     lang: 'ja'
   });
 
-  const transcribedText = transcribed
-    .map((x) => x.text)
-    .join('')
-    .replaceAll(/[\n|,]/g, '');
-
-  return transcribedText;
+  return toPlainText(transcribed, ' ');
 };

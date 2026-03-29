@@ -11,11 +11,11 @@
     "node-server": "node server.js"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.58",
-    "@ai-sdk/google": "^3.0.43",
-    "@ai-sdk/openai": "^3.0.41",
-    "@ai-sdk/react": "^3.0.118",
-    "@ai-sdk/rsc": "^2.0.116",
+    "@ai-sdk/anthropic": "^3.0.64",
+    "@ai-sdk/google": "^3.0.53",
+    "@ai-sdk/openai": "^3.0.48",
+    "@ai-sdk/react": "^3.0.143",
+    "@ai-sdk/rsc": "^2.0.141",
     "@biomejs/biome": "^2.4.8",
     "@mantine/carousel": "^8.3.17",
     "@mantine/core": "^8.3.17",
@@ -26,7 +26,7 @@
     "@types/node": "25.5.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
-    "ai": "^6.0.116",
+    "ai": "^6.0.141",
     "cheerio": "^1.2.0",
     "dayjs": "^1.11.20",
     "embla-carousel": "^8.6.0",
@@ -44,7 +44,7 @@
     "ts-dedent": "^2.2.0",
     "tsx": "^4.21.0",
     "typescript": "5.2.2",
-    "youtube-transcript-plus": "^1.2.0",
+    "youtube-transcript-plus": "^2.0.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {

@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       output: Output.object({ schema: synthesizeResultSchema }),
       providerOptions: {
         openai: {
-          reasoningEffort: 'minimal'
+          reasoningEffort: 'low'
         }
       }
     });
