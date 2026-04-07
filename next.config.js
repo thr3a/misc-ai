@@ -6,7 +6,8 @@ const nextConfig = {
     unoptimized: true
   },
   poweredByHeader: false,
-  output: 'standalone' // k8sの場合の設定
+  output: 'standalone',
+  allowedDevOrigins: ['192.168.16.12', 'ubuntu02.local']
 };
 
 module.exports = nextConfig;
