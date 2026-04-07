@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
     ...(messages.length > 0 ? { messages } : { prompt: '問題を読んで最初の質問をしてください。' }),
     providerOptions: {
       openai: {
-        reasoningEffort: 'high'
+        reasoningEffort: 'medium'
       } satisfies OpenAIResponsesProviderOptions
     }
   });
