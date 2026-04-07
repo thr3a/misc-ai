@@ -12,14 +12,15 @@ const messageSchema = z.object({
 
 const requestSchema = z.object({
   problem: z.string().min(1),
-  messages: z.array(messageSchema),
-  remaining: z.number().int().min(1),
-  maxTurns: z.number().int().min(1)
+  messages: z.array(messageSchema)
 });
 
 const StudentTurnSchema = z.object({
-  action: z.enum(['ASK', 'FINAL_ANSWER']),
-  question: z.string().describe('YES/NO/IRRELEVANTのいずれかで答えられる質問。action が FINAL_ANSWER の場合は空文字列')
+  action: z.enum(['ASK', 'ANSWER']),
+  question: z
+    .string()
+    .describe('YES/NO/IRRELEVANTのいずれかで答えられる質問。action が ASK の場合のみ使用、それ以外は空文字列'),
+  finalAnswer: z.string().describe('最終回答の内容。action が ANSWER の場合のみ使用。それ以外は空文字列')
 });
 
 export async function POST(req: NextRequest) {
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { problem, messages, remaining, maxTurns } = validatedFields.data;
+  const { problem, messages } = validatedFields.data;
 
   const systemPrompt = dedent`
     あなたは水平思考問題（ウミガメのスープ）を解くプレイヤーです。
@@ -41,10 +42,10 @@ export async function POST(req: NextRequest) {
     ユーザーが出題する「不可解な状況」に対し、核心を突く質問を複数回行い、その回答を元に真相を解明してください。
 
     【ルール】
+    質問する場合は action: "ASK"とし、 回答する場合は action: "ANSWER" としてください。
     質問は必ず「YES / NO / IRRELEVANT（関係ない）」で答えられる形式にしてください。
     質問は一度に1つずつ投げかけてください。
-    最大${maxTurns}回質問できます（残り${remaining}回）。
-    回答が確定し他に選択肢の余地がないときのみ質問ではなく action: "FINAL_ANSWER" と解答を返してください。あなたに解答権は1回しかありません。慎重になってください。
+    回答が不正解だった場合は再度質問を続けることができます。
 
     【問題文】
     ${problem}
