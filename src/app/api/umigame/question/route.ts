@@ -1,11 +1,11 @@
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { openai } from '@ai-sdk/openai';
-
-export const maxDuration = 300;
 import { generateText, Output } from 'ai';
 import type { NextRequest } from 'next/server';
 import dedent from 'ts-dedent';
 import { z } from 'zod';
+
+export const maxDuration = 300;
 
 const messageSchema = z.object({
   role: z.enum(['user', 'assistant']),
