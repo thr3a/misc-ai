@@ -1,13 +1,11 @@
 import { z } from 'zod';
 
 export const schema = z.object({
-  candidates: z
-    .array(
-      z.object({
-        candidate: z.string().describe('命名候補')
-      })
-    )
-    .describe('6つの命名候補の配列')
+  candidates: z.array(
+    z.object({
+      candidate: z.string()
+    })
+  )
 });
 
 export const supportedNamingConventions: Array<{ name: string; label: string }> = [
