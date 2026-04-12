@@ -100,7 +100,7 @@ export const Header = () => {
                 (e.currentTarget as HTMLElement).style.borderColor = 'transparent';
               }}
             >
-              <Group gap={4} align='flex-end'>
+              <Group gap={4} align='center'>
                 <Box style={{ position: 'relative' }}>
                   <IconShoppingCart size={32} />
                   {totalItems > 0 && (
@@ -126,7 +126,7 @@ export const Header = () => {
                     </Box>
                   )}
                 </Box>
-                <Text size='sm' fw='bold' style={{ lineHeight: 1 }}>
+                <Text size='sm' fw='bold' style={{ lineHeight: 1 }} visibleFrom='sm'>
                   カート
                 </Text>
               </Group>
