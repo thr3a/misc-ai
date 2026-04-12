@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Footer } from '../components/Footer';
 import { Header } from '../components/Header';
+import { useLastOrder } from '../hooks/useLastOrder';
 
 type PaymentStep = {
   title: string;
@@ -42,6 +43,8 @@ const ThankYouPage = () => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [orderId] = useState(generateOrderId);
   const [deliveryDate] = useState(generateDeliveryDate);
+  const { lastOrder, isReady: isLastOrderReady } = useLastOrder();
+  const hasLastOrder = lastOrder.totalItems > 0;
 
   // isProcessing が false になった瞬間に紙吹雪を発火
   useEffect(() => {
@@ -229,6 +232,19 @@ const ThankYouPage = () => {
               <Text c='#007600' fw='bold'>
                 {deliveryDate}
               </Text>
+            </Group>
+            <Group justify='space-between' align='flex-start'>
+              <Text fw='bold'>発散できた金額</Text>
+              <Stack gap={2} align='flex-end'>
+                <Text c='#B12704' fw='bold' size='xl'>
+                  {isLastOrderReady && hasLastOrder ? `¥${lastOrder.totalPrice.toLocaleString()}` : '---'}
+                </Text>
+                <Text size='xs' c='#565959'>
+                  {isLastOrderReady && hasLastOrder
+                    ? `${lastOrder.totalItems}点の注文を完了しました`
+                    : '注文情報を確認しています'}
+                </Text>
+              </Stack>
             </Group>
             <Group justify='space-between' align='flex-start'>
               <Text fw='bold'>お届け先</Text>

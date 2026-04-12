@@ -9,12 +9,14 @@ import { Footer } from '../components/Footer';
 import { Header } from '../components/Header';
 import { useCart } from '../hooks/useCart';
 import { useGeneratedItems } from '../hooks/useGeneratedItems';
+import { useLastOrder } from '../hooks/useLastOrder';
 
 const CheckoutPage = () => {
   const router = useRouter();
-  const { cartItems, clearCart, isReady: isCartReady } = useCart();
+  const { cartItems, clearCart, isReady: isCartReady, totalItems } = useCart();
   const [paymentMethod, setPaymentMethod] = useState('credit');
   const { items, isReady: isItemsReady, hasItems } = useGeneratedItems();
+  const { setLastOrder } = useLastOrder();
 
   const getItemById = (productId: string) => items.find((item) => String(item.id) === productId);
 
@@ -24,6 +26,10 @@ const CheckoutPage = () => {
   }, 0);
 
   const handleOrder = () => {
+    setLastOrder({
+      totalPrice,
+      totalItems
+    });
     clearCart();
     router.push('/null-cart/thank-you');
   };
