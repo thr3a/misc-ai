@@ -6,5 +6,15 @@ export const metadata: Metadata = {
 };
 
 export default function NullCartLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    // CSS の "full-bleed" テクニックを使い、親 Container から脱出する
+    <div
+      style={{
+        width: '100vw',
+        marginLeft: 'calc(50% - 50vw)'
+      }}
+    >
+      {children}
+    </div>
+  );
 }
