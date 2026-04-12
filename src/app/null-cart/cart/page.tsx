@@ -1,26 +1,69 @@
 'use client';
 
 import { Anchor, Badge, Box, Button, Container, Divider, Grid, Group, NumberInput, Stack, Text } from '@mantine/core';
-import { useFetch } from '@mantine/hooks';
 import { IconShoppingCart, IconTrash } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { CatalogEmptyState } from '../components/CatalogEmptyState';
 import { Footer } from '../components/Footer';
 import { Header } from '../components/Header';
 import { useCart } from '../hooks/useCart';
-import type { Item } from '../types';
+import { useGeneratedItems } from '../hooks/useGeneratedItems';
 
 const CartPage = () => {
-  const { cartItems, removeFromCart, updateQuantity, totalItems } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, totalItems, isReady: isCartReady } = useCart();
   const router = useRouter();
-  const { data: items } = useFetch<Item[]>('/api/null-cart/items/');
+  const { items, isReady: isItemsReady, hasItems } = useGeneratedItems();
 
-  const getItemById = (productId: string): Item | undefined => items?.find((item) => String(item.id) === productId);
+  const getItemById = (productId: string) => items.find((item) => String(item.id) === productId);
 
   const totalPrice = cartItems.reduce((sum, cartItem) => {
     const item = getItemById(cartItem.productId);
     return sum + (item?.discountedPrice ?? 0) * cartItem.quantity;
   }, 0);
+
+  if (!isCartReady || !isItemsReady) {
+    return (
+      <Box
+        style={{
+          backgroundColor: '#EAEDED',
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        <Header />
+        <Container size='xl' py='xl' style={{ flex: 1 }}>
+          <Text ta='center' c='dimmed'>
+            カート情報を読み込み中...
+          </Text>
+        </Container>
+        <Footer />
+      </Box>
+    );
+  }
+
+  if (!hasItems) {
+    return (
+      <Box
+        style={{
+          backgroundColor: '#EAEDED',
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        <Header />
+        <Container size='xl' py='xl' style={{ flex: 1 }}>
+          <CatalogEmptyState
+            title='商品データがありません'
+            description='カートを使う前に、購入したいジャンルから商品を生成してください。'
+          />
+        </Container>
+        <Footer />
+      </Box>
+    );
+  }
 
   if (cartItems.length === 0) {
     return (

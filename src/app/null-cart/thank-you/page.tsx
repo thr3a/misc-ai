@@ -31,7 +31,7 @@ const paymentSteps: PaymentStep[] = [
   }
 ];
 
-const generateOrderId = () => `OTL-${Math.random().toString(36).substring(2, 14).toUpperCase()}`;
+const generateOrderId = () => `NULL-${Math.random().toString(36).substring(2, 14).toUpperCase()}`;
 
 const generateDeliveryDate = () => {
   return dayjs().locale('ja').year(2099).format('YYYY年M月D日');

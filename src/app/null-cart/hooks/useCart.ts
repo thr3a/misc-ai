@@ -1,12 +1,14 @@
 'use client';
 
-import { useLocalStorage } from '@mantine/hooks';
+import { useLocalStorage, useMounted } from '@mantine/hooks';
 import type { CartItem } from '../types';
 
 export const useCart = () => {
+  const mounted = useMounted();
   const [cartItems, setCartItems] = useLocalStorage<CartItem[]>({
     key: 'null-cart-items',
-    defaultValue: []
+    defaultValue: [],
+    getInitialValueInEffect: true
   });
 
   const addToCart = (productId: string, quantity = 1) => {
@@ -35,10 +37,12 @@ export const useCart = () => {
 
   const clearCart = () => setCartItems([]);
 
-  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const resolvedCartItems = mounted ? cartItems : [];
+  const totalItems = resolvedCartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return {
-    cartItems,
+    cartItems: resolvedCartItems,
+    isReady: mounted,
     addToCart,
     removeFromCart,
     updateQuantity,

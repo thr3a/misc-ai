@@ -3,38 +3,15 @@
 import { Badge, Box, Button, Card, Container, Loader, SimpleGrid, Stack, Text } from '@mantine/core';
 import { IconFlame } from '@tabler/icons-react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { CatalogEmptyState } from './components/CatalogEmptyState';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
 import { StarRating } from './components/StarRating';
+import { useGeneratedItems } from './hooks/useGeneratedItems';
 import type { Item } from './types';
 
 const TopPage = () => {
-  const [items, setItems] = useState<Item[] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('/api/null-cart/items/');
-        if (!response.ok) {
-          throw new Error('アイテムの取得に失敗しました');
-        }
-        const data = await response.json();
-        setItems(data);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : '商品の読み込みに失敗しました。');
-        setItems(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchItems();
-  }, []);
+  const { items, isReady, hasItems } = useGeneratedItems();
 
   const discountRate = (item: Item) =>
     Math.round(((item.originalPrice - item.discountedPrice) / item.originalPrice) * 100);
@@ -83,6 +60,13 @@ const TopPage = () => {
             数量限定・売り切れ次第終了！今すぐチェック
           </Text>
           <Box style={{ display: 'flex', gap: 8, marginTop: 16, flexWrap: 'wrap' }}>
+            <Button
+              component={Link}
+              href='/null-cart/generate'
+              style={{ backgroundColor: '#FFD814', color: '#0F1111' }}
+            >
+              AIで商品を作る
+            </Button>
             <Badge color='yellow' variant='filled' size='lg'>
               タイムセール実施中
             </Badge>
@@ -107,7 +91,7 @@ const TopPage = () => {
           </Badge>
         </Box>
 
-        {loading && (
+        {!isReady && (
           <Box style={{ textAlign: 'center', padding: 60 }}>
             <Loader color='orange' size='lg' />
             <Text mt='md' c='dimmed'>
@@ -116,9 +100,14 @@ const TopPage = () => {
           </Box>
         )}
 
-        {error && <Text c='red'>{error}</Text>}
+        {isReady && !hasItems && (
+          <CatalogEmptyState
+            title='まだ商品が生成されていません'
+            description='購入したいもののジャンルを入力して、null-cart 用の商品を5件まとめて作れます。'
+          />
+        )}
 
-        {items && (
+        {hasItems && (
           <SimpleGrid cols={{ base: 1, sm: 5 }} spacing='md'>
             {items.map((item) => {
               const rate = discountRate(item);

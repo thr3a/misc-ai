@@ -20,16 +20,17 @@ import {
   Text,
   ThemeIcon
 } from '@mantine/core';
-import { useDisclosure, useFetch } from '@mantine/hooks';
+import { useDisclosure } from '@mantine/hooks';
 import { IconCheck, IconFlame, IconLock, IconShoppingCart } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { CatalogEmptyState } from '../../components/CatalogEmptyState';
 import { Footer } from '../../components/Footer';
 import { Header } from '../../components/Header';
 import { StarRating } from '../../components/StarRating';
 import { useCart } from '../../hooks/useCart';
-import type { Item } from '../../types';
+import { useGeneratedItems } from '../../hooks/useGeneratedItems';
 
 const ProductDetailPage = () => {
   const params = useParams();
@@ -39,8 +40,7 @@ const ProductDetailPage = () => {
   const [quantity, setQuantity] = useState<string | null>('1');
   const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false);
   const [addedQuantity, setAddedQuantity] = useState(0);
-
-  const { data: items, loading, error } = useFetch<Item[]>('/api/null-cart/items/');
+  const { items, isReady, hasItems } = useGeneratedItems();
 
   const product = items?.find((item) => String(item.id) === id);
 
@@ -61,7 +61,7 @@ const ProductDetailPage = () => {
     label: `${i + 1}`
   }));
 
-  if (loading) {
+  if (!isReady) {
     return (
       <Box style={{ backgroundColor: '#EAEDED', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Header />
@@ -78,7 +78,22 @@ const ProductDetailPage = () => {
     );
   }
 
-  if (error || !product) {
+  if (!hasItems) {
+    return (
+      <Box style={{ backgroundColor: '#EAEDED', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <Header />
+        <Container size='xl' py='xl' style={{ flex: 1 }}>
+          <CatalogEmptyState
+            title='商品データがありません'
+            description='商品詳細を見るには、先に null-cart 用の商品を生成してください。'
+          />
+        </Container>
+        <Footer />
+      </Box>
+    );
+  }
+
+  if (!product) {
     return (
       <Box style={{ backgroundColor: '#EAEDED', minHeight: '100vh' }}>
         <Header />

@@ -1,22 +1,22 @@
 'use client';
 
 import { Badge, Box, Button, Container, Divider, Grid, Group, Radio, Stack, Text, TextInput } from '@mantine/core';
-import { useFetch } from '@mantine/hooks';
 import { IconCreditCard, IconLock } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { CatalogEmptyState } from '../components/CatalogEmptyState';
 import { Footer } from '../components/Footer';
 import { Header } from '../components/Header';
 import { useCart } from '../hooks/useCart';
-import type { Item } from '../types';
+import { useGeneratedItems } from '../hooks/useGeneratedItems';
 
 const CheckoutPage = () => {
   const router = useRouter();
-  const { cartItems, clearCart } = useCart();
+  const { cartItems, clearCart, isReady: isCartReady } = useCart();
   const [paymentMethod, setPaymentMethod] = useState('credit');
-  const { data: items } = useFetch<Item[]>('/api/null-cart/items/');
+  const { items, isReady: isItemsReady, hasItems } = useGeneratedItems();
 
-  const getItemById = (productId: string): Item | undefined => items?.find((item) => String(item.id) === productId);
+  const getItemById = (productId: string) => items.find((item) => String(item.id) === productId);
 
   const totalPrice = cartItems.reduce((sum, cartItem) => {
     const item = getItemById(cartItem.productId);
@@ -27,6 +27,49 @@ const CheckoutPage = () => {
     clearCart();
     router.push('/null-cart/thank-you');
   };
+
+  if (!isCartReady || !isItemsReady) {
+    return (
+      <Box
+        style={{
+          backgroundColor: '#EAEDED',
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        <Header />
+        <Container size='lg' py='md' style={{ flex: 1 }}>
+          <Text ta='center' c='dimmed'>
+            注文情報を読み込み中...
+          </Text>
+        </Container>
+        <Footer />
+      </Box>
+    );
+  }
+
+  if (!hasItems) {
+    return (
+      <Box
+        style={{
+          backgroundColor: '#EAEDED',
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        <Header />
+        <Container size='lg' py='md' style={{ flex: 1 }}>
+          <CatalogEmptyState
+            title='商品データがありません'
+            description='注文画面に進む前に、null-cart の商品を生成してください。'
+          />
+        </Container>
+        <Footer />
+      </Box>
+    );
+  }
 
   return (
     <Box

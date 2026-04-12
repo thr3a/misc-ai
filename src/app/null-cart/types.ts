@@ -13,6 +13,23 @@ export const ItemSchema = z.object({
 
 export type Item = z.infer<typeof ItemSchema>;
 
+export const NullCartTasteSchema = z.enum(['real', 'joke']);
+
+export type NullCartTaste = z.infer<typeof NullCartTasteSchema>;
+
+export const NullCartGenerateRequestSchema = z.object({
+  prompt: z.string().min(1, 'prompt is required').max(200, 'prompt is too long'),
+  taste: NullCartTasteSchema
+});
+
+export type NullCartGenerateRequest = z.infer<typeof NullCartGenerateRequestSchema>;
+
+export const NullCartItemsResponseSchema = z.object({
+  items: z.array(ItemSchema).length(5)
+});
+
+export type NullCartItemsResponse = z.infer<typeof NullCartItemsResponseSchema>;
+
 export type CartItem = {
   productId: string;
   quantity: number;
