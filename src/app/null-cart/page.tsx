@@ -146,7 +146,8 @@ const TopPage = () => {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: 48
+                        fontSize: 48,
+                        maxHeight: 160
                       }}
                     >
                       🛒
