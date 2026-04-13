@@ -7,18 +7,6 @@ import { ItemSchema, NullCartGenerateRequestSchema, NullCartItemsResponseSchema 
 
 export const maxDuration = 300;
 
-const systemPrompt = dedent`
-  あなたは、ユーザーの購入欲求を満たすために作られたAmazon風架空のECサイトの商品データジェネレーターです。
-  実際の購入は発生しないため、遊び心がありつつも、思わずカートに入れたくなる魅力的な商品を5つ作成してください。
-
-  【スキーマ】
-  ${JSON.stringify(z.toJSONSchema(ItemSchema))}
-
-  【制約】
-  - description は200文字以上の購買意欲を刺激する説明にする
-  - features は具体的な特徴を端的に5つ列挙する
-`;
-
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -37,23 +25,35 @@ export async function POST(req: NextRequest) {
     const { prompt, taste } = validatedFields.data;
 
     const realTasteInstruction = dedent`
-    リアル系として、実在の通販にありそうな説得力を重視しつつ、少しだけスケールや機能を盛ってください。現実味のある範囲で魅力を最大化してください。
+    ユーモア系よりかはリアル系で現実感のある商品を考えてください。少しだけ数値の仕様や機能を誇張してください。
     `;
     const jokeTasteInstruction = dedent`
-    ネタ系として、真面目なトーンで徹底的にふざけた商品を提案してください。
-    誰が買うのかとツッコミたくなるようなニッチすぎる用途や、無駄に高すぎるオーバースペック、あるいは物理法則を無視したような謎の機能を含めること。
-    ただし、商品説明文自体は深夜の通販番組のように異様に熱量がこもっていて、読んでいるうちに「あれ、もしかしてこれ必要なのかも…？」と錯覚させてしまうような、謎の魅力とユーモアを持たせてください。
+    リアル系よりかはユーモア系で真面目なトーンで徹底的にふざけた商品を考えてください。
+    誰が買うのかとツッコミたくなるようなニッチすぎる用途や、無駄に高すぎるオーバースペック、あるいは物理法則を無視したような謎の機能を含めてください。
     `;
 
     const tasteInstruction = taste === 'real' ? realTasteInstruction : jokeTasteInstruction;
 
+    const systemPrompt = dedent`
+    あなたは、ユーザーの購入欲求を満たすために作られたAmazon風架空のECサイトの商品データジェネレーターです。
+    実際の購入は発生しないため、遊び心がありつつも、思わずカートに入れたくなる魅力的な商品を5つ作成してください。
+    ${tasteInstruction}
+
+    【スキーマ】
+    ${JSON.stringify(z.toJSONSchema(ItemSchema))}
+
+    【制約】
+    数値の仕様も記載すること(イヤホンなら12時間駆動やSSDなら200GBなど)
+    Amazonで取り扱っていない商品(高層マンションやエジプトのツタンカーメン、宇宙ステーション)などを入力されてもそれを模した商品ではなくそれ自体を商品と考えて商品を作成してください。
+    - description は200文字以上の購買意欲を刺激する説明にする
+    - features は具体的な特徴を端的に5つ列挙する
+    `;
+
     const result = await generateText({
-      model: openai('gpt-5.4-mini'),
+      model: openai('gpt-5.4'),
       system: systemPrompt,
       prompt: dedent`
-        ユーザーが今購入意欲を発散したいテーマ: ${prompt}
-
-        テイスト: ${tasteInstruction}
+        ユーザーが今購入意欲を発散したい商品テーマ: ${prompt}
       `,
       output: Output.object({ schema: NullCartItemsResponseSchema }),
       providerOptions: {
