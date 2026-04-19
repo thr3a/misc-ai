@@ -13,7 +13,7 @@ const requestSchema = z.object({
 });
 
 const localOpenAI = createOpenAI({
-  baseURL: 'http://192.168.16.21:8000/v1'
+  baseURL: 'https://chatgpt-api.turai.work/v1'
 });
 
 const openRouter = createOpenAI({
