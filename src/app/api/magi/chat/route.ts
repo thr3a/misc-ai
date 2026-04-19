@@ -5,6 +5,8 @@ import type { NextRequest } from 'next/server';
 import { resolveModel } from '@/app/api/magi/helpers';
 import { type ModelKey, systemPrompt } from '@/app/magi/util';
 
+export const maxDuration = 300;
+
 type ChatRequestBody = {
   messages: UIMessage[];
   modelId: ModelKey;
