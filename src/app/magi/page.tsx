@@ -18,6 +18,7 @@ export default function Page() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [broadcast, setBroadcast] = useState<BroadcastPayload>(null);
   const [completedResponses, setCompletedResponses] = useState<Partial<Record<ModelKey, string>>>({});
+  const [erroredModels, setErroredModels] = useState<Partial<Record<ModelKey, true>>>({});
   const autoSynthesizeTriggered = useRef(false);
 
   const {
@@ -31,8 +32,8 @@ export default function Page() {
   });
 
   const allModelsCompleted = useMemo(
-    () => MODEL_DEFINITIONS.every((d) => completedResponses[d.id] !== undefined),
-    [completedResponses]
+    () => MODEL_DEFINITIONS.every((d) => completedResponses[d.id] !== undefined || erroredModels[d.id]),
+    [completedResponses, erroredModels]
   );
 
   const handleSynthesize = useCallback(
@@ -55,6 +56,7 @@ export default function Page() {
     setErrorMessage(null);
     autoSynthesizeTriggered.current = false;
     setCompletedResponses({});
+    setErroredModels({});
     setBroadcast((prev) => ({ text: question, id: (prev?.id ?? 0) + 1 }));
   };
 
@@ -84,6 +86,24 @@ export default function Page() {
 
   const handleOnCompleted = useCallback((modelId: ModelKey, response: string) => {
     setCompletedResponses((prev) => ({ ...prev, [modelId]: response }));
+  }, []);
+
+  const handleOnError = useCallback((modelId: ModelKey) => {
+    setErroredModels((prev) => ({ ...prev, [modelId]: true }));
+  }, []);
+
+  const handleOnRetry = useCallback((modelId: ModelKey) => {
+    setErroredModels((prev) => {
+      const next = { ...prev };
+      delete next[modelId];
+      return next;
+    });
+    setCompletedResponses((prev) => {
+      const next = { ...prev };
+      delete next[modelId];
+      return next;
+    });
+    autoSynthesizeTriggered.current = false;
   }, []);
 
   const handleExport = () => {
@@ -176,6 +196,8 @@ export default function Page() {
               definition={definition}
               broadcast={broadcast}
               onCompleted={handleOnCompleted}
+              onError={handleOnError}
+              onRetry={handleOnRetry}
             />
           ))}
         </Carousel>
