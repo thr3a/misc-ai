@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "mantine-colors": {
+      "source": "thr3a/Skills",
+      "sourceType": "github",
+      "skillPath": "skills/mantine-colors/SKILL.md",
+      "computedHash": "34c541bbdecbece8e1aa5a4241718277fe8fc4ae20a25af37d14a2ab453378e1"
+    },
+    "mantine-style-props": {
+      "source": "thr3a/Skills",
+      "sourceType": "github",
+      "skillPath": "skills/mantine-style-props/SKILL.md",
+      "computedHash": "653ec34fb6c5d92f990d4b0e192159f8c176b0b455745154773963768ef0472e"
+    }
+  }
+}
