@@ -74,6 +74,7 @@ export const ModelSlide = memo(({ definition, broadcast, onCompleted, onError, o
   useEffect(() => {
     if (broadcast && broadcast.id !== lastProcessedBroadcastId.current) {
       lastProcessedBroadcastId.current = broadcast.id;
+      completionNotifiedRef.current = false;
       errorNotifiedRef.current = false;
       void chat.sendMessage({ parts: [{ type: 'text', text: broadcast.text }] });
     }
@@ -112,6 +113,7 @@ export const ModelSlide = memo(({ definition, broadcast, onCompleted, onError, o
 
   const handleRetry = () => {
     if (!broadcast) return;
+    completionNotifiedRef.current = false;
     onRetry(definition.id);
     chat.setMessages([]);
     void chat.sendMessage({ parts: [{ type: 'text', text: broadcast.text }] });
@@ -154,26 +156,24 @@ export const ModelSlide = memo(({ definition, broadcast, onCompleted, onError, o
           ) : null}
 
           <Stack gap='sm' flex={1}>
-            {isWaitingForText ? (
+            {displayMessages.map((message) => (
+              <Stack key={message.id ?? `${message.role}-${definition.id}`}>
+                <Text size='sm' style={{ whiteSpace: 'pre-wrap' }}>
+                  {collectText(message.parts)}
+                </Text>
+                <Divider />
+              </Stack>
+            ))}
+            {isWaitingForText && (
               <Stack gap='xs'>
                 <Skeleton height={14} radius='sm' />
                 <Skeleton height={14} radius='sm' width='85%' />
                 <Skeleton height={14} radius='sm' width='70%' />
               </Stack>
-            ) : (
-              displayMessages.length !== 0 &&
-              displayMessages.map((message) => (
-                <Stack key={message.id ?? `${message.role}-${definition.id}`}>
-                  <Text size='sm' style={{ whiteSpace: 'pre-wrap' }}>
-                    {collectText(message.parts)}
-                  </Text>
-                  <Divider />
-                </Stack>
-              ))
             )}
           </Stack>
 
-          {hasAssistantReply && (
+          {status === '応答済み' && (
             <Stack gap='xs' pb={'lg'}>
               <Textarea
                 autosize

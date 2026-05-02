@@ -18,7 +18,6 @@ export default function Page() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [broadcast, setBroadcast] = useState<BroadcastPayload>(null);
   const [completedResponses, setCompletedResponses] = useState<Partial<Record<ModelKey, string>>>({});
-  const [erroredModels, setErroredModels] = useState<Partial<Record<ModelKey, true>>>({});
   const autoSynthesizeTriggered = useRef(false);
 
   const {
@@ -31,9 +30,9 @@ export default function Page() {
     schema: synthesizeResultSchema
   });
 
-  const allModelsCompleted = useMemo(
-    () => MODEL_DEFINITIONS.every((d) => completedResponses[d.id] !== undefined || erroredModels[d.id]),
-    [completedResponses, erroredModels]
+  const allModelsSucceeded = useMemo(
+    () => MODEL_DEFINITIONS.every((d) => completedResponses[d.id] !== undefined),
+    [completedResponses]
   );
 
   const handleSynthesize = useCallback(
@@ -46,17 +45,15 @@ export default function Page() {
   );
 
   useEffect(() => {
-    if (allModelsCompleted && !autoSynthesizeTriggered.current) {
+    if (allModelsSucceeded && !autoSynthesizeTriggered.current) {
       autoSynthesizeTriggered.current = true;
       handleSynthesize(completedResponses);
     }
-  }, [allModelsCompleted, completedResponses, handleSynthesize]);
+  }, [allModelsSucceeded, completedResponses, handleSynthesize]);
 
   const handleBroadcast = () => {
     setErrorMessage(null);
-    autoSynthesizeTriggered.current = false;
     setCompletedResponses({});
-    setErroredModels({});
     setBroadcast((prev) => ({ text: question, id: (prev?.id ?? 0) + 1 }));
   };
 
@@ -88,16 +85,9 @@ export default function Page() {
     setCompletedResponses((prev) => ({ ...prev, [modelId]: response }));
   }, []);
 
-  const handleOnError = useCallback((modelId: ModelKey) => {
-    setErroredModels((prev) => ({ ...prev, [modelId]: true }));
-  }, []);
+  const handleOnError = useCallback((_modelId: ModelKey) => {}, []);
 
   const handleOnRetry = useCallback((modelId: ModelKey) => {
-    setErroredModels((prev) => {
-      const next = { ...prev };
-      delete next[modelId];
-      return next;
-    });
     setCompletedResponses((prev) => {
       const next = { ...prev };
       delete next[modelId];
