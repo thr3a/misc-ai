@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 
     const isOpenRouter = provider === 'openrouter';
 
-    const model = isOpenRouter ? openRouter.chat('z-ai/glm-5') : localOpenAI.chat('main');
+    const model = isOpenRouter ? openRouter.chat('z-ai/glm-5.1') : localOpenAI.chat('main');
 
     const selectedSystemPrompt = mode === 'creative' ? creativeSystemPrompt : systemPrompt;
 
