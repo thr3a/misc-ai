@@ -1,17 +1,20 @@
 'use client';
 
-import { Avatar, Badge, Box, Button, Group, Loader, Paper, Stack, Text, Textarea } from '@mantine/core';
+import { Avatar, Badge, Box, Button, Divider, Group, Loader, Paper, Stack, Text, Textarea } from '@mantine/core';
 import { IconCheck, IconRobot, IconX } from '@tabler/icons-react';
 import { useState } from 'react';
+
+const QUESTIONS_PER_ROUND = 5;
 
 type Message = { role: 'user' | 'assistant'; content: string };
 
 type GameEvent =
+  | { type: 'round_start'; round: number }
   | { type: 'student_question'; turn: number; question: string }
   | { type: 'teacher_answer'; turn: number; answer: string }
-  | { type: 'student_final_attempt'; turn: number; answer: string }
-  | { type: 'teacher_judgment'; turn: number; correct: boolean }
-  | { type: 'game_clear'; answer: string };
+  | { type: 'student_final_attempt'; round: number; answer: string }
+  | { type: 'teacher_judgment'; round: number; correct: boolean }
+  | { type: 'game_clear'; round: number };
 
 const answerColor = (answer: string) => {
   if (answer === 'YES') return 'green';
@@ -35,22 +38,29 @@ export default function Page() {
     setIsLoading(true);
 
     const studentMessages: Message[] = [];
-    let turn = 0;
+    let roundNumber = 0;
+    let cleared = false;
 
-    while (true) {
-      turn++;
+    while (!cleared) {
+      roundNumber++;
+      setEvents((prev) => [...prev, { type: 'round_start', round: roundNumber }]);
 
-      const questionRes = await fetch('/api/umigame/question', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ problem, messages: studentMessages })
-      });
+      // 5回質問フェーズ
+      for (let q = 1; q <= QUESTIONS_PER_ROUND; q++) {
+        const turn = (roundNumber - 1) * QUESTIONS_PER_ROUND + q;
 
-      if (!questionRes.ok) break;
-      const studentTurn = await questionRes.json();
+        const questionRes = await fetch('/api/umigame/question', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ problem, messages: studentMessages })
+        });
 
-      if (studentTurn.action === 'ASK') {
-        const question: string = studentTurn.question ?? '';
+        if (!questionRes.ok) {
+          setIsLoading(false);
+          return;
+        }
+
+        const { question } = await questionRes.json();
         setEvents((prev) => [...prev, { type: 'student_question', turn, question }]);
         studentMessages.push({ role: 'assistant', content: question });
 
@@ -60,35 +70,41 @@ export default function Page() {
           body: JSON.stringify({ problem, answer, question })
         });
 
-        if (!answerRes.ok) break;
-        const teacherData = await answerRes.json();
-
-        setEvents((prev) => [...prev, { type: 'teacher_answer', turn, answer: teacherData.answer }]);
-        studentMessages.push({ role: 'user', content: `出題者の回答: ${teacherData.answer}` });
-      } else {
-        // FINAL_ANSWER
-        const finalAnswer: string = studentTurn.finalAnswer ?? '';
-        setEvents((prev) => [...prev, { type: 'student_final_attempt', turn, answer: finalAnswer }]);
-
-        const judgmentRes = await fetch('/api/umigame/final', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ problem, answer, studentAnswer: finalAnswer })
-        });
-
-        if (!judgmentRes.ok) break;
-        const judgment = await judgmentRes.json();
-
-        setEvents((prev) => [...prev, { type: 'teacher_judgment', turn, correct: judgment.correct }]);
-
-        if (judgment.correct) {
-          setEvents((prev) => [...prev, { type: 'game_clear', answer: finalAnswer }]);
-          break;
+        if (!answerRes.ok) {
+          setIsLoading(false);
+          return;
         }
 
-        // 不正解だったのでコンテキストに追加して質問を継続
+        const teacherData = await answerRes.json();
+        setEvents((prev) => [...prev, { type: 'teacher_answer', turn, answer: teacherData.answer }]);
+        studentMessages.push({ role: 'user', content: `出題者の回答: ${teacherData.answer}` });
+      }
+
+      // 強制回答フェーズ
+      const guessRes = await fetch('/api/umigame/guess', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ problem, answer, messages: studentMessages })
+      });
+
+      if (!guessRes.ok) {
+        setIsLoading(false);
+        return;
+      }
+
+      const { finalAnswer, correct } = await guessRes.json();
+      setEvents((prev) => [...prev, { type: 'student_final_attempt', round: roundNumber, answer: finalAnswer }]);
+      setEvents((prev) => [...prev, { type: 'teacher_judgment', round: roundNumber, correct }]);
+
+      if (correct) {
+        setEvents((prev) => [...prev, { type: 'game_clear', round: roundNumber }]);
+        cleared = true;
+      } else {
         studentMessages.push({ role: 'assistant', content: `最終回答: ${finalAnswer}` });
-        studentMessages.push({ role: 'user', content: '不正解です。引き続き質問を続けて推理してください。' });
+        studentMessages.push({
+          role: 'user',
+          content: '不正解です。引き続き質問を続けて真相に迫ってください。'
+        });
       }
     }
 
@@ -116,18 +132,29 @@ export default function Page() {
             </Text>
             <Stack gap='lg'>
               {events.map((event) => {
+                if (event.type === 'round_start') {
+                  return (
+                    <Divider
+                      key={`rs-${event.round}`}
+                      label={
+                        <Text size='xs' fw='bold' c='dimmed'>
+                          ラウンド {event.round}
+                        </Text>
+                      }
+                      labelPosition='center'
+                    />
+                  );
+                }
                 if (event.type === 'student_question') {
                   return (
-                    <Stack key={`sq-${event.turn}`} gap='xs'>
-                      <Group align='flex-start' gap='xs' wrap='nowrap'>
-                        <Avatar color='blue' radius='xl' style={{ flexShrink: 0 }}>
-                          <IconRobot size={20} />
-                        </Avatar>
-                        <Paper px='sm' py='xs' bg='white' flex={1}>
-                          <Text>{event.question}</Text>
-                        </Paper>
-                      </Group>
-                    </Stack>
+                    <Group key={`sq-${event.turn}`} align='flex-start' gap='xs' wrap='nowrap'>
+                      <Avatar color='blue' radius='xl' style={{ flexShrink: 0 }}>
+                        <IconRobot size={20} />
+                      </Avatar>
+                      <Paper px='sm' py='xs' bg='white' flex={1}>
+                        <Text>{event.question}</Text>
+                      </Paper>
+                    </Group>
                   );
                 }
                 if (event.type === 'teacher_answer') {
@@ -141,9 +168,9 @@ export default function Page() {
                 }
                 if (event.type === 'student_final_attempt') {
                   return (
-                    <Stack key={`fa-${event.turn}`} gap='xs'>
-                      <Text size='xs' fw='bold' c='dimmed' ta='center' lts={1}>
-                        最終回答
+                    <Stack key={`fa-${event.round}`} gap='xs'>
+                      <Text size='xs' fw='bold' c='dimmed' ta='center'>
+                        最終回答（ラウンド {event.round}）
                       </Text>
                       <Group align='flex-start' gap='xs' wrap='nowrap'>
                         <Avatar color='violet' radius='xl' style={{ flexShrink: 0 }}>
@@ -158,7 +185,7 @@ export default function Page() {
                 }
                 if (event.type === 'teacher_judgment') {
                   return (
-                    <Group key={`tj-${event.turn}`} justify='flex-end'>
+                    <Group key={`tj-${event.round}`} justify='flex-end'>
                       <Badge
                         size='lg'
                         color={event.correct ? 'green' : 'red'}
@@ -169,6 +196,15 @@ export default function Page() {
                         {event.correct ? '正解！' : '不正解'}
                       </Badge>
                     </Group>
+                  );
+                }
+                if (event.type === 'game_clear') {
+                  return (
+                    <Paper key='gc' p='sm' bg='green.1' bd='1px solid var(--mantine-color-green-4)'>
+                      <Text fw='bold' c='green' ta='center'>
+                        {event.round} ラウンドで正解！
+                      </Text>
+                    </Paper>
                   );
                 }
                 return null;
@@ -184,15 +220,6 @@ export default function Page() {
                 </Group>
               )}
             </Stack>
-          </Paper>
-        )}
-
-        {gameClear && gameClear.type === 'game_clear' && (
-          <Paper p='md' withBorder bd='2px solid var(--mantine-color-green-6)'>
-            <Text fw='bold' mb='sm' c='green'>
-              正解！
-            </Text>
-            <Text style={{ whiteSpace: 'pre-wrap' }}>{gameClear.answer}</Text>
           </Paper>
         )}
       </Stack>

@@ -19,7 +19,7 @@ const TeacherJudgmentSchema = z.object({
   correct: z.boolean()
 });
 
-const QUESTIONS_PER_ROUND = 3;
+const QUESTIONS_PER_ROUND = 5;
 
 const localOpenAI = createOpenAI({
   baseURL: 'https://chatgpt-api.turai.work/v1'
@@ -97,7 +97,7 @@ const main = async () => {
 
     【ルール】
     - 質問フェーズでは、YES / NO / IRRELEVANT（関係ない）で答えられる形式の質問を1つ投げかけてください。
-    - 3回の質問後、推理フェーズとして真相を述べてください。
+    - ${QUESTIONS_PER_ROUND}回の質問後、推理フェーズとして真相を述べてください。
     - 正解するまで何度でも挑戦できます。過去の質問とそれに対する回答、自分の過去の推理を活かしてください。
 
     【問題文】
@@ -127,6 +127,7 @@ const main = async () => {
         model: studentModel,
         output: Output.object({ schema: StudentQuestionSchema }),
         system: studentSystemPrompt,
+        temperature: 0,
         ...questionInput
       });
 

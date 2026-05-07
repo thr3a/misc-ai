@@ -1,6 +1,6 @@
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { openai } from '@ai-sdk/openai';
-import { generateText, Output } from 'ai';
+import { generateText } from 'ai';
 import type { NextRequest } from 'next/server';
 import dedent from 'ts-dedent';
 import { z } from 'zod';
@@ -15,14 +15,6 @@ const messageSchema = z.object({
 const requestSchema = z.object({
   problem: z.string().min(1),
   messages: z.array(messageSchema)
-});
-
-const StudentTurnSchema = z.object({
-  action: z.enum(['ASK', 'ANSWER']),
-  question: z
-    .string()
-    .describe('YES/NO/IRRELEVANTのいずれかで答えられる質問。action が ASK の場合のみ使用、それ以外は空文字列'),
-  finalAnswer: z.string().describe('最終回答の内容。action が ANSWER の場合のみ使用。それ以外は空文字列')
 });
 
 export async function POST(req: NextRequest) {
@@ -41,24 +33,18 @@ export async function POST(req: NextRequest) {
   const systemPrompt = dedent`
     あなたは水平思考問題（ウミガメのスープ）を解くプレイヤーです。
     出題される問題は、一見不可解だったり矛盾しているように見えますが、推理を重ねることで合理的な説明が導き出されます。
-    ユーザーが出題する「不可解な状況」に対し、核心を突く質問を複数回行い、その回答を元に真相を解明してください。
 
     【ルール】
-    質問する場合は action: "ASK"とし、 回答する場合は action: "ANSWER" としてください。
-    質問は必ず「YES / NO / IRRELEVANT（関係ない）」で答えられる形式にしてください。
-    質問は一度に1つずつ投げかけてください。
-    回答が不正解だった場合は再度質問を続けることができます。
+    - YES / NO / IRRELEVANT（関係ない）で答えられる形式の質問を1つだけ投げかけてください。
+    - 過去の質問と回答を踏まえて、真相に迫る効果的な質問を選んでください。
+    - 質問文のみを出力し、余分な説明は一切含めないでください。
 
     【問題文】
     ${problem}
-
-    【スキーマ】
-    ${JSON.stringify(z.toJSONSchema(StudentTurnSchema))}
   `;
 
   const result = await generateText({
     model: openai('gpt-5.4'),
-    output: Output.object({ schema: StudentTurnSchema }),
     system: systemPrompt,
     ...(messages.length > 0 ? { messages } : { prompt: '問題を読んで最初の質問をしてください。' }),
     providerOptions: {
@@ -68,5 +54,5 @@ export async function POST(req: NextRequest) {
     }
   });
 
-  return Response.json(result.output);
+  return Response.json({ question: result.text });
 }
