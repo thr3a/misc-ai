@@ -1,6 +1,20 @@
 'use client';
 
-import { Avatar, Badge, Box, Button, Divider, Group, Loader, Paper, Stack, Text, Textarea } from '@mantine/core';
+import {
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Card,
+  Divider,
+  Group,
+  List,
+  Loader,
+  Paper,
+  Stack,
+  Text,
+  Textarea
+} from '@mantine/core';
 import { IconCheck, IconRobot, IconX } from '@tabler/icons-react';
 import { useState } from 'react';
 
@@ -117,8 +131,29 @@ export default function Page() {
   return (
     <Box mb='lg'>
       <Stack>
+        <Card bg='cyan.0' p='md' withBorder style={{ borderColor: 'var(--mantine-color-cyan-3)' }}>
+          <Text c='cyan.9' size='sm' mb='sm'>
+            水平思考クイズ（ウミガメのスープ）をAI同士で自動プレイするシミュレーターです。
+            問題文と正解・解説を設定してゲームを開始すると、回答者AIが YES/NO
+            で答えられる質問を繰り返しながら真相に迫ります。
+          </Text>
+          <Text fw='bold' size='sm' mb='xs' c='cyan.8'>
+            ルール
+          </Text>
+          <List size='sm' c='cyan.8'>
+            <List.Item>回答者AIは出題者AIに対してYES / NOで答えられる質問を行います</List.Item>
+            <List.Item>出題者AIは「YES」「NO」「関係ない」のいずれかで回答します</List.Item>
+            <List.Item>1ラウンドにつき {QUESTIONS_PER_ROUND} 回の質問が行われた後、最終回答を行います</List.Item>
+            <List.Item>最終回答が不正解の場合は次のラウンドに進み、正解するまで繰り返します</List.Item>
+          </List>
+        </Card>
         <Textarea label='問題文' rows={3} value={problem} onChange={(e) => setProblem(e.currentTarget.value)} />
-        <Textarea label='正解と解説' rows={3} value={answer} onChange={(e) => setAnswer(e.currentTarget.value)} />
+        <Textarea
+          label='正解と解説(推理するAIには見えません)'
+          rows={3}
+          value={answer}
+          onChange={(e) => setAnswer(e.currentTarget.value)}
+        />
         <Group justify='center'>
           <Button onClick={handleStart} loading={isLoading} disabled={!problem.trim() || !answer.trim()}>
             ゲーム開始!

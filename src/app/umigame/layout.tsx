@@ -2,7 +2,7 @@ import { Title } from '@mantine/core';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'ウミガメのスープ',
+  title: 'ウミガメのスープ AIシミュレーター',
   description: 'AIが水平思考問題に挑戦します'
 };
 
