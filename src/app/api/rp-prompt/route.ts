@@ -1,5 +1,5 @@
 import { createOpenAI } from '@ai-sdk/openai';
-import { Output, streamText } from 'ai';
+import { createTextStreamResponse, Output, streamText, toTextStream } from 'ai';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { scenarioPromptSchema } from '@/app/rp-prompt/type';
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
         : undefined
     });
 
-    return result.toTextStreamResponse();
+    return createTextStreamResponse({ stream: toTextStream({ stream: result.stream }) });
   } catch (_error) {
     return Response.json({ error: 'error' }, { status: 500 });
   }

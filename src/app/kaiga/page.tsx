@@ -1,6 +1,6 @@
 'use client';
 
-import { experimental_useObject as useObject } from '@ai-sdk/react';
+import { useObject } from '@ai-sdk/react';
 import { Button, FileInput, Group, Image, Stack, Text, Textarea, Title } from '@mantine/core';
 import { IconPhotoScan } from '@tabler/icons-react';
 import { useState } from 'react';

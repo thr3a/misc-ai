@@ -1,5 +1,5 @@
 import { openai } from '@ai-sdk/openai';
-import { Output, streamText } from 'ai';
+import { createTextStreamResponse, Output, streamText, toTextStream } from 'ai';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { lyricAnalysisSchema } from '@/app/lyric/type';
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       output: Output.object({ schema: lyricAnalysisSchema })
     });
 
-    return result.toTextStreamResponse();
+    return createTextStreamResponse({ stream: toTextStream({ stream: result.stream }) });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(error);

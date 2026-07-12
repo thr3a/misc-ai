@@ -1,5 +1,5 @@
 import { openai } from '@ai-sdk/openai';
-import { Output, streamText } from 'ai';
+import { createTextStreamResponse, Output, streamText, toTextStream } from 'ai';
 import type { NextRequest } from 'next/server';
 import dedent from 'ts-dedent';
 import { z } from 'zod';
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    return result.toTextStreamResponse();
+    return createTextStreamResponse({ stream: toTextStream({ stream: result.stream }) });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(error);

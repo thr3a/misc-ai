@@ -1,5 +1,5 @@
 'use client';
-import { experimental_useObject as useObject } from '@ai-sdk/react';
+import { useObject } from '@ai-sdk/react';
 import { Button, Group, Radio, Select, Stack, Textarea, Title } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
 import { useState } from 'react';

@@ -1,6 +1,6 @@
-import type { GoogleProviderOptions } from '@ai-sdk/google';
+import type { GoogleGenerativeAIProviderOptions } from '@ai-sdk/google';
 import { google } from '@ai-sdk/google';
-import { Output, streamText } from 'ai';
+import { createTextStreamResponse, Output, streamText, toTextStream } from 'ai';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { apiRequestSchema, schema } from '@/app/kaiga/type';
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
             thinkingLevel: 'high',
             includeThoughts: false
           }
-        } satisfies GoogleProviderOptions
+        } satisfies GoogleGenerativeAIProviderOptions
         // openai: {
         //   reasoningEffort: 'medium'
         // } satisfies OpenAIResponsesProviderOptions
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
       temperature: 0
     });
 
-    return result.toTextStreamResponse();
+    return createTextStreamResponse({ stream: toTextStream({ stream: result.stream }) });
   } catch (_error) {
     return Response.json({ error: 'error' }, { status: 500 });
   }

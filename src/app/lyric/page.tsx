@@ -1,6 +1,6 @@
 'use client';
 
-import { useChat, experimental_useObject as useObject } from '@ai-sdk/react';
+import { useChat, useObject } from '@ai-sdk/react';
 import {
   Badge,
   Box,

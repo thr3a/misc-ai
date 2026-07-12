@@ -1,6 +1,6 @@
 'use client';
 
-import { experimental_useObject as useObject } from '@ai-sdk/react';
+import { useObject } from '@ai-sdk/react';
 import { Box, Button, Group, Stack, Textarea } from '@mantine/core';
 import { useState } from 'react';
 import { ButtonCopy } from '@/app/html-ui/ButtonCopy';

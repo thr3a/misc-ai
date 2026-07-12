@@ -1,5 +1,5 @@
 'use client';
-import { experimental_useObject as useObject } from '@ai-sdk/react';
+import { useObject } from '@ai-sdk/react';
 import { Box, Button, Group, Paper, Stack, Textarea } from '@mantine/core';
 import { useState } from 'react';
 import { SearchButton } from '@/app/ggr-en/components/SearchButton';

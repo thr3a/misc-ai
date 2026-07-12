@@ -1,6 +1,6 @@
 'use client';
 
-import { experimental_useObject as useObject } from '@ai-sdk/react';
+import { useObject } from '@ai-sdk/react';
 import { Carousel } from '@mantine/carousel';
 import { Box, Stack } from '@mantine/core';
 import { useInputState } from '@mantine/hooks';

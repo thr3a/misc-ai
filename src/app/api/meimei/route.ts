@@ -1,5 +1,5 @@
 import { openai } from '@ai-sdk/openai';
-import { Output, streamText } from 'ai';
+import { createTextStreamResponse, Output, streamText, toTextStream } from 'ai';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { schema } from '@/app/meimei/util';
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    return result.toTextStreamResponse();
+    return createTextStreamResponse({ stream: toTextStream({ stream: result.stream }) });
   } catch (_error) {
     return Response.json({ error: 'error' }, { status: 500 });
   }

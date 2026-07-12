@@ -1,6 +1,13 @@
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { openai } from '@ai-sdk/openai';
-import { convertToModelMessages, streamText, type UIMessage, validateUIMessages } from 'ai';
+import {
+  convertToModelMessages,
+  createUIMessageStreamResponse,
+  streamText,
+  toUIMessageStream,
+  type UIMessage,
+  validateUIMessages
+} from 'ai';
 import type { NextRequest } from 'next/server';
 import { systemPrompt } from '@/app/example-chat/util';
 
@@ -24,9 +31,11 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    return result.toUIMessageStreamResponse({
+    const stream = toUIMessageStream({
+      stream: result.stream,
       originalMessages: messages
     });
+    return createUIMessageStreamResponse({ stream });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(error);

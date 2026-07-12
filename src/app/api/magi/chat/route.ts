@@ -1,6 +1,13 @@
-import type { GoogleProviderOptions } from '@ai-sdk/google';
+import type { GoogleGenerativeAIProviderOptions } from '@ai-sdk/google';
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
-import { convertToModelMessages, streamText, type UIMessage, validateUIMessages } from 'ai';
+import {
+  convertToModelMessages,
+  createUIMessageStreamResponse,
+  streamText,
+  toUIMessageStream,
+  type UIMessage,
+  validateUIMessages
+} from 'ai';
 import type { NextRequest } from 'next/server';
 import { resolveModel } from '@/app/api/magi/helpers';
 import { type ModelKey, systemPrompt } from '@/app/magi/util';
@@ -27,7 +34,7 @@ export async function POST(req: NextRequest) {
             thinkingLevel: 'high',
             includeThoughts: false
           }
-        } satisfies GoogleProviderOptions,
+        } satisfies GoogleGenerativeAIProviderOptions,
         openai: {
           reasoningEffort: 'medium'
         } satisfies OpenAIResponsesProviderOptions
@@ -35,9 +42,11 @@ export async function POST(req: NextRequest) {
       temperature: modelId === 'gpt5' ? 1 : 0
     });
 
-    return result.toUIMessageStreamResponse({
+    const stream = toUIMessageStream({
+      stream: result.stream,
       originalMessages: messages
     });
+    return createUIMessageStreamResponse({ stream });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(error);
