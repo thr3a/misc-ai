@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
   const result = await generateText({
     model: openai('gpt-5.4'),
     output: Output.object({ schema: TeacherAnswerSchema }),
-    system: systemPrompt,
+    instructions: systemPrompt,
     prompt: question,
     providerOptions: {
       openai: {

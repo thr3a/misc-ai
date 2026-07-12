@@ -9,7 +9,7 @@ export async function Generate(input: string) {
 
   const { object } = await generateObject({
     model: openai('gpt-5'),
-    system: systemPrompt,
+    instructions: systemPrompt,
     prompt: input,
     schema: schema,
     temperature: 0.3,

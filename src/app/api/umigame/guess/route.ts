@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 
   const guessResult = await generateText({
     model: openai('gpt-5.4'),
-    system: studentSystemPrompt,
+    instructions: studentSystemPrompt,
     messages: [...messages, { role: 'user', content: 'これまでの質問と回答をもとに、真相の推理を述べてください。' }],
     providerOptions: {
       openai: {
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
 
   const judgmentResult = await generateText({
     model: openai('gpt-5.4'),
-    system: teacherSystemPrompt,
+    instructions: teacherSystemPrompt,
     prompt: `プレイヤーの回答: ${finalAnswer}`,
     providerOptions: {
       openai: {

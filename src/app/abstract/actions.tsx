@@ -9,7 +9,7 @@ export async function generate(message: string, mode: 'abstract' | 'materialize'
 
   const { text } = await generateText({
     model: openai('gpt-4o-mini'),
-    system: mode === 'abstract' ? abstractSystemPrompt : materializeSystemPrompt,
+    instructions: mode === 'abstract' ? abstractSystemPrompt : materializeSystemPrompt,
     prompt: message,
     temperature: 1
   });

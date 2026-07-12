@@ -18,7 +18,7 @@ export async function generate(input: string) {
       // model: google('gemini-2.0-flash-exp', geminiNoneFilters),
       // model: openai('gpt-4o-mini'),
       model: anthropic('claude-3-5-sonnet-latest'),
-      system: systemPrompt,
+      instructions: systemPrompt,
       prompt: [`新しい4コマ漫画のお題:${input}`].join('\n'),
       schema: schema,
       temperature: 1

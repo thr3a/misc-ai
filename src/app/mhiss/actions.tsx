@@ -17,7 +17,7 @@ export async function continueConversation(history: MessageProps[]) {
     });
     const { textStream } = await streamText({
       model: openai('gpt-4.1-nano'),
-      system: systemMessage,
+      instructions: systemMessage,
       messages: history,
       temperature: 1
     });

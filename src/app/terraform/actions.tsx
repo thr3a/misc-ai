@@ -32,7 +32,7 @@ Terraform resource nameとなぜシステムにそのリソースが必要なの
     const { partialObjectStream } = await streamObject({
       // model: openai('gpt-3.5-turbo'),
       model: openai('gpt-4o'),
-      system: systemPrompt,
+      instructions: systemPrompt,
       prompt: ['# 実現したいシステム', input, '#必要なTerraform resource name'].join('\n'),
       schema: schema,
       temperature: 0.2

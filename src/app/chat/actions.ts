@@ -14,7 +14,7 @@ export async function continueConversation(history: MessageProps[]) {
   (async () => {
     const { textStream } = streamText({
       model: openai('gpt-4o-mini'),
-      system: systemPrompt,
+      instructions: systemPrompt,
       messages: history
     });
 

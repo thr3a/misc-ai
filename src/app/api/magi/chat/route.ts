@@ -1,4 +1,4 @@
-import type { GoogleGenerativeAIProviderOptions } from '@ai-sdk/google';
+import type { GoogleProviderOptions } from '@ai-sdk/google';
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { convertToModelMessages, streamText, type UIMessage, validateUIMessages } from 'ai';
 import type { NextRequest } from 'next/server';
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
     const result = streamText({
       model: resolveModel(modelId),
-      system: systemPrompt(),
+      instructions: systemPrompt(),
       messages: await convertToModelMessages(validatedMessages),
       providerOptions: {
         google: {
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
             thinkingLevel: 'high',
             includeThoughts: false
           }
-        } satisfies GoogleGenerativeAIProviderOptions,
+        } satisfies GoogleProviderOptions,
         openai: {
           reasoningEffort: 'medium'
         } satisfies OpenAIResponsesProviderOptions

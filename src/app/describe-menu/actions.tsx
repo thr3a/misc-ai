@@ -24,7 +24,7 @@ export async function generate(formData: FormData) {
   (async () => {
     const { partialObjectStream } = await streamObject({
       model: openai('gpt-4.1'),
-      system: systemPrompt,
+      instructions: systemPrompt,
       providerOptions: {
         openai: {
           reasoningEffort: 'minimal'
@@ -34,7 +34,11 @@ export async function generate(formData: FormData) {
         {
           role: 'user',
           content: [
-            { type: 'image', image: new URL(imageDataUrl) },
+            {
+              type: 'file',
+              data: new URL(imageDataUrl),
+              mediaType: 'image'
+            },
             {
               type: 'text',
               text: '入力されたレストランのメニュー画像について指定されたスキーマに従って解説してください。'

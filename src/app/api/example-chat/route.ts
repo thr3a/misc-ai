@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
     const result = streamText({
       model: openai('gpt-5-mini'),
-      system: systemPrompt,
+      instructions: systemPrompt,
       messages: await convertToModelMessages(validatedMessages),
       providerOptions: {
         openai: {

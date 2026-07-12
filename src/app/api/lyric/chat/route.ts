@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
 
     const result = streamText({
       model: openai('gpt-5.2'),
-      system: buildSystemPrompt(lyric, analysis),
+      instructions: buildSystemPrompt(lyric, analysis),
       messages: await convertToModelMessages(validatedMessages),
       providerOptions: {
         openai: {

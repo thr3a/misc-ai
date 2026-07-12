@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
 
     const result = streamText({
       model: openRouter.chat('qwen/qwen3-235b-a22b-2507'),
-      system: systemPrompt,
+      instructions: systemPrompt,
       prompt,
       output: Output.object({ schema }),
       providerOptions: {

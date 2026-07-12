@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
 
     const result = streamText({
       model: openai('gpt-5.2'),
-      system: analyzeSystemPrompt,
+      instructions: analyzeSystemPrompt,
       prompt: lyric,
       output: Output.object({ schema: lyricAnalysisSchema })
     });

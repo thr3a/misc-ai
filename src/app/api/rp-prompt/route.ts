@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     const result = streamText({
       model,
-      system: selectedSystemPrompt,
+      instructions: selectedSystemPrompt,
       prompt: situation,
       output: Output.object({ schema: scenarioPromptSchema }),
       temperature: 0.7,

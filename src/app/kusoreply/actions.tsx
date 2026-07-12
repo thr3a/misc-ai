@@ -14,7 +14,7 @@ export async function generate(input: string) {
     const { partialObjectStream } = await streamObject({
       model: openai('gpt-4o-mini'),
       // model: openai('gpt-4o'),
-      system: systemPrompt,
+      instructions: systemPrompt,
       prompt: input,
       schema: schema,
       temperature: 1

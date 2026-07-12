@@ -1,4 +1,4 @@
-import type { GoogleGenerativeAIProviderOptions } from '@ai-sdk/google';
+import type { GoogleProviderOptions } from '@ai-sdk/google';
 import { google } from '@ai-sdk/google';
 import { Output, streamText } from 'ai';
 import type { NextRequest } from 'next/server';
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     const result = streamText({
       // model: openai('gpt-4.1')
       model: google('gemini-3-pro-preview'),
-      system: systemPrompt,
+      instructions: systemPrompt,
       messages: [
         {
           role: 'user',
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
               type: 'text',
               text: 'この画像の絵画について、スキーマに従って情報を出力してください。'
             },
-            { type: 'image', image: parsed.data, mediaType: parsed.mediaType }
+            { type: 'file', data: parsed.data, mediaType: parsed.mediaType }
           ]
         }
       ],
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
             thinkingLevel: 'high',
             includeThoughts: false
           }
-        } satisfies GoogleGenerativeAIProviderOptions
+        } satisfies GoogleProviderOptions
         // openai: {
         //   reasoningEffort: 'medium'
         // } satisfies OpenAIResponsesProviderOptions

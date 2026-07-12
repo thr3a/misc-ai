@@ -15,7 +15,7 @@ export async function generate(input: string) {
       model: openai('gpt-4o-mini'),
       // model: openai('gpt-4o'),
       // model: anthropic('claude-3-haiku-20240307'),
-      system: systemPrompt,
+      instructions: systemPrompt,
       prompt: input,
       schema: schema,
       temperature: 1

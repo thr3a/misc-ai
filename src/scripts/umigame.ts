@@ -1,5 +1,6 @@
 import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
+import { google } from '@ai-sdk/google';
 import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { createOpenAI, openai } from '@ai-sdk/openai';
 import { generateText, type ModelMessage, Output } from 'ai';
@@ -104,7 +105,7 @@ const main = async () => {
     ${problemText}
   `;
 
-  const studentModel = values.local ? localOpenAI : values.openrouter ? openRouterModel : openai('gpt-5.4');
+  const studentModel = values.local ? localOpenAI : values.openrouter ? openRouterModel : google('gemini-pro-latest');
 
   const studentMessages: ModelMessage[] = [];
   let roundNumber = 0;
@@ -126,7 +127,7 @@ const main = async () => {
       const studentResult = await generateText({
         model: studentModel,
         output: Output.object({ schema: StudentQuestionSchema }),
-        system: studentSystemPrompt,
+        instructions: studentSystemPrompt,
         temperature: 0,
         ...questionInput
       });
@@ -137,13 +138,13 @@ const main = async () => {
       studentMessages.push({ role: 'assistant', content: question });
 
       const teacherResult = await generateText({
-        model: openai('gpt-5.4'),
+        model: google('gemini-pro-latest'),
         output: Output.object({ schema: TeacherAnswerSchema }),
-        system: teacherQASystemPrompt,
+        instructions: teacherQASystemPrompt,
         prompt: question,
         providerOptions: {
           openai: {
-            reasoningEffort: 'low'
+            reasoningEffort: 'medium'
           } satisfies OpenAIResponsesProviderOptions
         }
       });
@@ -161,7 +162,7 @@ const main = async () => {
 
     const { text: studentGuess } = await generateText({
       model: studentModel,
-      system: studentSystemPrompt,
+      instructions: studentSystemPrompt,
       messages: [
         ...studentMessages,
         { role: 'user', content: 'これまでの質問と回答をもとに、真相の推理を述べてください。' }
@@ -179,7 +180,7 @@ const main = async () => {
     const judgmentResult = await generateText({
       model: openai('gpt-5.4'),
       output: Output.object({ schema: TeacherJudgmentSchema }),
-      system: teacherJudgeSystemPrompt,
+      instructions: teacherJudgeSystemPrompt,
       prompt: `プレイヤーの回答: ${studentGuess}`,
       providerOptions: {
         openai: {

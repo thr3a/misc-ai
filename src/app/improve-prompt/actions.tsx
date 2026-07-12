@@ -22,7 +22,7 @@ export async function generate(input: string) {
       model: google('gemini-3-flash-preview'),
       // model: anthropic('claude-3-5-sonnet-latest'),
       // model: openai('gpt-4o'),
-      system: systemPrompt,
+      instructions: systemPrompt,
       prompt: inputPrompt,
       schema: schema,
       temperature: 0.7
