@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     `;
 
     const result = await generateText({
-      model: openai('gpt-5.4'),
+      model: openai('gpt-5.6-terra'),
       instructions: systemPrompt,
       prompt: dedent`
         ユーザーが今購入意欲を発散したい商品テーマ: ${prompt}
