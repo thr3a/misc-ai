@@ -11,10 +11,60 @@ import { useCart } from '../hooks/useCart';
 import { useGeneratedItems } from '../hooks/useGeneratedItems';
 import { useLastOrder } from '../hooks/useLastOrder';
 
+type CreditCard = {
+  id: string;
+  name: string;
+  tier: string;
+  tierColor: string;
+  maskedNumber: string;
+  holder: string;
+  expiry: string;
+};
+
+// 架空の登録済みクレジットカード一覧
+const creditCards: CreditCard[] = [
+  {
+    id: 'centurion',
+    name: 'アメリカン・エキスプレス センチュリオン・カード',
+    tier: 'ブラック',
+    tierColor: 'dark',
+    maskedNumber: '**** ****** *0001',
+    holder: 'TARO YAMADA',
+    expiry: '12/39'
+  },
+  {
+    id: 'jcb-the-class',
+    name: 'JCB ザ・クラス',
+    tier: 'ブラック',
+    tierColor: 'dark',
+    maskedNumber: '**** **** **** 3540',
+    holder: 'TARO YAMADA',
+    expiry: '08/38'
+  },
+  {
+    id: 'diners-premium',
+    name: 'ダイナースクラブ プレミアムカード',
+    tier: 'プレミアム',
+    tierColor: 'indigo',
+    maskedNumber: '**** ****** 0036',
+    holder: 'TARO YAMADA',
+    expiry: '03/37'
+  },
+  {
+    id: 'luxury-gold',
+    name: 'ラグジュアリーカード Mastercard Gold Card',
+    tier: 'ゴールド',
+    tierColor: 'yellow',
+    maskedNumber: '**** **** **** 5412',
+    holder: 'TARO YAMADA',
+    expiry: '10/40'
+  }
+];
+
 const CheckoutPage = () => {
   const router = useRouter();
   const { cartItems, clearCart, isReady: isCartReady, totalItems } = useCart();
-  const [paymentMethod, setPaymentMethod] = useState('credit');
+  const [selectedCardId, setSelectedCardId] = useState(creditCards[0].id);
   const { items, isReady: isItemsReady, hasItems } = useGeneratedItems();
   const { setLastOrder } = useLastOrder();
 
@@ -109,51 +159,51 @@ const CheckoutPage = () => {
               {/* お届け先住所 */}
               <Box style={{ backgroundColor: 'white', padding: 24, borderRadius: 4 }}>
                 <Text size='lg' fw='bold' mb='md'>
-                  お届け先住所
+                  お届け先住所（架空）
                 </Text>
-                <Badge color='orange' variant='light' size='sm' mb='md'>
-                  ダミーの住所（架空）
-                </Badge>
                 <Stack gap='sm'>
                   <Group>
-                    <TextInput label='姓' defaultValue='山田' style={{ flex: 1 }} />
-                    <TextInput label='名' defaultValue='太郎' style={{ flex: 1 }} />
+                    <TextInput label='姓' defaultValue='山田' disabled style={{ flex: 1 }} />
+                    <TextInput label='名' defaultValue='太郎' disabled style={{ flex: 1 }} />
                   </Group>
-                  <TextInput label='郵便番号' defaultValue='100-8111' />
-                  <TextInput label='都道府県' defaultValue='東京都' />
-                  <TextInput label='市区町村・番地' defaultValue='千代田区千代田1-1' />
-                  <TextInput label='建物名' defaultValue='皇居' />
-                  <TextInput label='電話番号' defaultValue='03-1234-5678' />
+                  <TextInput label='郵便番号' defaultValue='100-8111' disabled />
+                  <TextInput label='都道府県' defaultValue='東京都' disabled />
+                  <TextInput label='市区町村・番地' defaultValue='千代田区千代田1-1' disabled />
+                  <TextInput label='建物名' defaultValue='皇居' disabled />
+                  <TextInput label='電話番号' defaultValue='03-1234-5678' disabled />
                 </Stack>
               </Box>
 
               {/* お支払い方法 */}
               <Box style={{ backgroundColor: 'white', padding: 24, borderRadius: 4 }}>
                 <Text size='lg' fw='bold' mb='md'>
-                  お支払い方法
+                  お支払い方法（架空）
                 </Text>
-                <Radio.Group value={paymentMethod} onChange={setPaymentMethod}>
+                <Text size='sm' c='dimmed' mb='sm'>
+                  登録済みのクレジットカード（架空）からお選びください
+                </Text>
+                <Radio.Group value={selectedCardId} onChange={setSelectedCardId}>
                   <Stack gap='sm'>
-                    <Radio value='credit' label='クレジットカード（架空）' />
-                    <Radio value='amazon_pay' label='Amazon Pay（架空）' />
-                    <Radio value='convenience' label='コンビニ払い（架空）' />
+                    {creditCards.map((card) => (
+                      <Radio
+                        key={card.id}
+                        value={card.id}
+                        label={
+                          <Group gap='xs'>
+                            <IconCreditCard size={16} />
+                            <Text size='sm' fw='bold'>
+                              {card.name}
+                            </Text>
+                            <Badge color={card.tierColor} size='sm'>
+                              {card.tier}
+                            </Badge>
+                          </Group>
+                        }
+                        description={`${card.maskedNumber} ／ 有効期限 ${card.expiry} ／ 名義 ${card.holder}`}
+                      />
+                    ))}
                   </Stack>
                 </Radio.Group>
-
-                {paymentMethod === 'credit' && (
-                  <Stack gap='sm' mt='md'>
-                    <TextInput
-                      label='カード番号'
-                      placeholder='1234 5678 9012 3456'
-                      leftSection={<IconCreditCard size={16} />}
-                    />
-                    <Group>
-                      <TextInput label='有効期限' placeholder='MM/YY' style={{ flex: 1 }} />
-                      <TextInput label='セキュリティコード' placeholder='123' style={{ flex: 1 }} />
-                    </Group>
-                    <TextInput label='カード名義' placeholder='YAMADA TARO' />
-                  </Stack>
-                )}
               </Box>
             </Stack>
           </Grid.Col>

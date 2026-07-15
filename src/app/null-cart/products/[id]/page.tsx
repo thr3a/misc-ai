@@ -18,7 +18,8 @@ import {
   Select,
   Stack,
   Text,
-  ThemeIcon
+  ThemeIcon,
+  UnstyledButton
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconCheck, IconFlame, IconLock, IconShoppingCart } from '@tabler/icons-react';
@@ -35,6 +36,7 @@ import { StarRating } from '../../components/StarRating';
 import { useCart } from '../../hooks/useCart';
 import { useGeneratedItems } from '../../hooks/useGeneratedItems';
 import { getProductEmoji, getSoldToday, getStockLeft, getTileBackground, getViewerBase } from '../../presentation';
+import type { Item } from '../../types';
 
 const ProductDetailPage = () => {
   const params = useParams();
@@ -44,6 +46,7 @@ const ProductDetailPage = () => {
   const [quantity, setQuantity] = useState<string | null>('1');
   const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false);
   const [addedQuantity, setAddedQuantity] = useState(0);
+  const [recommendedItems, setRecommendedItems] = useState<Item[]>([]);
   const { items, isReady, hasItems } = useGeneratedItems();
 
   const product = items?.find((item) => String(item.id) === id);
@@ -57,6 +60,10 @@ const ProductDetailPage = () => {
     const qty = parseInt(quantity ?? '1', 10);
     addToCart(String(product.id), qty);
     setAddedQuantity(qty);
+    // 今見ている商品以外からランダムに2つ選んでおすすめ表示
+    const others = items.filter((item) => String(item.id) !== id);
+    const shuffled = [...others].sort(() => Math.random() - 0.5);
+    setRecommendedItems(shuffled.slice(0, 2));
     openDrawer();
   };
 
@@ -215,6 +222,50 @@ const ProductDetailPage = () => {
               買い物を続ける
             </Button>
           </Stack>
+
+          {/* おすすめ商品 */}
+          {recommendedItems.length > 0 && (
+            <>
+              <Divider />
+              <Stack gap='xs'>
+                <Text size='sm' fw='bold'>
+                  こちらの商品もどうぞ
+                </Text>
+                {recommendedItems.map((item) => (
+                  <UnstyledButton
+                    key={item.id}
+                    onClick={() => {
+                      closeDrawer();
+                      router.push(`/null-cart/products/${item.id}`);
+                    }}
+                    p='sm'
+                    bd='1px solid gray.2'
+                    style={{ borderRadius: 6 }}
+                  >
+                    <Group gap='sm' wrap='nowrap'>
+                      <Center
+                        w={48}
+                        h={48}
+                        style={{ backgroundColor: getTileBackground(item), borderRadius: 4, flexShrink: 0 }}
+                      >
+                        <Text fz={28} style={{ lineHeight: 1 }}>
+                          {getProductEmoji(item)}
+                        </Text>
+                      </Center>
+                      <Stack gap={2}>
+                        <Text size='sm' fw='bold' lineClamp={2}>
+                          {item.name}
+                        </Text>
+                        <Text size='sm' fw='bold' c='#B12704'>
+                          ¥{item.discountedPrice.toLocaleString()}
+                        </Text>
+                      </Stack>
+                    </Group>
+                  </UnstyledButton>
+                ))}
+              </Stack>
+            </>
+          )}
         </Stack>
       </Drawer>
 
