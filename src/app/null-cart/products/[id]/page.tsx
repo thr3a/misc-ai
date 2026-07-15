@@ -267,16 +267,6 @@ const ProductDetailPage = () => {
               {/* 商品情報 */}
               <Grid.Col span={{ base: 12, md: 4 }}>
                 <Stack gap='sm'>
-                  {/* セールバッジ */}
-                  <Group gap={6}>
-                    <Badge color='red' variant='filled' size='lg' leftSection={<IconFlame size={12} />}>
-                      セール -{discountRate}%OFF
-                    </Badge>
-                    <Badge color='orange' variant='light' size='sm'>
-                      タイムセール
-                    </Badge>
-                  </Group>
-
                   <Text size='xl' fw='bold'>
                     {product.name}
                   </Text>
@@ -301,13 +291,10 @@ const ProductDetailPage = () => {
                       <Text fw='bold' c='#B12704' fz={32}>
                         ¥{product.discountedPrice.toLocaleString()}
                       </Text>
+                      <Text size='xs' c='#565959'>
+                        税込
+                      </Text>
                     </Group>
-                    <Text size='xs' c='#565959'>
-                      税込
-                    </Text>
-                    <Badge color='red' variant='filled' size='sm' mt={4}>
-                      {discountRate}%OFF　¥{(product.originalPrice - product.discountedPrice).toLocaleString()}お得！
-                    </Badge>
                     <Text size='xs' c='#B12704' fw='bold' mt={4}>
                       🔥 本日{getSoldToday(product)}個売れています
                     </Text>
@@ -339,27 +326,26 @@ const ProductDetailPage = () => {
                   }}
                 >
                   <Stack gap='sm'>
-                    <Badge color='red' variant='filled' size='sm' leftSection={<IconFlame size={12} />}>
-                      セール実施中
+                    <Badge color='#E31837' variant='filled' size='md' leftSection={<IconFlame size={12} />}>
+                      {discountRate}%OFF 期間限定
                     </Badge>
                     <SaleCountdown label='タイムセール終了まで' compact />
                     <Box>
                       <Text size='xs' c='#888' td='line-through'>
                         ¥{product.originalPrice.toLocaleString()}
                       </Text>
-                      <Text fw='bold' c='#B12704' fz={28}>
-                        ¥{product.discountedPrice.toLocaleString()}
-                      </Text>
-                      <Text size='xs' c='#565959'>
-                        税込
-                      </Text>
+                      <Group gap={4} align='baseline'>
+                        <Text fw='bold' c='#B12704' fz={28}>
+                          ¥{product.discountedPrice.toLocaleString()}
+                        </Text>
+                        <Text size='xs' c='#565959'>
+                          税込
+                        </Text>
+                      </Group>
                     </Box>
                     <Text size='sm' fw='bold' c='#E31837'>
                       在庫あり（残り{getStockLeft(product)}点）お早めに！
                     </Text>
-                    <Badge color='blue' variant='light' size='sm'>
-                      明日 お届け可能
-                    </Badge>
                     <Text size='xs' c='#565959'>
                       配送先: 東京都千代田区
                     </Text>
