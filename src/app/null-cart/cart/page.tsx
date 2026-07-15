@@ -9,6 +9,7 @@ import { Footer } from '../components/Footer';
 import { Header } from '../components/Header';
 import { useCart } from '../hooks/useCart';
 import { useGeneratedItems } from '../hooks/useGeneratedItems';
+import { getProductEmoji, getTileBackground } from '../presentation';
 
 const CartPage = () => {
   const { cartItems, removeFromCart, updateQuantity, totalItems, isReady: isCartReady } = useCart();
@@ -20,6 +21,12 @@ const CartPage = () => {
   const totalPrice = cartItems.reduce((sum, cartItem) => {
     const item = getItemById(cartItem.productId);
     return sum + (item?.discountedPrice ?? 0) * cartItem.quantity;
+  }, 0);
+
+  const totalSavings = cartItems.reduce((sum, cartItem) => {
+    const item = getItemById(cartItem.productId);
+    if (!item) return sum;
+    return sum + (item.originalPrice - item.discountedPrice) * cartItem.quantity;
   }, 0);
 
   if (!isCartReady || !isItemsReady) {
@@ -131,7 +138,7 @@ const CartPage = () => {
                           style={{
                             width: 112,
                             height: 112,
-                            backgroundColor: '#FFF3E0',
+                            backgroundColor: getTileBackground(product),
                             borderRadius: 4,
                             display: 'flex',
                             alignItems: 'center',
@@ -140,7 +147,7 @@ const CartPage = () => {
                             flexShrink: 0
                           }}
                         >
-                          🛒
+                          {getProductEmoji(product)}
                         </Box>
                         <Stack gap='sm' style={{ flex: 1, minWidth: 0 }}>
                           <Group justify='space-between' align='flex-start' gap='md' wrap='nowrap'>
@@ -222,6 +229,27 @@ const CartPage = () => {
                     ¥{totalPrice.toLocaleString()}
                   </Text>
                 </Text>
+                {totalSavings > 0 && (
+                  <Box
+                    style={{
+                      backgroundColor: '#FFF0F0',
+                      border: '1px dashed #E31837',
+                      borderRadius: 4,
+                      padding: '8px 12px',
+                      textAlign: 'center'
+                    }}
+                  >
+                    <Text size='sm' c='#B12704' fw='bold'>
+                      🎉 このカートで
+                    </Text>
+                    <Text fz={22} c='#E31837' fw='bold' style={{ lineHeight: 1.2 }}>
+                      ¥{totalSavings.toLocaleString()}
+                    </Text>
+                    <Text size='sm' c='#B12704' fw='bold'>
+                      もお得！
+                    </Text>
+                  </Box>
+                )}
                 <Button
                   fullWidth
                   onClick={() => router.push('/null-cart/checkout')}

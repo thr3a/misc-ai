@@ -25,10 +25,17 @@ const CheckoutPage = () => {
     return sum + (item?.discountedPrice ?? 0) * cartItem.quantity;
   }, 0);
 
+  const totalSavings = cartItems.reduce((sum, cartItem) => {
+    const item = getItemById(cartItem.productId);
+    if (!item) return sum;
+    return sum + (item.originalPrice - item.discountedPrice) * cartItem.quantity;
+  }, 0);
+
   const handleOrder = () => {
     setLastOrder({
       totalPrice,
-      totalItems
+      totalItems,
+      totalSavings
     });
     clearCart();
     router.push('/null-cart/thank-you');
@@ -182,6 +189,16 @@ const CheckoutPage = () => {
                   <Text>配送料</Text>
                   <Text c='#007600'>無料</Text>
                 </Group>
+                {totalSavings > 0 && (
+                  <Group justify='space-between'>
+                    <Text c='#B12704' fw='bold'>
+                      割引
+                    </Text>
+                    <Text c='#B12704' fw='bold'>
+                      -¥{totalSavings.toLocaleString()}
+                    </Text>
+                  </Group>
+                )}
                 <Divider />
                 <Group justify='space-between'>
                   <Text fw='bold' size='lg'>

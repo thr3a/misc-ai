@@ -38,4 +38,6 @@ export type CartItem = {
 export type NullCartOrderSummary = {
   totalPrice: number;
   totalItems: number;
+  // 定価との差額（過去の保存データには存在しないため optional）
+  totalSavings?: number;
 };

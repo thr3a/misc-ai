@@ -73,16 +73,10 @@ const GeneratePage = () => {
           <Stack gap='lg'>
             <Stack gap='xs'>
               <Text size='xl' fw='bold'>
-                null-cart 商品生成
+                Null cart 商品生成
               </Text>
-              <Text c='dimmed'>購入意欲を発散したいジャンルを入れると、架空のEC商品を5件まとめて作成します。</Text>
+              <Text c='dimmed'>購入意欲を発散したいジャンルを入れると、AIが架空の通販商品を作成します。</Text>
             </Stack>
-
-            {hasItems && (
-              <Alert color='yellow' title='現在の商品を上書きします'>
-                新しく生成した商品を保存すると、今のカート内容はクリアされます。
-              </Alert>
-            )}
 
             <Textarea
               label='あなたが購入したいアイテムやジャンル(購入意欲を発散したいもの)'
@@ -108,7 +102,7 @@ const GeneratePage = () => {
               leftSection={<IconSparkles size={18} />}
               style={{ backgroundColor: '#FFD814', color: '#0F1111' }}
             >
-              5件生成してショップへ移動
+              生成
             </Button>
           </Stack>
         </Box>

@@ -1,7 +1,6 @@
 'use server';
 
-// import { anthropic } from '@ai-sdk/anthropic';
-import { google } from '@ai-sdk/google';
+import { openai } from '@ai-sdk/openai';
 import { createStreamableValue } from '@ai-sdk/rsc';
 import { streamObject } from 'ai';
 import { schema, systemPrompt } from './util';
@@ -19,13 +18,11 @@ export async function generate(input: string) {
       '=====プロンプトここまで====='
     ].join('\n');
     const { partialObjectStream } = await streamObject({
-      model: google('gemini-3-flash-preview'),
-      // model: anthropic('claude-3-5-sonnet-latest'),
-      // model: openai('gpt-4o'),
+      model: openai('gpt-5.6-terra'),
       instructions: systemPrompt,
       prompt: inputPrompt,
-      schema: schema,
-      temperature: 0.7
+      schema: schema
+      // temperature: 0.7
     });
 
     for await (const partialObject of partialObjectStream) {

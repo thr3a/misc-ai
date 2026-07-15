@@ -246,6 +246,14 @@ const ThankYouPage = () => {
                 </Text>
               </Stack>
             </Group>
+            {isLastOrderReady && hasLastOrder && (lastOrder.totalSavings ?? 0) > 0 && (
+              <Group justify='space-between' align='center'>
+                <Text fw='bold'>お得にできた金額</Text>
+                <Text c='#E31837' fw='bold' size='xl'>
+                  🎉 ¥{(lastOrder.totalSavings ?? 0).toLocaleString()}
+                </Text>
+              </Group>
+            )}
             <Group justify='space-between' align='flex-start'>
               <Text fw='bold'>お届け先</Text>
               <Text ta='right'>

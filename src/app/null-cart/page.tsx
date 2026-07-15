@@ -1,13 +1,17 @@
 'use client';
 
-import { Badge, Box, Button, Card, Container, Loader, SimpleGrid, Stack, Text } from '@mantine/core';
+import { Badge, Box, Button, Card, Container, Group, Loader, SimpleGrid, Stack, Text } from '@mantine/core';
 import { IconFlame } from '@tabler/icons-react';
 import Link from 'next/link';
 import { CatalogEmptyState } from './components/CatalogEmptyState';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
+import { LiveViewers } from './components/LiveViewers';
+import { SaleCountdown } from './components/SaleCountdown';
+import { SocialProofToast } from './components/SocialProofToast';
 import { StarRating } from './components/StarRating';
 import { useGeneratedItems } from './hooks/useGeneratedItems';
+import { getProductEmoji, getSoldToday, getTileBackground, getUrgencyBadge } from './presentation';
 import type { Item } from './types';
 
 const TopPage = () => {
@@ -18,6 +22,25 @@ const TopPage = () => {
 
   return (
     <Box style={{ backgroundColor: '#EAEDED', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* カードのホバー演出とバッジのパルスアニメーション定義 */}
+      <style>{`
+        .nc-card {
+          transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+        .nc-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 10px 24px rgba(15, 17, 17, 0.2);
+        }
+        @keyframes ncPulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.07); }
+        }
+        @keyframes ncShine {
+          0% { transform: translateX(-120%) skewX(-18deg); }
+          60%, 100% { transform: translateX(240%) skewX(-18deg); }
+        }
+      `}</style>
+
       <Header />
 
       {/* セールヒーローバナー */}
@@ -41,10 +64,27 @@ const TopPage = () => {
               'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.03) 10px, rgba(255,255,255,0.03) 20px)'
           }}
         />
+        {/* 横切る光の演出 */}
+        <Box
+          style={{
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            width: '18%',
+            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent)',
+            animation: 'ncShine 4.5s ease-in-out infinite'
+          }}
+        />
         <Container size='xl' style={{ position: 'relative' }}>
           <Box style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
             <IconFlame size={28} color='#FFD814' />
-            <Badge size='xl' color='yellow' variant='filled' style={{ fontSize: 14 }} fw='bold'>
+            <Badge
+              size='xl'
+              color='yellow'
+              variant='filled'
+              style={{ fontSize: 14, animation: 'ncPulse 1.6s ease-in-out infinite' }}
+              fw='bold'
+            >
               緊急SALE開催中
             </Badge>
             <IconFlame size={28} color='#FFD814' />
@@ -59,6 +99,10 @@ const TopPage = () => {
           <Text size='md' c='#ffcccc' mt={8}>
             数量限定・売り切れ次第終了！今すぐチェック
           </Text>
+          <Group gap='lg' mt='sm' align='center'>
+            <SaleCountdown label='セール終了まで' labelColor='#FFD814' />
+            <LiveViewers baseCount={132} label='がセール会場を閲覧中' color='white' />
+          </Group>
           <Box style={{ display: 'flex', gap: 8, marginTop: 16, flexWrap: 'wrap' }}>
             <Button
               component={Link}
@@ -111,12 +155,14 @@ const TopPage = () => {
           <SimpleGrid cols={{ base: 1, sm: 5 }} spacing='md'>
             {items.map((item) => {
               const rate = discountRate(item);
+              const urgency = getUrgencyBadge(item);
               return (
                 <Card
                   key={item.id}
                   component={Link}
                   href={`/null-cart/products/${item.id}`}
                   shadow='sm'
+                  className='nc-card'
                   style={{ backgroundColor: 'white', textDecoration: 'none', color: 'inherit', position: 'relative' }}
                 >
                   {/* 割引率バッジ */}
@@ -131,7 +177,8 @@ const TopPage = () => {
                       fontSize: 13,
                       padding: '2px 8px',
                       borderRadius: 4,
-                      zIndex: 1
+                      zIndex: 1,
+                      animation: 'ncPulse 1.8s ease-in-out infinite'
                     }}
                   >
                     -{rate}%
@@ -142,7 +189,7 @@ const TopPage = () => {
                       style={{
                         width: '100%',
                         aspectRatio: '1',
-                        backgroundColor: '#FFF3E0',
+                        backgroundColor: getTileBackground(item),
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -150,7 +197,7 @@ const TopPage = () => {
                         maxHeight: 160
                       }}
                     >
-                      🛒
+                      {getProductEmoji(item)}
                     </Box>
                   </Card.Section>
 
@@ -167,8 +214,11 @@ const TopPage = () => {
                         ¥{item.discountedPrice.toLocaleString()}
                       </Text>
                     </Box>
-                    <Badge color='red' variant='filled' size='xs' style={{ width: 'fit-content' }}>
-                      残りわずか！
+                    <Text size='xs' c='#B12704' fw='bold'>
+                      🔥 本日{getSoldToday(item)}個売れています
+                    </Text>
+                    <Badge color={urgency.color} variant='filled' size='xs' style={{ width: 'fit-content' }}>
+                      {urgency.label}
                     </Badge>
                     <Button size='xs' style={{ backgroundColor: '#FFD814', color: '#0F1111' }} fw='bold' mt={4}>
                       今すぐ購入
@@ -181,6 +231,7 @@ const TopPage = () => {
         )}
       </Container>
 
+      <SocialProofToast items={items} />
       <Footer />
     </Box>
   );

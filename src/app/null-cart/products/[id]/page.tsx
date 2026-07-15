@@ -28,9 +28,13 @@ import { useState } from 'react';
 import { CatalogEmptyState } from '../../components/CatalogEmptyState';
 import { Footer } from '../../components/Footer';
 import { Header } from '../../components/Header';
+import { LiveViewers } from '../../components/LiveViewers';
+import { SaleCountdown } from '../../components/SaleCountdown';
+import { SocialProofToast } from '../../components/SocialProofToast';
 import { StarRating } from '../../components/StarRating';
 import { useCart } from '../../hooks/useCart';
 import { useGeneratedItems } from '../../hooks/useGeneratedItems';
+import { getProductEmoji, getSoldToday, getStockLeft, getTileBackground, getViewerBase } from '../../presentation';
 
 const ProductDetailPage = () => {
   const params = useParams();
@@ -237,27 +241,26 @@ const ProductDetailPage = () => {
               {/* 商品画像カルーセル */}
               <Grid.Col span={{ base: 12, md: 5 }}>
                 <Carousel withIndicators withControls emblaOptions={{ loop: true }} height={360}>
-                  <Carousel.Slide>
-                    <Center style={{ backgroundColor: '#D6EAF8', height: '100%', borderRadius: 4 }}>
-                      <Text size='lg' c='dimmed'>
-                        {product.name} - 正面
-                      </Text>
-                    </Center>
-                  </Carousel.Slide>
-                  <Carousel.Slide>
-                    <Center style={{ backgroundColor: '#D5F5E3', height: '100%', borderRadius: 4 }}>
-                      <Text size='lg' c='dimmed'>
-                        {product.name} - 側面
-                      </Text>
-                    </Center>
-                  </Carousel.Slide>
-                  <Carousel.Slide>
-                    <Center style={{ backgroundColor: '#FCF3CF', height: '100%', borderRadius: 4 }}>
-                      <Text size='lg' c='dimmed'>
-                        {product.name} - 背面
-                      </Text>
-                    </Center>
-                  </Carousel.Slide>
+                  {(['正面', '側面', '背面'] as const).map((angle, index) => (
+                    <Carousel.Slide key={angle}>
+                      <Center
+                        style={{
+                          backgroundColor: getTileBackground(product),
+                          height: '100%',
+                          borderRadius: 4,
+                          flexDirection: 'column',
+                          gap: 8
+                        }}
+                      >
+                        <Text fz={96} style={{ lineHeight: 1, transform: `rotate(${(index - 1) * 12}deg)` }}>
+                          {getProductEmoji(product)}
+                        </Text>
+                        <Text size='sm' c='dimmed'>
+                          {product.name} - {angle}
+                        </Text>
+                      </Center>
+                    </Carousel.Slide>
+                  ))}
                 </Carousel>
               </Grid.Col>
 
@@ -278,6 +281,7 @@ const ProductDetailPage = () => {
                     {product.name}
                   </Text>
                   <StarRating rating={product.rating} count={product.reviewCount} />
+                  <LiveViewers baseCount={getViewerBase(product)} label='がこの商品を見ています' />
                   <Divider />
 
                   {/* 価格 */}
@@ -304,6 +308,9 @@ const ProductDetailPage = () => {
                     <Badge color='red' variant='filled' size='sm' mt={4}>
                       {discountRate}%OFF　¥{(product.originalPrice - product.discountedPrice).toLocaleString()}お得！
                     </Badge>
+                    <Text size='xs' c='#B12704' fw='bold' mt={4}>
+                      🔥 本日{getSoldToday(product)}個売れています
+                    </Text>
                   </Box>
 
                   <Divider />
@@ -335,6 +342,7 @@ const ProductDetailPage = () => {
                     <Badge color='red' variant='filled' size='sm' leftSection={<IconFlame size={12} />}>
                       セール実施中
                     </Badge>
+                    <SaleCountdown label='タイムセール終了まで' compact />
                     <Box>
                       <Text size='xs' c='#888' td='line-through'>
                         ¥{product.originalPrice.toLocaleString()}
@@ -346,8 +354,8 @@ const ProductDetailPage = () => {
                         税込
                       </Text>
                     </Box>
-                    <Text size='sm' fw='bold' c='#007600'>
-                      在庫あり（残りわずか）
+                    <Text size='sm' fw='bold' c='#E31837'>
+                      在庫あり（残り{getStockLeft(product)}点）お早めに！
                     </Text>
                     <Badge color='blue' variant='light' size='sm'>
                       明日 お届け可能
@@ -377,6 +385,7 @@ const ProductDetailPage = () => {
             </Grid>
           </Box>
         </Container>
+        <SocialProofToast items={items} />
         <Footer />
       </Box>
     </>
