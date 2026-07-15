@@ -3,6 +3,7 @@
 import { Badge, Box, Button, Card, Container, Group, Loader, SimpleGrid, Stack, Text } from '@mantine/core';
 import { IconFlame } from '@tabler/icons-react';
 import Link from 'next/link';
+import { useMemo } from 'react';
 import { CatalogEmptyState } from './components/CatalogEmptyState';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
@@ -16,6 +17,16 @@ import type { Item } from './types';
 
 const TopPage = () => {
   const { items, isReady, hasItems } = useGeneratedItems();
+
+  // リロードごとに表示順をランダム化する
+  const shuffledItems = useMemo(() => {
+    const shuffled = [...items];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }, [items]);
 
   const discountRate = (item: Item) =>
     Math.round(((item.originalPrice - item.discountedPrice) / item.originalPrice) * 100);
@@ -153,7 +164,7 @@ const TopPage = () => {
 
         {hasItems && (
           <SimpleGrid cols={{ base: 1, sm: 5 }} spacing='md'>
-            {items.map((item) => {
+            {shuffledItems.map((item) => {
               const rate = discountRate(item);
               const urgency = getUrgencyBadge(item);
               return (
