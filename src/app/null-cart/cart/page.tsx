@@ -7,9 +7,9 @@ import { useRouter } from 'next/navigation';
 import { CatalogEmptyState } from '../components/CatalogEmptyState';
 import { Footer } from '../components/Footer';
 import { Header } from '../components/Header';
+import { ProductVisual } from '../components/ProductVisual';
 import { useCart } from '../hooks/useCart';
 import { useGeneratedItems } from '../hooks/useGeneratedItems';
-import { getProductEmoji, getTileBackground } from '../presentation';
 
 const CartPage = () => {
   const { cartItems, removeFromCart, updateQuantity, totalItems, isReady: isCartReady } = useCart();
@@ -134,20 +134,8 @@ const CartPage = () => {
                   return (
                     <Box key={cartItem.productId}>
                       <Group align='flex-start' gap='md'>
-                        <Box
-                          style={{
-                            width: 112,
-                            height: 112,
-                            backgroundColor: getTileBackground(product),
-                            borderRadius: 4,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: 40,
-                            flexShrink: 0
-                          }}
-                        >
-                          {getProductEmoji(product)}
+                        <Box w={112} h={112} style={{ overflow: 'hidden', flexShrink: 0 }}>
+                          <ProductVisual item={product} compact height={112} />
                         </Box>
                         <Stack gap='sm' style={{ flex: 1, minWidth: 0 }}>
                           <Group justify='space-between' align='flex-start' gap='md' wrap='nowrap'>

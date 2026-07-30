@@ -48,6 +48,34 @@ const productEmojis = [
   '💰'
 ] as const;
 
+const productEmojiKeywords: readonly { keywords: readonly string[]; emoji: string }[] = [
+  { keywords: ['時計', 'ウォッチ'], emoji: '⌚' },
+  { keywords: ['イヤホン', 'ヘッドホン', 'スピーカー'], emoji: '🎧' },
+  { keywords: ['カメラ', 'レンズ'], emoji: '📷' },
+  { keywords: ['靴', 'シューズ', 'スニーカー', 'サンダル'], emoji: '👟' },
+  { keywords: ['ゲーム', 'コントローラー'], emoji: '🎮' },
+  { keywords: ['スマホ', 'フォン', '携帯'], emoji: '📱' },
+  { keywords: ['パソコン', 'PC', 'モニター', 'ディスプレイ'], emoji: '💻' },
+  { keywords: ['キーボード'], emoji: '⌨️' },
+  { keywords: ['バッテリー', '充電'], emoji: '🔋' },
+  { keywords: ['自転車', 'サイクル'], emoji: '🚲' },
+  { keywords: ['フライパン', '鍋'], emoji: '🍳' },
+  { keywords: ['スプーン'], emoji: '🥄' },
+  { keywords: ['枕', 'クッション'], emoji: '🛏️' },
+  { keywords: ['ネクタイ'], emoji: '👔' },
+  { keywords: ['カレンダー'], emoji: '📅' },
+  { keywords: ['パンケーキ', 'ケーキ'], emoji: '🥞' },
+  { keywords: ['ドリル', '工具'], emoji: '🛠️' },
+  { keywords: ['どんぶり', 'ラーメン'], emoji: '🍜' },
+  { keywords: ['棺'], emoji: '⚱️' },
+  { keywords: ['火星', '宇宙', '月面'], emoji: '🚀' },
+  { keywords: ['ギター', '楽器'], emoji: '🎸' },
+  { keywords: ['本', '書籍'], emoji: '📚' },
+  { keywords: ['バッグ', '鞄'], emoji: '👜' },
+  { keywords: ['香水', 'コスメ', '美容'], emoji: '🧴' },
+  { keywords: ['食品', 'カプセル', 'サプリ'], emoji: '🍽️' }
+];
+
 const tileBackgrounds = ['#FFF3E0', '#E3F2FD', '#F3E5F5', '#E8F5E9', '#FFF8E1', '#FCE4EC', '#E0F7FA'] as const;
 
 export type UrgencyBadge = {
@@ -65,8 +93,40 @@ const urgencyBadges: readonly UrgencyBadge[] = [
   { label: '再入荷未定', color: 'grape' }
 ];
 
+const dealClaims: readonly string[] = [
+  '過去30日で最も売れた商品',
+  'リピート購入が増えています',
+  'ギフトでよく選ばれています',
+  'いま注目されている商品',
+  'この価格で買えるのは本日まで',
+  'カート追加率が急上昇中'
+];
+
+const deliveryLabels: readonly string[] = [
+  '明日 8:00 - 12:00 にお届け',
+  '明日中に無料配送',
+  '本日 22:00 までにお届け',
+  '最短2時間でお届け',
+  'お届け日時指定便が無料'
+];
+
+const couponLabels: readonly string[] = [
+  '5% OFFクーポン',
+  '¥500 OFFクーポン',
+  'レジで10% OFF',
+  'まとめ買いでさらに5% OFF'
+];
+
 // 商品ごとに固定の絵文字（毎回同じ商品には同じ絵文字が出る）
-export const getProductEmoji = (item: Item): string => pickFromSeed(item, 1, productEmojis);
+export const getProductEmoji = (item: Item): string => {
+  const matched = productEmojiKeywords.find(({ keywords }) => keywords.some((keyword) => item.name.includes(keyword)));
+
+  if (matched) {
+    return matched.emoji;
+  }
+
+  return pickFromSeed(item, 1, productEmojis);
+};
 
 // 商品画像タイルの背景色
 export const getTileBackground = (item: Item): string => pickFromSeed(item, 2, tileBackgrounds);
@@ -82,3 +142,24 @@ export const getStockLeft = (item: Item): number => intFromSeed(item, 5, 1, 4);
 
 // 「現在◯人が見ています」のベース人数
 export const getViewerBase = (item: Item): number => intFromSeed(item, 6, 9, 58);
+
+// 商品ごとに変化するセール進捗（売り切れが近いほど大きい）
+export const getDealProgress = (item: Item): number => intFromSeed(item, 7, 62, 94);
+
+// 商品棚に表示する購買行動の後押しコピー
+export const getDealClaim = (item: Item): string => pickFromSeed(item, 8, dealClaims);
+
+// 商品ごとに異なるお届け予定
+export const getDeliveryLabel = (item: Item): string => pickFromSeed(item, 9, deliveryLabels);
+
+// 一部の商品だけに表示するクーポン
+export const getCouponLabel = (item: Item): string | null => {
+  if (seededRandom(itemSeed(item) + 10) < 0.42) {
+    return null;
+  }
+
+  return pickFromSeed(item, 11, couponLabels);
+};
+
+// Amazon風のおすすめラベルを表示するかどうか
+export const isNullChoice = (item: Item): boolean => seededRandom(itemSeed(item) + 12) > 0.48;

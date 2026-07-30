@@ -12,7 +12,7 @@ import { NullCartItemsResponseSchema, type NullCartTaste, NullCartTasteSchema } 
 
 const GeneratePage = () => {
   const router = useRouter();
-  const { setItems, hasItems } = useGeneratedItems();
+  const { setItems } = useGeneratedItems();
   const { clearCart } = useCart();
   const [prompt, setPrompt] = useState('');
   const [taste, setTaste] = useState<NullCartTaste>('real');

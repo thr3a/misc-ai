@@ -30,12 +30,13 @@ import { CatalogEmptyState } from '../../components/CatalogEmptyState';
 import { Footer } from '../../components/Footer';
 import { Header } from '../../components/Header';
 import { LiveViewers } from '../../components/LiveViewers';
+import { ProductVisual } from '../../components/ProductVisual';
 import { SaleCountdown } from '../../components/SaleCountdown';
 import { SocialProofToast } from '../../components/SocialProofToast';
 import { StarRating } from '../../components/StarRating';
 import { useCart } from '../../hooks/useCart';
 import { useGeneratedItems } from '../../hooks/useGeneratedItems';
-import { getProductEmoji, getSoldToday, getStockLeft, getTileBackground, getViewerBase } from '../../presentation';
+import { getSoldToday, getStockLeft, getViewerBase } from '../../presentation';
 import type { Item } from '../../types';
 
 const ProductDetailPage = () => {
@@ -243,15 +244,9 @@ const ProductDetailPage = () => {
                     style={{ borderRadius: 6 }}
                   >
                     <Group gap='sm' wrap='nowrap'>
-                      <Center
-                        w={48}
-                        h={48}
-                        style={{ backgroundColor: getTileBackground(item), borderRadius: 4, flexShrink: 0 }}
-                      >
-                        <Text fz={28} style={{ lineHeight: 1 }}>
-                          {getProductEmoji(item)}
-                        </Text>
-                      </Center>
+                      <Box w={48} h={48} style={{ overflow: 'hidden', flexShrink: 0 }}>
+                        <ProductVisual item={item} compact height={48} />
+                      </Box>
                       <Stack gap={2}>
                         <Text size='sm' fw='bold' lineClamp={2}>
                           {item.name}
@@ -294,22 +289,12 @@ const ProductDetailPage = () => {
                 <Carousel withIndicators withControls emblaOptions={{ loop: true }} height={360}>
                   {(['正面', '側面', '背面'] as const).map((angle, index) => (
                     <Carousel.Slide key={angle}>
-                      <Center
-                        style={{
-                          backgroundColor: getTileBackground(product),
-                          height: '100%',
-                          borderRadius: 4,
-                          flexDirection: 'column',
-                          gap: 8
-                        }}
-                      >
-                        <Text fz={96} style={{ lineHeight: 1, transform: `rotate(${(index - 1) * 12}deg)` }}>
-                          {getProductEmoji(product)}
-                        </Text>
-                        <Text size='sm' c='dimmed'>
-                          {product.name} - {angle}
-                        </Text>
-                      </Center>
+                      <Box pos='relative'>
+                        <ProductVisual item={product} height={360} rotation={(index - 1) * 8} />
+                        <Badge pos='absolute' bottom='md' left='md' color='dark' variant='filled'>
+                          {angle}イメージ
+                        </Badge>
+                      </Box>
                     </Carousel.Slide>
                   ))}
                 </Carousel>
