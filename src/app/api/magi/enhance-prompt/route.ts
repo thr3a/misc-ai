@@ -1,6 +1,6 @@
 // jo 'prompt=スプラはなぜ面白い？'| curl 'localhost:3000/api/magi/enhance-prompt/' --json @-
-
-import { google } from '@ai-sdk/google';
+import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
+import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
@@ -17,10 +17,14 @@ export async function POST(req: NextRequest) {
     const { prompt } = requestSchema.parse(body);
 
     const { text } = await generateText({
-      model: google('gemini-3-flash-preview'),
+      model: openai('gpt-5.6-terra'),
       instructions: promptEnhancerSystemPrompt,
       prompt,
-      temperature: 0
+      providerOptions: {
+        openai: {
+          reasoningEffort: 'none'
+        } satisfies OpenAIResponsesProviderOptions
+      }
     });
     return Response.json({ enhancedPrompt: text });
   } catch (error) {
