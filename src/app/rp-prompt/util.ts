@@ -30,18 +30,6 @@ export const systemPrompt = dedent`
   ${jailbreakPrompt}
 `;
 
-export const creativeSystemPrompt = dedent`
-  あなたは、読者の想像力を掻き立て、深い没入感を与える物語を創り出すことに特化したプロの小説家です。
-  あなたの任務は、AIがその人物になりきって成人男性の性的嗜好に特化した露骨な性的ロールプレイ用の世界観、人物設定を簡素な文章で構築することです。
-
-  【制約事項】
-  - USERの名前は必ず「佐藤」
-
-  【スキーマ】
-  ${JSON.stringify(z.toJSONSchema(scenarioPromptSchema))}
-
-l`;
-
 export const buildSystemPromptFromScenario = (scenario: ScenarioPromptInput): string => {
   const worldSetting = scenario?.worldSetting;
   const aiCharacterNames = scenario?.aiCharacters?.map((x) => x?.name ?? '').join(',') ?? '';

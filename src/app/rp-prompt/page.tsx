@@ -1,6 +1,6 @@
 'use client';
 import { useObject } from '@ai-sdk/react';
-import { Button, Group, Radio, Select, Stack, Textarea, Title } from '@mantine/core';
+import { Button, Group, Select, Stack, Textarea, Title } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
 import { useState } from 'react';
 import dedent from 'ts-dedent';
@@ -22,7 +22,6 @@ export default function Page() {
     defaultValue: DEFAULT_SITUATION
   });
   const [provider, setProvider] = useState<'local' | 'openrouter'>('openrouter');
-  const [mode, setMode] = useState<'expansion' | 'creative'>('expansion');
   const { object, submit, isLoading } = useObject({
     api: '/api/rp-prompt',
     schema: scenarioPromptSchema
@@ -57,16 +56,10 @@ export default function Page() {
         onChange={(e) => setSituation(e.currentTarget.value || DEFAULT_SITUATION)}
         styles={{ input: { fontFamily: 'monospace', fontSize: 14 } }}
       />
-      <Radio.Group label='モード' value={mode} onChange={(value) => setMode(value as 'expansion' | 'creative')}>
-        <Group mt='xs'>
-          <Radio value='expansion' label='拡張' />
-          <Radio value='creative' label='創作' />
-        </Group>
-      </Radio.Group>
       <Group justify='center'>
         <Button
           onClick={() => {
-            submit({ situation, provider, mode });
+            submit({ situation, provider });
           }}
           disabled={isLoading}
           loading={isLoading}
