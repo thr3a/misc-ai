@@ -8,12 +8,28 @@ export const synthesizeResultSchema = z.object({
 
 export type SynthesizeResult = z.infer<typeof synthesizeResultSchema>;
 
-export type ReconSource = {
-  url: string;
-  title: string;
-};
+export const reconSourceSchema = z.object({
+  url: z.string(),
+  title: z.string()
+});
 
-export type ReconResult = {
-  summary: string;
-  sources: ReconSource[];
-};
+export const reconResultSchema = z.object({
+  summary: z.string(),
+  sources: z.array(reconSourceSchema).default([])
+});
+
+export type ReconSource = z.infer<typeof reconSourceSchema>;
+
+export type ReconResult = z.infer<typeof reconResultSchema>;
+
+export const OPINION_SECTIONS = [
+  { key: 'commonOpinions', label: '共通している意見', color: 'teal' },
+  { key: 'uniqueOpinions', label: 'ユニークな意見', color: 'violet' },
+  { key: 'conflictingOpinions', label: '対立している意見', color: 'orange' }
+] as const satisfies ReadonlyArray<{ key: keyof SynthesizeResult; label: string; color: string }>;
+
+export type OpinionSectionKey = (typeof OPINION_SECTIONS)[number]['key'];
+
+export const enhancePromptResultSchema = z.object({
+  enhancedPrompt: z.string().optional()
+});

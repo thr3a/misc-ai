@@ -55,28 +55,41 @@ const collectText = (parts: Array<{ type: string; text?: string }>) =>
     .map((part) => part.text)
     .join('\n');
 
+// 文字列を連結せずにテキストが到着済みかどうかだけを判定する
+const hasTextPart = (parts: Array<{ type: string; text?: string }>) =>
+  parts.some((part) => part.type === 'text' && typeof part.text === 'string' && part.text.length > 0);
+
+type MessageTextProps = {
+  parts: Array<{ type: string; text?: string }>;
+};
+
+// メッセージ単位でmemo化し、ストリーミング中に確定済みメッセージが再連結されないようにする
+const MessageText = memo(({ parts }: MessageTextProps) => (
+  <Text size='sm' style={{ whiteSpace: 'pre-wrap' }}>
+    {collectText(parts)}
+  </Text>
+));
+MessageText.displayName = 'MessageText';
+
 export type ModelSlideProps = {
   definition: ModelDefinition;
   broadcast: BroadcastPayload;
   recon: string | undefined;
   onCompleted: (modelId: ModelKey, response: string) => void;
-  onError: (modelId: ModelKey) => void;
   onRetry: (modelId: ModelKey) => void;
 };
 
-export const ModelSlide = memo(({ definition, broadcast, recon, onCompleted, onError, onRetry }: ModelSlideProps) => {
+export const ModelSlide = memo(({ definition, broadcast, recon, onCompleted, onRetry }: ModelSlideProps) => {
   const chat = useModelChat(definition.id, recon);
   const [followUpInput, setFollowUpInput] = useInputState('');
   const lastProcessedBroadcastId = useRef<number>(-1);
   const completionNotifiedRef = useRef(false);
-  const errorNotifiedRef = useRef(false);
 
   // broadcastが変化したらメッセージを送信
   useEffect(() => {
     if (broadcast && broadcast.id !== lastProcessedBroadcastId.current) {
       lastProcessedBroadcastId.current = broadcast.id;
       completionNotifiedRef.current = false;
-      errorNotifiedRef.current = false;
       void chat.sendMessage({ parts: [{ type: 'text', text: broadcast.text }] });
     }
   }, [broadcast, chat.sendMessage]);
@@ -87,8 +100,7 @@ export const ModelSlide = memo(({ definition, broadcast, recon, onCompleted, onE
   const visibleMessages = chat.messages.filter((message) => message.role !== 'system');
   const displayMessages = visibleMessages.filter((_, i) => !(i === 0 && visibleMessages[0]?.role === 'user'));
   const lastMessage = chat.messages[chat.messages.length - 1];
-  const isWaitingForText =
-    isGenerating && (!lastMessage || lastMessage.role !== 'assistant' || collectText(lastMessage.parts).length === 0);
+  const isWaitingForText = isGenerating && (lastMessage?.role !== 'assistant' || !hasTextPart(lastMessage.parts));
 
   // 完了時に親へ最初のアシスタント応答を通知（1回のbroadcastにつき1回だけ実行）
   useEffect(() => {
@@ -103,14 +115,6 @@ export const ModelSlide = memo(({ definition, broadcast, recon, onCompleted, onE
       onCompleted(definition.id, response);
     }
   }, [hasAssistantReply, isGenerating, broadcast, chat.messages, definition.id, onCompleted]);
-
-  // エラー発生時に親へ通知（1回のbroadcastにつき1回だけ実行）
-  useEffect(() => {
-    if (chat.error && broadcast && !errorNotifiedRef.current) {
-      errorNotifiedRef.current = true;
-      onError(definition.id);
-    }
-  }, [chat.error, broadcast, definition.id, onError]);
 
   const handleRetry = () => {
     if (!broadcast) return;
@@ -159,9 +163,7 @@ export const ModelSlide = memo(({ definition, broadcast, recon, onCompleted, onE
           <Stack gap='sm' flex={1}>
             {displayMessages.map((message) => (
               <Stack key={message.id ?? `${message.role}-${definition.id}`}>
-                <Text size='sm' style={{ whiteSpace: 'pre-wrap' }}>
-                  {collectText(message.parts)}
-                </Text>
+                <MessageText parts={message.parts} />
                 <Divider />
               </Stack>
             ))}

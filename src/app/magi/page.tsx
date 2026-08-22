@@ -1,14 +1,14 @@
 'use client';
 
-import { useObject } from '@ai-sdk/react';
 import { Carousel } from '@mantine/carousel';
 import { Box, Stack } from '@mantine/core';
 import { useInputState } from '@mantine/hooks';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
+import { postJson } from '@/app/lib/postJson';
 import { type BroadcastPayload, ModelSlide } from '@/app/magi/components/ModelSlide';
 import { QuestionInput } from '@/app/magi/components/QuestionInput';
 import { SynthesizePanel } from '@/app/magi/components/SynthesizePanel';
-import { type ReconResult, synthesizeResultSchema } from '@/app/magi/type';
+import { enhancePromptResultSchema, type ReconResult, reconResultSchema } from '@/app/magi/type';
 import { MODEL_DEFINITIONS, type ModelKey } from '@/app/magi/util';
 
 // 関数名は変えないこと
@@ -22,37 +22,6 @@ export default function Page() {
   const [completedResponses, setCompletedResponses] = useState<Partial<Record<ModelKey, string>>>({});
   const autoSynthesizeTriggered = useRef(false);
 
-  const {
-    object: synthesizeObject,
-    submit: submitSynthesize,
-    isLoading: isSynthesizing,
-    error: synthesizeError
-  } = useObject({
-    api: '/api/magi/synthesize',
-    schema: synthesizeResultSchema
-  });
-
-  const allModelsSucceeded = useMemo(
-    () => MODEL_DEFINITIONS.every((d) => completedResponses[d.id] !== undefined),
-    [completedResponses]
-  );
-
-  const handleSynthesize = useCallback(
-    (responses: Partial<Record<ModelKey, string>>) => {
-      setErrorMessage(null);
-      const responseList = MODEL_DEFINITIONS.map((d) => responses[d.id] ?? '');
-      submitSynthesize({ responses: responseList });
-    },
-    [submitSynthesize]
-  );
-
-  useEffect(() => {
-    if (allModelsSucceeded && !autoSynthesizeTriggered.current) {
-      autoSynthesizeTriggered.current = true;
-      handleSynthesize(completedResponses);
-    }
-  }, [allModelsSucceeded, completedResponses, handleSynthesize]);
-
   const handleBroadcast = () => {
     setErrorMessage(null);
     setCompletedResponses({});
@@ -63,16 +32,13 @@ export default function Page() {
     setErrorMessage(null);
     setIsReconning(true);
     try {
-      const response = await fetch('/api/magi/recon', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: question })
-      });
-      const payload = (await response.json().catch(() => null)) as (ReconResult & { error?: string }) | null;
-      if (!response.ok || !payload) {
-        throw new Error(payload?.error ?? '下調べリクエストに失敗しました。');
-      }
-      setRecon({ summary: payload.summary, sources: payload.sources ?? [] });
+      const payload = await postJson(
+        '/api/magi/recon',
+        { prompt: question },
+        reconResultSchema,
+        '下調べリクエストに失敗しました。'
+      );
+      setRecon(payload);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       setErrorMessage(message);
@@ -85,15 +51,12 @@ export default function Page() {
     setErrorMessage(null);
     setIsEnhancing(true);
     try {
-      const response = await fetch('/api/magi/enhance-prompt', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: question })
-      });
-      const payload = (await response.json().catch(() => null)) as { enhancedPrompt?: string; error?: string } | null;
-      if (!response.ok || !payload) {
-        throw new Error(payload?.error ?? '強化リクエストに失敗しました。');
-      }
+      const payload = await postJson(
+        '/api/magi/enhance-prompt',
+        { prompt: question },
+        enhancePromptResultSchema,
+        '強化リクエストに失敗しました。'
+      );
       if (payload.enhancedPrompt) {
         setQuestion(payload.enhancedPrompt);
       }
@@ -109,8 +72,6 @@ export default function Page() {
     setCompletedResponses((prev) => ({ ...prev, [modelId]: response }));
   }, []);
 
-  const handleOnError = useCallback((_modelId: ModelKey) => {}, []);
-
   const handleOnRetry = useCallback((modelId: ModelKey) => {
     setCompletedResponses((prev) => {
       const next = { ...prev };
@@ -120,67 +81,9 @@ export default function Page() {
     autoSynthesizeTriggered.current = false;
   }, []);
 
-  const handleExport = () => {
-    if (!synthesizeObject) return;
-
-    const lines: string[] = [];
-
-    lines.push(`# 質問\n\n${question}\n`);
-
-    if (recon) {
-      lines.push(`## 下調べ\n\n${recon.summary}\n`);
-      if (recon.sources.length > 0) {
-        lines.push('### 出典\n');
-        for (const source of recon.sources) {
-          lines.push(`- [${source.title}](${source.url})`);
-        }
-        lines.push('');
-      }
-    }
-
-    lines.push('## 各モデルの回答\n');
-    for (const definition of MODEL_DEFINITIONS) {
-      const response = completedResponses[definition.id];
-      if (response) {
-        lines.push(`### ${definition.label}\n\n${response}\n`);
-      }
-    }
-
-    lines.push('## 集合知の統合\n');
-
-    if (synthesizeObject.commonOpinions && synthesizeObject.commonOpinions.length > 0) {
-      lines.push('### 共通している意見\n');
-      for (const opinion of synthesizeObject.commonOpinions) {
-        lines.push(`- ${opinion}`);
-      }
-      lines.push('');
-    }
-
-    if (synthesizeObject.uniqueOpinions && synthesizeObject.uniqueOpinions.length > 0) {
-      lines.push('### ユニークな意見\n');
-      for (const opinion of synthesizeObject.uniqueOpinions) {
-        lines.push(`- ${opinion}`);
-      }
-      lines.push('');
-    }
-
-    if (synthesizeObject.conflictingOpinions && synthesizeObject.conflictingOpinions.length > 0) {
-      lines.push('### 対立している意見\n');
-      for (const opinion of synthesizeObject.conflictingOpinions) {
-        lines.push(`- ${opinion}`);
-      }
-      lines.push('');
-    }
-
-    const content = lines.join('\n');
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = 'magi-result.txt';
-    anchor.click();
-    URL.revokeObjectURL(url);
-  };
+  const handleSynthesizeStart = useCallback(() => {
+    setErrorMessage(null);
+  }, []);
 
   return (
     <Box mx='auto' mb={'xl'}>
@@ -226,17 +129,17 @@ export default function Page() {
               broadcast={broadcast}
               recon={recon?.summary}
               onCompleted={handleOnCompleted}
-              onError={handleOnError}
               onRetry={handleOnRetry}
             />
           ))}
         </Carousel>
 
         <SynthesizePanel
-          synthesizeObject={synthesizeObject}
-          isSynthesizing={isSynthesizing}
-          synthesizeError={synthesizeError ?? null}
-          onExport={handleExport}
+          question={question}
+          recon={recon}
+          completedResponses={completedResponses}
+          autoSynthesizeTriggeredRef={autoSynthesizeTriggered}
+          onSynthesizeStart={handleSynthesizeStart}
         />
       </Stack>
     </Box>
