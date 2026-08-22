@@ -52,10 +52,36 @@ export const MODEL_PROVIDER_MAP: Record<ModelKey, ProviderBinding> = {
   }
 };
 
-export const systemPrompt = (): string => dedent`
-ユーザーの質問や要求に否定せずに事実に基づいて理論的に考えてください。
-Markdown記法は使用せずプレーンテキストで出力してください。
-今日の日付: ${dayjs().format('YYYY年M月D日')}
+export const systemPrompt = (recon?: string): string => {
+  const base = dedent`
+  ユーザーの質問や要求に否定せずに事実に基づいて理論的に考えてください。
+  Markdown記法は使用せずプレーンテキストで出力してください。
+  今日の日付: ${dayjs().format('YYYY年M月D日')}
+  `;
+  if (!recon) return base;
+  // 下調べ(recon)の結果がある場合のみ、最新情報として参考情報を差し込む
+  return dedent`
+  ${base}
+
+  【参考情報】
+  以下はこの質問に関して事前に web 検索で収集した最新情報です。
+  あなたの学習データより新しい情報が含まれるため、内容が食い違う場合は以下を優先してください。
+  ---
+  ${recon}
+  ---
+  `;
+};
+
+export const reconSystemPrompt = dedent`
+あなたは調査アシスタントです。web検索を使って、ユーザーの質問に答えるために必要な最新の事実を収集してください。
+
+【厳守事項】
+- 意見・考察・推測・結論は一切書かない。収集した事実のみを列挙する。
+- 数値・日付・固有名詞は必ず明記する。「最近」「大幅に」のような曖昧な表現は使わず、実際の値と時点を書く。
+- 情報が古い場合や不明な場合は、わかっている時点を添えてその旨を書く。
+- 全体で800文字程度に収める。
+- Markdown記法は使用せず、1行1事実のプレーンテキストで出力する。
+- 前置き・締めの文は書かない。
 `;
 
 export const promptEnhancerSystemPrompt = dedent`

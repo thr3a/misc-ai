@@ -7,3 +7,13 @@ export const synthesizeResultSchema = z.object({
 });
 
 export type SynthesizeResult = z.infer<typeof synthesizeResultSchema>;
+
+export type ReconSource = {
+  url: string;
+  title: string;
+};
+
+export type ReconResult = {
+  summary: string;
+  sources: ReconSource[];
+};

@@ -8,13 +8,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { type BroadcastPayload, ModelSlide } from '@/app/magi/components/ModelSlide';
 import { QuestionInput } from '@/app/magi/components/QuestionInput';
 import { SynthesizePanel } from '@/app/magi/components/SynthesizePanel';
-import { synthesizeResultSchema } from '@/app/magi/type';
+import { type ReconResult, synthesizeResultSchema } from '@/app/magi/type';
 import { MODEL_DEFINITIONS, type ModelKey } from '@/app/magi/util';
 
 // 関数名は変えないこと
 export default function Page() {
   const [question, setQuestion] = useInputState('');
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [isReconning, setIsReconning] = useState(false);
+  const [recon, setRecon] = useState<ReconResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [broadcast, setBroadcast] = useState<BroadcastPayload>(null);
   const [completedResponses, setCompletedResponses] = useState<Partial<Record<ModelKey, string>>>({});
@@ -55,6 +57,28 @@ export default function Page() {
     setErrorMessage(null);
     setCompletedResponses({});
     setBroadcast((prev) => ({ text: question, id: (prev?.id ?? 0) + 1 }));
+  };
+
+  const handleRecon = async () => {
+    setErrorMessage(null);
+    setIsReconning(true);
+    try {
+      const response = await fetch('/api/magi/recon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: question })
+      });
+      const payload = (await response.json().catch(() => null)) as (ReconResult & { error?: string }) | null;
+      if (!response.ok || !payload) {
+        throw new Error(payload?.error ?? '下調べリクエストに失敗しました。');
+      }
+      setRecon({ summary: payload.summary, sources: payload.sources ?? [] });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setErrorMessage(message);
+    } finally {
+      setIsReconning(false);
+    }
   };
 
   const handleEnhancePrompt = async () => {
@@ -102,6 +126,17 @@ export default function Page() {
     const lines: string[] = [];
 
     lines.push(`# 質問\n\n${question}\n`);
+
+    if (recon) {
+      lines.push(`## 下調べ\n\n${recon.summary}\n`);
+      if (recon.sources.length > 0) {
+        lines.push('### 出典\n');
+        for (const source of recon.sources) {
+          lines.push(`- [${source.title}](${source.url})`);
+        }
+        lines.push('');
+      }
+    }
 
     lines.push('## 各モデルの回答\n');
     for (const definition of MODEL_DEFINITIONS) {
@@ -159,6 +194,10 @@ export default function Page() {
           onBroadcast={handleBroadcast}
           onEnhance={handleEnhancePrompt}
           isEnhancing={isEnhancing}
+          onRecon={handleRecon}
+          isReconning={isReconning}
+          recon={recon}
+          onReconClear={() => setRecon(null)}
           errorMessage={errorMessage}
         />
 
@@ -185,6 +224,7 @@ export default function Page() {
               key={definition.id}
               definition={definition}
               broadcast={broadcast}
+              recon={recon?.summary}
               onCompleted={handleOnCompleted}
               onError={handleOnError}
               onRetry={handleOnRetry}

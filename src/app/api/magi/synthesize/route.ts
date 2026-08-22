@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     `;
 
     const result = streamText({
-      model: openai('gpt-5.4-mini-2026-03-17'),
+      model: openai('gpt-5.6-luna'),
       instructions: synthesizeSystemPrompt,
       prompt: userPrompt,
       temperature: 0,

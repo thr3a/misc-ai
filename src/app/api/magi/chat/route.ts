@@ -17,16 +17,17 @@ export const maxDuration = 300;
 type ChatRequestBody = {
   messages: UIMessage[];
   modelId: ModelKey;
+  recon?: string;
 };
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, modelId }: ChatRequestBody = await req.json();
+    const { messages, modelId, recon }: ChatRequestBody = await req.json();
     const validatedMessages = await validateUIMessages({ messages });
 
     const result = streamText({
       model: resolveModel(modelId),
-      instructions: systemPrompt(),
+      instructions: systemPrompt(recon),
       messages: await convertToModelMessages(validatedMessages),
       providerOptions: {
         google: {

@@ -20,14 +20,14 @@ const STATUS_COLORS: Record<ModelStatus, string> = {
   エラー: 'red'
 };
 
-const useModelChat = (modelId: ModelKey) => {
+const useModelChat = (modelId: ModelKey, recon: string | undefined) => {
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
         api: '/api/magi/chat',
-        body: { modelId }
+        body: { modelId, recon }
       }),
-    [modelId]
+    [modelId, recon]
   );
 
   return useChat({
@@ -58,13 +58,14 @@ const collectText = (parts: Array<{ type: string; text?: string }>) =>
 export type ModelSlideProps = {
   definition: ModelDefinition;
   broadcast: BroadcastPayload;
+  recon: string | undefined;
   onCompleted: (modelId: ModelKey, response: string) => void;
   onError: (modelId: ModelKey) => void;
   onRetry: (modelId: ModelKey) => void;
 };
 
-export const ModelSlide = memo(({ definition, broadcast, onCompleted, onError, onRetry }: ModelSlideProps) => {
-  const chat = useModelChat(definition.id);
+export const ModelSlide = memo(({ definition, broadcast, recon, onCompleted, onError, onRetry }: ModelSlideProps) => {
+  const chat = useModelChat(definition.id, recon);
   const [followUpInput, setFollowUpInput] = useInputState('');
   const lastProcessedBroadcastId = useRef<number>(-1);
   const completionNotifiedRef = useRef(false);
