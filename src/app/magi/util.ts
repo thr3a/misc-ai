@@ -37,8 +37,9 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
 export const MODEL_PROVIDER_MAP: Record<ModelKey, ProviderBinding> = {
   gemini: {
     provider: 'google',
-    cheapModel: 'gemini-3-flash-preview' satisfies GoogleResponsesModelId,
-    productionModel: 'gemini-3.1-pro-preview' satisfies GoogleResponsesModelId
+    cheapModel: 'gemini-3.7-flash' satisfies GoogleResponsesModelId,
+    // 最新モデルが出ないのでしゃーない
+    productionModel: 'gemini-3.7-flash' satisfies GoogleResponsesModelId
   },
   gpt5: {
     provider: 'openai',
@@ -73,14 +74,29 @@ export const systemPrompt = (recon?: string): string => {
 };
 
 export const reconSystemPrompt = dedent`
-あなたは調査アシスタントです。web検索を使って、ユーザーの質問に答えるために必要な最新の事実を収集してください。
+あなたは調査アシスタントです。web検索を使って、ユーザーの質問に答えるための判断材料を収集してください。
+質問に答えるのはあなたではなく後続のAIです。あなたは材料だけを渡します。
+
+【手順】
+1. その質問に専門家が答えるとしたら、どんな事実を踏まえるべきかを洗い出す。
+2. 対象そのものの最新の実績値・現在の数値・公式に発表済みの事実を調べる。
+3. さらに、結論を左右する周辺の材料を、次のうち異なる2種類以上から必ず調べる。
+   ・過去に同種のことが起きたときの経緯や履歴（過去の価格改定、前作の内容、前回の対応など）
+   ・当事者本人の過去の発言、作風や意思決定の傾向、直近の仕事
+   ・為替、金利、物価、賃金、需給、原材料や部材のコストなどのマクロ指標の現在値
+   ・競合の実績、業界全体の動向や流行
+   ・関連する制度や規制の現行ルールと変更予定
+4. 集めた事実を1行1件で並べる。
 
 【厳守事項】
-- 意見・考察・推測・結論は一切書かない。収集した事実のみを列挙する。
+- 「未発表」「データがない」で調査を終えない。直接のデータが無い質問ほど、手順3の材料を厚く集める。未発表・未確定である事実に触れるのは1行までとする。
+- 第三者による予測・噂・リーク・アナリスト観測は材料にしない。確定した事実、実績値、当事者自身の発表や発言のみを扱う。
+- 意見・考察・推測・結論は一切書かない。
 - 数値・日付・固有名詞は必ず明記する。「最近」「大幅に」のような曖昧な表現は使わず、実際の値と時点を書く。
 - 情報が古い場合や不明な場合は、わかっている時点を添えてその旨を書く。
+- 相場・指標・価格は必ず最新の公表値を確認し、いつ時点の値かを明記する。
+- 見出し・分類ラベル・箇条書き記号は付けず、1行1事実のプレーンテキストで出力する。Markdown記法は使用しない。
 - 全体で800文字程度に収める。
-- Markdown記法は使用せず、1行1事実のプレーンテキストで出力する。
 - 前置き・締めの文は書かない。
 `;
 

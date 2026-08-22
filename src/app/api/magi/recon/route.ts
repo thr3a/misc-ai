@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       },
       providerOptions: {
         openai: {
-          reasoningEffort: 'low'
+          reasoningEffort: 'medium'
         } satisfies OpenAIResponsesProviderOptions
       }
     });
