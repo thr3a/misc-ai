@@ -21,10 +21,3 @@ export const resolveModel = (modelId: ModelKey): LanguageModel => {
   });
   return openrouter.chat(`anthropic/${modelName}`);
 };
-
-export const ensureModelKey = (value: unknown): value is ModelKey => {
-  if (typeof value !== 'string') {
-    return false;
-  }
-  return (Object.keys(MODEL_PROVIDER_MAP) as ModelKey[]).includes(value as ModelKey);
-};
