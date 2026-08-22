@@ -11,12 +11,12 @@
     "node-server": "node server.js"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^4.0.24",
-    "@ai-sdk/google": "^4.0.28",
-    "@ai-sdk/openai": "^4.0.24",
-    "@ai-sdk/react": "^4.0.45",
-    "@ai-sdk/rsc": "^3.0.42",
-    "@biomejs/biome": "^2.5.6",
+    "@ai-sdk/anthropic": "^4.0.41",
+    "@ai-sdk/google": "^4.0.50",
+    "@ai-sdk/openai": "^4.0.46",
+    "@ai-sdk/react": "^4.0.80",
+    "@ai-sdk/rsc": "^3.0.77",
+    "@biomejs/biome": "^2.5.10",
     "@mantine/carousel": "^8.3.17",
     "@mantine/core": "^8.3.17",
     "@mantine/form": "^8.3.17",
@@ -24,13 +24,13 @@
     "@streamdown/cjk": "^1.0.3",
     "@tabler/icons-react": "^3.46.0",
     "@types/canvas-confetti": "^1.9.0",
-    "@types/node": "26.1.2",
-    "@types/react": "19.2.17",
-    "@types/react-dom": "19.2.3",
-    "ai": "^7.0.42",
+    "@types/node": "26.2.0",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "ai": "^7.0.77",
     "canvas-confetti": "^1.9.4",
     "cheerio": "^1.2.0",
-    "dayjs": "^1.11.21",
+    "dayjs": "^1.11.23",
     "embla-carousel": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "google-spreadsheet": "^5.3.0",
@@ -44,7 +44,7 @@
     "remark-gfm": "^4.0.1",
     "streamdown": "^2.5.0",
     "ts-dedent": "^2.3.0",
-    "tsx": "^4.23.1",
+    "tsx": "^4.23.12",
     "typescript": "5.2.2",
     "youtube-transcript-plus": "^2.0.1",
     "zod": "^4.4.3"
@@ -53,7 +53,7 @@
     "encoding": "^0.1.13"
   },
   "overrides": {
-    "@types/react": "19.2.17",
-    "@types/react-dom": "19.2.3"
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4"
   }
 }
