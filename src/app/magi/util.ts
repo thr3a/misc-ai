@@ -44,7 +44,7 @@ export const MODEL_PROVIDER_MAP: Record<ModelKey, ProviderBinding> = {
   gpt5: {
     provider: 'openai',
     cheapModel: 'gpt-5.6-luna' satisfies OpenAIResponsesModelId,
-    productionModel: 'gpt-5.6-sol' satisfies OpenAIResponsesModelId
+    productionModel: 'gpt-6-astra' satisfies OpenAIResponsesModelId
   },
   claude: {
     provider: 'anthropic',
