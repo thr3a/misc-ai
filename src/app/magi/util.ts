@@ -37,9 +37,9 @@ export const MODEL_DEFINITIONS: ModelDefinition[] = [
 export const MODEL_PROVIDER_MAP: Record<ModelKey, ProviderBinding> = {
   gemini: {
     provider: 'google',
-    cheapModel: 'gemini-3.7-flash' satisfies GoogleResponsesModelId,
+    cheapModel: 'gemini-3.8-flash' satisfies GoogleResponsesModelId,
     // 最新モデルが出ないのでしゃーない
-    productionModel: 'gemini-3.7-flash' satisfies GoogleResponsesModelId
+    productionModel: 'gemini-3.8-flash' satisfies GoogleResponsesModelId
   },
   gpt5: {
     provider: 'openai',

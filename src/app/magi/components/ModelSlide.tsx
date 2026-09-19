@@ -6,10 +6,17 @@ import { Badge, Button, Divider, Group, Paper, Skeleton, Stack, Text, Textarea }
 import { useInputState } from '@mantine/hooks';
 import { DefaultChatTransport } from 'ai';
 import { memo, useEffect, useMemo, useRef } from 'react';
+import type { ImageAttachment } from '@/app/magi/type';
 import type { ModelDefinition, ModelKey } from '@/app/magi/util';
 
 // broadcastのたびにidをインクリメントし、同じ質問文でも再送信できるようにする
-export type BroadcastPayload = { text: string; id: number } | null;
+export type BroadcastPayload = { text: string; images: ImageAttachment[]; id: number } | null;
+
+// テキストと画像添付を合わせてsendMessage用のpartsに変換する
+const buildMessageParts = (text: string, images: ImageAttachment[]) => [
+  { type: 'text' as const, text },
+  ...images.map((image) => ({ type: 'file' as const, mediaType: image.mediaType, url: image.dataUrl }))
+];
 
 type ModelStatus = '待機中' | '生成中' | '応答済み' | 'エラー';
 
@@ -90,7 +97,7 @@ export const ModelSlide = memo(({ definition, broadcast, recon, onCompleted, onR
     if (broadcast && broadcast.id !== lastProcessedBroadcastId.current) {
       lastProcessedBroadcastId.current = broadcast.id;
       completionNotifiedRef.current = false;
-      void chat.sendMessage({ parts: [{ type: 'text', text: broadcast.text }] });
+      void chat.sendMessage({ parts: buildMessageParts(broadcast.text, broadcast.images) });
     }
   }, [broadcast, chat.sendMessage]);
 
@@ -121,7 +128,7 @@ export const ModelSlide = memo(({ definition, broadcast, recon, onCompleted, onR
     completionNotifiedRef.current = false;
     onRetry(definition.id);
     chat.setMessages([]);
-    void chat.sendMessage({ parts: [{ type: 'text', text: broadcast.text }] });
+    void chat.sendMessage({ parts: buildMessageParts(broadcast.text, broadcast.images) });
   };
 
   const handleFollowUpSend = () => {

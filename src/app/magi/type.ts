@@ -33,3 +33,9 @@ export type OpinionSectionKey = (typeof OPINION_SECTIONS)[number]['key'];
 export const enhancePromptResultSchema = z.object({
   enhancedPrompt: z.string().optional()
 });
+
+export type ImageAttachment = {
+  id: string;
+  dataUrl: string;
+  mediaType: string;
+};

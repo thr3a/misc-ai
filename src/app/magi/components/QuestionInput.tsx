@@ -1,8 +1,24 @@
-import { Anchor, Button, Collapse, Group, List, Paper, Stack, Text, Textarea, Tooltip } from '@mantine/core';
+import {
+  ActionIcon,
+  Anchor,
+  Box,
+  Button,
+  Collapse,
+  Group,
+  Image,
+  List,
+  Paper,
+  Stack,
+  Text,
+  Textarea,
+  Tooltip
+} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconSearch, IconSend2, IconSparkles } from '@tabler/icons-react';
+import { IconPhotoPlus, IconSearch, IconSend2, IconSparkles, IconX } from '@tabler/icons-react';
+import { useRef } from 'react';
 import { ButtonCopy } from '@/app/html-ui/ButtonCopy';
-import type { ReconResult } from '@/app/magi/type';
+import { MAX_IMAGES } from '@/app/magi/imageAttachment';
+import type { ImageAttachment, ReconResult } from '@/app/magi/type';
 
 type QuestionInputProps = {
   question: string;
@@ -15,6 +31,9 @@ type QuestionInputProps = {
   recon: ReconResult | null;
   onReconClear: () => void;
   errorMessage: string | null;
+  images: ImageAttachment[];
+  onImagesAdd: (files: FileList) => void;
+  onImageRemove: (id: string) => void;
 };
 
 export const QuestionInput = ({
@@ -27,10 +46,14 @@ export const QuestionInput = ({
   isReconning,
   recon,
   onReconClear,
-  errorMessage
+  errorMessage,
+  images,
+  onImagesAdd,
+  onImageRemove
 }: QuestionInputProps) => {
   const isQuestionEmpty = question.length === 0;
   const [isReconOpened, { toggle: toggleRecon }] = useDisclosure(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
     <Stack gap='xs'>
@@ -43,7 +66,51 @@ export const QuestionInput = ({
         maxRows={10}
         placeholder='スプラトゥーンが流行った理由は？'
       />
+
+      {images.length > 0 && (
+        <Group gap='xs'>
+          {images.map((image) => (
+            <Box key={image.id} pos='relative'>
+              <Image src={image.dataUrl} alt='添付画像' w={64} h={64} fit='cover' />
+              <ActionIcon
+                size='xs'
+                color='red'
+                variant='filled'
+                style={{ position: 'absolute', top: -6, right: -6 }}
+                onClick={() => onImageRemove(image.id)}
+              >
+                <IconX size={12} />
+              </ActionIcon>
+            </Box>
+          ))}
+        </Group>
+      )}
+
       <Group justify='center' align='center'>
+        <Tooltip label={`画像を追加（最大${MAX_IMAGES}枚）`}>
+          <Button
+            size='sm'
+            variant='light'
+            color='gray'
+            disabled={images.length >= MAX_IMAGES}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <IconPhotoPlus size={20} stroke={1.5} />
+          </Button>
+        </Tooltip>
+        <input
+          ref={fileInputRef}
+          type='file'
+          accept='image/jpeg,image/png,image/webp'
+          multiple
+          hidden
+          onChange={(e) => {
+            if (e.currentTarget.files && e.currentTarget.files.length > 0) {
+              onImagesAdd(e.currentTarget.files);
+            }
+            e.currentTarget.value = '';
+          }}
+        />
         <Tooltip label='送信'>
           <Button size='sm' disabled={isQuestionEmpty} onClick={onBroadcast}>
             <IconSend2 size={20} stroke={1.5} />
