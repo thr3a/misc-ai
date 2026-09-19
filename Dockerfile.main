@@ -2,36 +2,26 @@
 # FROM node:24-bookworm-slim AS base
 FROM node@sha256:4660b1ca8b28d6d1906fd644abe34b2ed81d15434d26d845ef0aced307cf4b6f AS base
 
-# Install dependencies only when needed
 FROM base AS deps
 WORKDIR /app
 
 ENV YOUTUBE_DL_SKIP_PYTHON_CHECK=1
 ENV YOUTUBE_DL_SKIP_DOWNLOAD=true
 
-# package.json と package-lock.json のみをコピー
-COPY package.json package-lock.json* ./
+COPY package.json package-lock.json ./
 
 # npm ci を実行。npmのキャッシュディレクトリをマウント
 RUN --mount=type=cache,target=/root/.npm \
-    if [ -f package-lock.json ]; then npm ci; \
+    if [ -f package-lock.json ]; then npm ci --no-audit; \
     else echo "Lockfile not found." && exit 1; \
     fi
 
 
-# Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends curl ca-certificates xz-utils
-
-# RUN curl -L https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz > ffmpeg.tar.gz \
-#   && tar xfv ffmpeg.tar.gz \
-#   && cp ./ffmpeg*-static/ffmpeg /usr/bin/
-
-# RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/download/2024.08.06/yt-dlp_linux > yt-dlp_linux \
-#   && chmod 555 yt-dlp_linux
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -57,8 +47,6 @@ COPY --from=builder /app/public ./public
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-# COPY --from=builder /usr/bin/ffmpeg /usr/bin/ffmpeg
-# COPY --from=builder /app/yt-dlp_linux /usr/bin/yt-dlp_linux
 
 USER nextjs
 
