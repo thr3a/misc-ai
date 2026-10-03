@@ -14,9 +14,8 @@ import {
   Tooltip
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconPhotoPlus, IconSearch, IconSend2, IconSparkles, IconX } from '@tabler/icons-react';
+import { IconPhotoPlus, IconRefresh, IconSearch, IconSend2, IconSparkles, IconX } from '@tabler/icons-react';
 import { useRef } from 'react';
-import { ButtonCopy } from '@/app/html-ui/ButtonCopy';
 import { MAX_IMAGES } from '@/app/magi/imageAttachment';
 import type { ImageAttachment, ReconResult } from '@/app/magi/type';
 
@@ -24,6 +23,8 @@ type QuestionInputProps = {
   question: string;
   onQuestionChange: (value: string) => void;
   onBroadcast: () => void;
+  onReset: () => void;
+  canReset: boolean;
   onEnhance: () => void;
   isEnhancing: boolean;
   onRecon: () => void;
@@ -40,6 +41,8 @@ export const QuestionInput = ({
   question,
   onQuestionChange,
   onBroadcast,
+  onReset,
+  canReset,
   onEnhance,
   isEnhancing,
   onRecon,
@@ -133,7 +136,11 @@ export const QuestionInput = ({
             <IconSearch size={20} stroke={1.5} />
           </Button>
         </Tooltip>
-        <ButtonCopy content={question} disabled={isQuestionEmpty} />
+        <Tooltip label='会話リセット'>
+          <Button size='sm' variant='light' color='red' disabled={!canReset} onClick={onReset}>
+            <IconRefresh size={20} stroke={1.5} />
+          </Button>
+        </Tooltip>
       </Group>
 
       {recon && (

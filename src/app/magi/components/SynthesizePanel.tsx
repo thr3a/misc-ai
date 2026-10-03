@@ -9,6 +9,8 @@ type SynthesizePanelProps = {
   question: string;
   recon: ReconResult | null;
   completedResponses: Partial<Record<ModelKey, string>>;
+  // 親でリセットされるたびにインクリメントされる。変化したら統合結果を消去する
+  resetId: number;
   // 自動統合を一度だけ発火させるためのフラグ。リトライ時に親側で false に戻される
   autoSynthesizeTriggeredRef: RefObject<boolean>;
   onSynthesizeStart: () => void;
@@ -24,6 +26,7 @@ export const SynthesizePanel = ({
   question,
   recon,
   completedResponses,
+  resetId,
   autoSynthesizeTriggeredRef,
   onSynthesizeStart
 }: SynthesizePanelProps) => {
@@ -31,11 +34,19 @@ export const SynthesizePanel = ({
     object: synthesizeObject,
     submit: submitSynthesize,
     isLoading: isSynthesizing,
-    error: synthesizeError
+    error: synthesizeError,
+    clear: clearSynthesize
   } = useObject({
     api: '/api/magi/synthesize',
     schema: synthesizeResultSchema
   });
+
+  // clearSynthesizeは毎レンダー再生成されるため、resetIdの変化時のみ実行する
+  // biome-ignore lint/correctness/useExhaustiveDependencies: clearSynthesizeを依存に含めると毎レンダー実行されてしまう
+  useEffect(() => {
+    if (resetId === 0) return;
+    clearSynthesize();
+  }, [resetId]);
 
   const allModelsSucceeded = useMemo(
     () => MODEL_DEFINITIONS.every((d) => completedResponses[d.id] !== undefined),

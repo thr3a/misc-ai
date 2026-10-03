@@ -81,16 +81,19 @@ MessageText.displayName = 'MessageText';
 export type ModelSlideProps = {
   definition: ModelDefinition;
   broadcast: BroadcastPayload;
+  // 親でリセットされるたびにインクリメントされる。変化したら会話履歴を消去する
+  resetId: number;
   recon: string | undefined;
   onCompleted: (modelId: ModelKey, response: string) => void;
   onRetry: (modelId: ModelKey) => void;
 };
 
-export const ModelSlide = memo(({ definition, broadcast, recon, onCompleted, onRetry }: ModelSlideProps) => {
+export const ModelSlide = memo(({ definition, broadcast, resetId, recon, onCompleted, onRetry }: ModelSlideProps) => {
   const chat = useModelChat(definition.id, recon);
   const [followUpInput, setFollowUpInput] = useInputState('');
   const lastProcessedBroadcastId = useRef<number>(-1);
   const completionNotifiedRef = useRef(false);
+  const lastProcessedResetId = useRef(resetId);
 
   // broadcastが変化したらメッセージを送信
   useEffect(() => {
@@ -100,6 +103,17 @@ export const ModelSlide = memo(({ definition, broadcast, recon, onCompleted, onR
       void chat.sendMessage({ parts: buildMessageParts(broadcast.text, broadcast.images) });
     }
   }, [broadcast, chat.sendMessage]);
+
+  // リセット時は生成中のストリームを止めてから会話履歴を消去
+  // setFollowUpInputは毎レンダー再生成されるため、処理済みのresetIdを記録して1回だけ実行する
+  useEffect(() => {
+    if (resetId === lastProcessedResetId.current) return;
+    lastProcessedResetId.current = resetId;
+    void chat.stop();
+    chat.setMessages([]);
+    chat.clearError();
+    setFollowUpInput('');
+  }, [resetId, chat.stop, chat.setMessages, chat.clearError, setFollowUpInput]);
 
   const hasAssistantReply = chat.messages.some((message) => message.role === 'assistant');
   const isGenerating = chat.status === 'streaming' || chat.status === 'submitted';

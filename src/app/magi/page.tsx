@@ -28,12 +28,26 @@ export default function Page() {
   const [broadcast, setBroadcast] = useState<BroadcastPayload>(null);
   const [completedResponses, setCompletedResponses] = useState<Partial<Record<ModelKey, string>>>({});
   const [images, setImages] = useState<ImageAttachment[]>([]);
+  const [resetId, setResetId] = useState(0);
   const autoSynthesizeTriggered = useRef(false);
+  // リセットでbroadcastをnullに戻してもidが重複しないよう、ページ単位で連番を管理する
+  const broadcastIdRef = useRef(0);
 
   const handleBroadcast = () => {
     setErrorMessage(null);
     setCompletedResponses({});
-    setBroadcast((prev) => ({ text: question, images, id: (prev?.id ?? 0) + 1 }));
+    broadcastIdRef.current += 1;
+    setBroadcast({ text: question, images, id: broadcastIdRef.current });
+  };
+
+  // 会話履歴と意見まとめのみ消去する。質問文・画像・調査レポートは残す
+  const handleReset = () => {
+    if (!window.confirm('会話履歴と意見まとめをリセットしますか？')) return;
+    setErrorMessage(null);
+    setBroadcast(null);
+    setCompletedResponses({});
+    autoSynthesizeTriggered.current = false;
+    setResetId((prev) => prev + 1);
   };
 
   const handleImagesAdd = async (files: FileList) => {
@@ -137,6 +151,8 @@ export default function Page() {
             setQuestion(value);
           }}
           onBroadcast={handleBroadcast}
+          onReset={handleReset}
+          canReset={broadcast !== null}
           onEnhance={handleEnhancePrompt}
           isEnhancing={isEnhancing}
           onRecon={handleRecon}
@@ -172,6 +188,7 @@ export default function Page() {
               key={definition.id}
               definition={definition}
               broadcast={broadcast}
+              resetId={resetId}
               recon={recon?.summary}
               onCompleted={handleOnCompleted}
               onRetry={handleOnRetry}
@@ -183,6 +200,7 @@ export default function Page() {
           question={question}
           recon={recon}
           completedResponses={completedResponses}
+          resetId={resetId}
           autoSynthesizeTriggeredRef={autoSynthesizeTriggered}
           onSynthesizeStart={handleSynthesizeStart}
         />
