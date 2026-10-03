@@ -21,7 +21,8 @@ const readAsDataUrl = (file: File): Promise<string> =>
     reader.readAsDataURL(file);
   });
 
-// 長辺がMAX_IMAGE_DIMENSIONを超える場合のみアスペクト比を維持して縮小し、JPEGのDataURLで返す
+// 1MB未満のJPEGはそのままDataURLで返す
+// それ以外は長辺がMAX_IMAGE_DIMENSIONを超える場合のみアスペクト比を維持して縮小し、JPEGのDataURLで返す
 export const compressImage = async (file: File): Promise<string> => {
   const compressed = await resizeAndCompressImage(file, MAX_IMAGE_DIMENSION, 0.8);
   return readAsDataUrl(compressed);
