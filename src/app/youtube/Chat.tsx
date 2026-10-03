@@ -3,7 +3,6 @@ import { getHotkeyHandler } from '@mantine/hooks';
 import { cjk } from '@streamdown/cjk';
 import { IconPlayerStop, IconSend } from '@tabler/icons-react';
 import type { UIMessage } from 'ai';
-import { useRef } from 'react';
 import { Streamdown } from 'streamdown';
 
 const collectText = (parts: UIMessage['parts']) =>
@@ -41,8 +40,6 @@ const Message = ({ message }: { message: UIMessage }) => {
 };
 
 export const Messages = ({ messages }: { messages: UIMessage[] }) => {
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
   return (
     <ScrollArea h='80dvh' type='always' p={0}>
       <Stack gap={'sm'}>
@@ -50,7 +47,6 @@ export const Messages = ({ messages }: { messages: UIMessage[] }) => {
           <Message key={message.id} message={message} />
         ))}
       </Stack>
-      <div ref={messagesEndRef} />
     </ScrollArea>
   );
 };

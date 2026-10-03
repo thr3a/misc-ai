@@ -1,5 +1,6 @@
+// node --import tsx src/scripts/youtube.tsでテスト可能
 import * as cheerio from 'cheerio';
-import { fetchTranscript, toPlainText } from 'youtube-transcript-plus';
+import { fetchTranscript, toPlainText, YoutubeTranscriptNotAvailableLanguageError } from 'youtube-transcript-plus';
 
 export async function getPageTitle(url: string): Promise<string> {
   const response = await fetch(url, {
@@ -28,11 +29,18 @@ export function getYouTubeVideoId(url: string): string | null {
 }
 
 export const getYouTubeTranscript = async (url: string): Promise<string> => {
-  const transcribed = await fetchTranscript(url, {
-    userAgent:
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    lang: 'ja'
-  });
+  const userAgent =
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
 
-  return toPlainText(transcribed, ' ');
+  try {
+    const transcribed = await fetchTranscript(url, { userAgent, lang: 'ja' });
+    return toPlainText(transcribed, ' ');
+  } catch (error) {
+    if (!(error instanceof YoutubeTranscriptNotAvailableLanguageError)) {
+      throw error;
+    }
+    // 日本語字幕がない場合は言語指定なしで再取得する
+    const transcribed = await fetchTranscript(url, { userAgent });
+    return toPlainText(transcribed, ' ');
+  }
 };

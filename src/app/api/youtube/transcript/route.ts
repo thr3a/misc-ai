@@ -23,8 +23,10 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const transcribedText = await getYouTubeTranscript(schema.data.url);
-    const title = await getPageTitle(schema.data.url);
+    const [transcribedText, title] = await Promise.all([
+      getYouTubeTranscript(schema.data.url),
+      getPageTitle(schema.data.url)
+    ]);
     return NextResponse.json({ status: 'ok', title, transcribed: transcribedText });
   } catch (error) {
     console.error('Error fetching transcript:', error);
