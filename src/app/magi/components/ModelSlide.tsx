@@ -21,7 +21,7 @@ const buildMessageParts = (text: string, images: ImageAttachment[]) => [
 type ModelStatus = '待機中' | '生成中' | '応答済み' | 'エラー';
 
 const STATUS_COLORS: Record<ModelStatus, string> = {
-  待機中: 'dark.8',
+  待機中: 'gray',
   生成中: 'blue',
   応答済み: 'teal',
   エラー: 'red'

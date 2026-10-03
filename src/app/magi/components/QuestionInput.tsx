@@ -152,7 +152,7 @@ export const QuestionInput = ({
                 </Button>
               </Group>
             </Group>
-            <Collapse in={isReconOpened}>
+            <Collapse expanded={isReconOpened}>
               <Stack gap='xs'>
                 <Text size='sm' style={{ whiteSpace: 'pre-wrap' }}>
                   {recon.summary}

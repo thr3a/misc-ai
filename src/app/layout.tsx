@@ -1,4 +1,4 @@
-import { ColorSchemeScript, Container, MantineProvider, mantineHtmlProps } from '@mantine/core';
+import { ColorSchemeScript, Container, MantineProvider, mantineHtmlProps, v8CssVariablesResolver } from '@mantine/core';
 import { theme } from '@/theme';
 import '@mantine/core/styles.css';
 import '@mantine/carousel/styles.css';
@@ -30,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </Script>
       </head>
       <body>
-        <MantineProvider theme={theme} forceColorScheme='light'>
+        <MantineProvider theme={theme} forceColorScheme='light' cssVariablesResolver={v8CssVariablesResolver}>
           <Container id='container'>{children}</Container>
         </MantineProvider>
       </body>

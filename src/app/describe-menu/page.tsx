@@ -1,9 +1,8 @@
 'use client';
 import { readStreamableValue } from '@ai-sdk/rsc';
 import { Box, Button, FileInput, Group, List, ListItem, Select, Space, Text, Title } from '@mantine/core';
-import { createFormContext } from '@mantine/form';
+import { createFormContext, schemaResolver } from '@mantine/form';
 import { IconPhotoScan } from '@tabler/icons-react';
-import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { z } from 'zod/v4';
 import { resizeAndCompressImage } from '@/app/lib/resizeAndCompressImage';
 import { generate } from './actions';
@@ -30,10 +29,11 @@ export default function Page() {
       result: null,
       currencyCode: CURRENCY_LIST[0].code
     },
-    validate: zod4Resolver(
+    validate: schemaResolver(
       z.object({
         imageFile: z.instanceof(File, { message: '画像ファイルをアップロードしてください。' })
-      })
+      }),
+      { sync: true }
     )
   });
 

@@ -220,7 +220,7 @@ const TopPage = () => {
           }}
         />
         <Container size='xl' py={44} pos='relative'>
-          <Grid align='center' gutter='xl'>
+          <Grid align='center' gap='xl'>
             <Grid.Col span={{ base: 12, md: featuredItem ? 7 : 12 }}>
               <Stack gap='md' maw={720}>
                 <Group gap='xs'>
@@ -272,7 +272,7 @@ const TopPage = () => {
             {featuredItem && (
               <Grid.Col span={{ base: 12, md: 5 }} visibleFrom='md'>
                 <Box bg='white' p='sm' style={{ boxShadow: '0 18px 50px rgba(0, 0, 0, 0.34)' }}>
-                  <Grid gutter='sm' align='center'>
+                  <Grid gap='sm' align='center'>
                     <Grid.Col span={5}>
                       <ProductVisual item={featuredItem} compact />
                     </Grid.Col>
