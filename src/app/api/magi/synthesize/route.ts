@@ -1,3 +1,4 @@
+import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { openai } from '@ai-sdk/openai';
 import { createTextStreamResponse, Output, streamText, toTextStream } from 'ai';
 import type { NextRequest } from 'next/server';
@@ -11,7 +12,7 @@ const requestSchema = z.object({
 
 const synthesizeSystemPrompt = dedent`
 あなたは多角的な視点を統合し、最適な意思決定を支援する合意形成の専門家です。
-複数の回答者から提供された異なる意見や情報を精査・分析し、以下の2つのカテゴリに整理してください。
+複数の回答者から提供された異なる意見や情報を精査・分析し、以下の3つのカテゴリに整理してください。
 
 【commonOpinions（共通している意見）】
 - 2名以上の回答者が同じ主張をしている場合、その信頼性は高いと判断できます。
@@ -51,12 +52,11 @@ export async function POST(req: NextRequest) {
       model: openai('gpt-5.6-luna'),
       instructions: synthesizeSystemPrompt,
       prompt: userPrompt,
-      temperature: 0,
       output: Output.object({ schema: synthesizeResultSchema }),
       providerOptions: {
         openai: {
           reasoningEffort: 'low'
-        }
+        } satisfies OpenAIResponsesProviderOptions
       }
     });
 
