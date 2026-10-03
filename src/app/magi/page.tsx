@@ -39,11 +39,13 @@ export default function Page() {
 
   // 各チャットの出力中（個別の追加質問・リトライ含む）・意見統合中は操作ボタンを押せなくする
   const isBusy = isSynthesizing || Object.values(generatingModels).some(Boolean);
+  // 下調べ・強化の実行中も質問入力欄の操作を止め、結果が反映される前の送信や同時実行を防ぐ
+  const isQuestionBusy = isBusy || isReconning || isEnhancing;
 
   // リセット後（初回含む）の最初の送信のみ意見統合の対象にする
   // 統合後にリセットせず送信した場合は追加の一括質問として扱い、既存の統合結果は残す
   const handleBroadcast = () => {
-    if (isBusy) return;
+    if (isQuestionBusy) return;
     setErrorMessage(null);
     const synthesize = broadcast === null;
     if (synthesize) {
@@ -101,6 +103,7 @@ export default function Page() {
   };
 
   const handleRecon = async () => {
+    if (isQuestionBusy) return;
     setErrorMessage(null);
     setIsReconning(true);
     try {
@@ -120,6 +123,7 @@ export default function Page() {
   };
 
   const handleEnhancePrompt = async () => {
+    if (isQuestionBusy) return;
     setErrorMessage(null);
     setIsEnhancing(true);
     try {
@@ -162,7 +166,7 @@ export default function Page() {
             setQuestion(value);
           }}
           onBroadcast={handleBroadcast}
-          isBusy={isBusy}
+          isBusy={isQuestionBusy}
           onReset={handleReset}
           canReset={broadcast !== null}
           onEnhance={handleEnhancePrompt}
