@@ -4,13 +4,14 @@ import { useChat } from '@ai-sdk/react';
 import { Carousel } from '@mantine/carousel';
 import { Badge, Button, Divider, Group, Paper, Skeleton, Stack, Text, Textarea } from '@mantine/core';
 import { useInputState } from '@mantine/hooks';
-import { DefaultChatTransport } from 'ai';
-import { memo, useEffect, useMemo, useRef } from 'react';
+import { type ChatOnFinishCallback, DefaultChatTransport, type UIMessage } from 'ai';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import type { ImageAttachment } from '@/app/magi/type';
 import type { ModelDefinition, ModelKey } from '@/app/magi/util';
 
 // broadcastのたびにidをインクリメントし、同じ質問文でも再送信できるようにする
-export type BroadcastPayload = { text: string; images: ImageAttachment[]; id: number } | null;
+// synthesizeがfalse（統合済みの状態での追加の一括質問）の場合は、完了しても親へ通知せず意見統合を走らせない
+export type BroadcastPayload = { text: string; images: ImageAttachment[]; id: number; synthesize: boolean } | null;
 
 // テキストと画像添付を合わせてsendMessage用のpartsに変換する
 const buildMessageParts = (text: string, images: ImageAttachment[]) => [
@@ -27,7 +28,7 @@ const STATUS_COLORS: Record<ModelStatus, string> = {
   エラー: 'red'
 };
 
-const useModelChat = (modelId: ModelKey, recon: string | undefined) => {
+const useModelChat = (modelId: ModelKey, recon: string | undefined, onFinish: ChatOnFinishCallback<UIMessage>) => {
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
@@ -39,7 +40,8 @@ const useModelChat = (modelId: ModelKey, recon: string | undefined) => {
 
   return useChat({
     id: `magi-${modelId}`,
-    transport
+    transport,
+    onFinish
   });
 };
 
@@ -85,143 +87,158 @@ export type ModelSlideProps = {
   resetId: number;
   recon: string | undefined;
   onCompleted: (modelId: ModelKey, response: string) => void;
-  onRetry: (modelId: ModelKey) => void;
+  // 生成中かどうかが変わったら親へ通知する（親の操作ボタンの無効化に使う）
+  onGeneratingChange: (modelId: ModelKey, isGenerating: boolean) => void;
 };
 
-export const ModelSlide = memo(({ definition, broadcast, resetId, recon, onCompleted, onRetry }: ModelSlideProps) => {
-  const chat = useModelChat(definition.id, recon);
-  const [followUpInput, setFollowUpInput] = useInputState('');
-  const lastProcessedBroadcastId = useRef<number>(-1);
-  const completionNotifiedRef = useRef(false);
-  const lastProcessedResetId = useRef(resetId);
+export const ModelSlide = memo(
+  ({ definition, broadcast, resetId, recon, onCompleted, onGeneratingChange }: ModelSlideProps) => {
+    const [followUpInput, setFollowUpInput] = useInputState('');
+    // 停止ボタンで中断したかどうか。停止はエラー扱いとし、リトライで再生成できるようにする
+    const [isStopped, setIsStopped] = useState(false);
+    const lastProcessedBroadcastId = useRef<number>(-1);
+    // 現在のリクエストが意見統合の対象（リセット後最初の一括質問、またはそのリトライ）かどうか
+    // 個別チャット・追加の一括質問では false にし、完了しても親へ通知しない
+    const notifyOnFinishRef = useRef(false);
 
-  // broadcastが変化したらメッセージを送信
-  useEffect(() => {
-    if (broadcast && broadcast.id !== lastProcessedBroadcastId.current) {
-      lastProcessedBroadcastId.current = broadcast.id;
-      completionNotifiedRef.current = false;
-      void chat.sendMessage({ parts: buildMessageParts(broadcast.text, broadcast.images) });
-    }
-  }, [broadcast, chat.sendMessage]);
-
-  // リセット時は生成中のストリームを止めてから会話履歴を消去
-  // setFollowUpInputは毎レンダー再生成されるため、処理済みのresetIdを記録して1回だけ実行する
-  useEffect(() => {
-    if (resetId === lastProcessedResetId.current) return;
-    lastProcessedResetId.current = resetId;
-    void chat.stop();
-    chat.setMessages([]);
-    chat.clearError();
-    setFollowUpInput('');
-  }, [resetId, chat.stop, chat.setMessages, chat.clearError, setFollowUpInput]);
-
-  const hasAssistantReply = chat.messages.some((message) => message.role === 'assistant');
-  const isGenerating = chat.status === 'streaming' || chat.status === 'submitted';
-  const status = getModelStatus(chat.status, hasAssistantReply, !!chat.error);
-  const visibleMessages = chat.messages.filter((message) => message.role !== 'system');
-  const displayMessages = visibleMessages.filter((_, i) => !(i === 0 && visibleMessages[0]?.role === 'user'));
-  const lastMessage = chat.messages[chat.messages.length - 1];
-  const isWaitingForText = isGenerating && (lastMessage?.role !== 'assistant' || !hasTextPart(lastMessage.parts));
-
-  // 完了時に親へ最初のアシスタント応答を通知（1回のbroadcastにつき1回だけ実行）
-  useEffect(() => {
-    if (!broadcast) {
-      completionNotifiedRef.current = false;
-      return;
-    }
-    if (hasAssistantReply && !isGenerating && !completionNotifiedRef.current) {
-      completionNotifiedRef.current = true;
-      const assistantMessage = chat.messages.find((m) => m.role === 'assistant');
-      const response = assistantMessage ? collectText(assistantMessage.parts) : '';
+    // 完了通知は正常終了時のみ行う。エラー・停止ボタンによる中断・切断や空応答は成功として扱わない
+    const chat = useModelChat(definition.id, recon, ({ message, isAbort, isDisconnect, isError }) => {
+      if (isAbort || isDisconnect || isError) return;
+      if (!notifyOnFinishRef.current) return;
+      const response = collectText(message.parts);
+      if (response.length === 0) return;
+      notifyOnFinishRef.current = false;
       onCompleted(definition.id, response);
-    }
-  }, [hasAssistantReply, isGenerating, broadcast, chat.messages, definition.id, onCompleted]);
+    });
+    const lastProcessedResetId = useRef(resetId);
 
-  const handleRetry = () => {
-    if (!broadcast) return;
-    completionNotifiedRef.current = false;
-    onRetry(definition.id);
-    chat.setMessages([]);
-    void chat.sendMessage({ parts: buildMessageParts(broadcast.text, broadcast.images) });
-  };
+    // broadcastが変化したらメッセージを送信
+    useEffect(() => {
+      if (broadcast && broadcast.id !== lastProcessedBroadcastId.current) {
+        lastProcessedBroadcastId.current = broadcast.id;
+        notifyOnFinishRef.current = broadcast.synthesize;
+        setIsStopped(false);
+        void chat.sendMessage({ parts: buildMessageParts(broadcast.text, broadcast.images) });
+      }
+    }, [broadcast, chat.sendMessage]);
 
-  const handleFollowUpSend = () => {
-    if (!followUpInput) return;
-    const text = followUpInput;
-    setFollowUpInput('');
-    void chat.sendMessage({ parts: [{ type: 'text', text }] });
-  };
+    // リセット時は生成中のストリームを止めてから会話履歴を消去
+    // setFollowUpInputは毎レンダー再生成されるため、処理済みのresetIdを記録して1回だけ実行する
+    useEffect(() => {
+      if (resetId === lastProcessedResetId.current) return;
+      lastProcessedResetId.current = resetId;
+      notifyOnFinishRef.current = false;
+      void chat.stop();
+      chat.setMessages([]);
+      chat.clearError();
+      setIsStopped(false);
+      setFollowUpInput('');
+    }, [resetId, chat.stop, chat.setMessages, chat.clearError, setFollowUpInput]);
 
-  return (
-    <Carousel.Slide>
-      <Paper withBorder p='sm' h='100%' mih={'200px'}>
-        <Stack gap='sm' h='100%'>
-          <Group justify='space-between' align='flex-start'>
-            <Group gap='xs'>
-              <Text fw='bold'>{definition.label}</Text>
-              <Badge variant='light' color={STATUS_COLORS[status]}>
-                {status}
-              </Badge>
+    const hasAssistantReply = chat.messages.some((message) => message.role === 'assistant');
+    const isGenerating = chat.status === 'streaming' || chat.status === 'submitted';
+    const hasError = !!chat.error || isStopped;
+    const status = getModelStatus(chat.status, hasAssistantReply, hasError);
+    const visibleMessages = chat.messages.filter((message) => message.role !== 'system');
+    const displayMessages = visibleMessages.filter((_, i) => !(i === 0 && visibleMessages[0]?.role === 'user'));
+    const lastMessage = chat.messages[chat.messages.length - 1];
+    const isWaitingForText = isGenerating && (lastMessage?.role !== 'assistant' || !hasTextPart(lastMessage.parts));
+
+    // 生成中かどうかを親へ通知する
+    useEffect(() => {
+      onGeneratingChange(definition.id, isGenerating);
+    }, [definition.id, isGenerating, onGeneratingChange]);
+
+    const handleStop = () => {
+      setIsStopped(true);
+      void chat.stop();
+    };
+
+    // 失敗・停止したリクエストだけを再生成する。会話履歴と意見統合の対象かどうかはそのまま引き継ぐ
+    const handleRetry = () => {
+      setIsStopped(false);
+      void chat.regenerate();
+    };
+
+    const handleFollowUpSend = () => {
+      if (!followUpInput) return;
+      const text = followUpInput;
+      setFollowUpInput('');
+      notifyOnFinishRef.current = false;
+      void chat.sendMessage({ parts: [{ type: 'text', text }] });
+    };
+
+    return (
+      <Carousel.Slide>
+        <Paper withBorder p='sm' h='100%' mih={'200px'}>
+          <Stack gap='sm' h='100%'>
+            <Group justify='space-between' align='flex-start'>
+              <Group gap='xs'>
+                <Text fw='bold'>{definition.label}</Text>
+                <Badge variant='light' color={STATUS_COLORS[status]}>
+                  {status}
+                </Badge>
+              </Group>
+              <Button size='xs' color='red' onClick={handleStop} disabled={!isGenerating}>
+                停止
+              </Button>
             </Group>
-            <Button size='xs' color='red' onClick={() => chat.stop()} disabled={!isGenerating}>
-              停止
-            </Button>
-          </Group>
 
-          {chat.error ? (
-            <Stack gap='xs'>
-              <Text size='sm' c='red'>
-                エラー: {chat.error.message}
-              </Text>
-              {broadcast && (
-                <Button size='xs' color='orange' onClick={handleRetry} disabled={isGenerating}>
-                  リトライ
-                </Button>
+            {hasError && !isGenerating ? (
+              <Stack gap='xs'>
+                <Text size='sm' c='red'>
+                  エラー: {chat.error ? chat.error.message : '停止しました'}
+                </Text>
+                {chat.messages.length > 0 && (
+                  <Button size='xs' color='orange' onClick={handleRetry}>
+                    リトライ
+                  </Button>
+                )}
+              </Stack>
+            ) : null}
+
+            <Stack gap='sm' flex={1}>
+              {displayMessages.map((message) => (
+                <Stack key={message.id ?? `${message.role}-${definition.id}`}>
+                  <MessageText parts={message.parts} />
+                  <Divider />
+                </Stack>
+              ))}
+              {isWaitingForText && (
+                <Stack gap='xs'>
+                  <Skeleton height={14} radius='sm' />
+                  <Skeleton height={14} radius='sm' width='85%' />
+                  <Skeleton height={14} radius='sm' width='70%' />
+                </Stack>
               )}
             </Stack>
-          ) : null}
 
-          <Stack gap='sm' flex={1}>
-            {displayMessages.map((message) => (
-              <Stack key={message.id ?? `${message.role}-${definition.id}`}>
-                <MessageText parts={message.parts} />
-                <Divider />
-              </Stack>
-            ))}
-            {isWaitingForText && (
-              <Stack gap='xs'>
-                <Skeleton height={14} radius='sm' />
-                <Skeleton height={14} radius='sm' width='85%' />
-                <Skeleton height={14} radius='sm' width='70%' />
+            {status === '応答済み' && (
+              <Stack gap='xs' pb={'lg'}>
+                <Textarea
+                  autosize
+                  minRows={1}
+                  maxRows={4}
+                  placeholder={`${definition.label}に追加質問する`}
+                  value={followUpInput}
+                  onChange={setFollowUpInput}
+                />
+                <Group justify='flex-end'>
+                  <Button
+                    size='sm'
+                    variant='light'
+                    disabled={followUpInput.length === 0 || isGenerating}
+                    onClick={handleFollowUpSend}
+                  >
+                    個別に送信
+                  </Button>
+                </Group>
               </Stack>
             )}
           </Stack>
-
-          {status === '応答済み' && (
-            <Stack gap='xs' pb={'lg'}>
-              <Textarea
-                autosize
-                minRows={1}
-                maxRows={4}
-                placeholder={`${definition.label}に追加質問する`}
-                value={followUpInput}
-                onChange={setFollowUpInput}
-              />
-              <Group justify='flex-end'>
-                <Button
-                  size='sm'
-                  variant='light'
-                  disabled={followUpInput.length === 0 || isGenerating}
-                  onClick={handleFollowUpSend}
-                >
-                  個別に送信
-                </Button>
-              </Group>
-            </Stack>
-          )}
-        </Stack>
-      </Paper>
-    </Carousel.Slide>
-  );
-});
+        </Paper>
+      </Carousel.Slide>
+    );
+  }
+);
 ModelSlide.displayName = 'ModelSlide';

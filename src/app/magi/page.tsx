@@ -29,15 +29,27 @@ export default function Page() {
   const [completedResponses, setCompletedResponses] = useState<Partial<Record<ModelKey, string>>>({});
   const [images, setImages] = useState<ImageAttachment[]>([]);
   const [resetId, setResetId] = useState(0);
+  const [generatingModels, setGeneratingModels] = useState<Partial<Record<ModelKey, boolean>>>({});
+  const [isSynthesizing, setIsSynthesizing] = useState(false);
   const autoSynthesizeTriggered = useRef(false);
   // リセットでbroadcastをnullに戻してもidが重複しないよう、ページ単位で連番を管理する
   const broadcastIdRef = useRef(0);
 
+  // 各チャットの出力中（個別の追加質問・リトライ含む）・意見統合中は操作ボタンを押せなくする
+  const isBusy = isSynthesizing || Object.values(generatingModels).some(Boolean);
+
+  // リセット後（初回含む）の最初の送信のみ意見統合の対象にする
+  // 統合後にリセットせず送信した場合は追加の一括質問として扱い、既存の統合結果は残す
   const handleBroadcast = () => {
+    if (isBusy) return;
     setErrorMessage(null);
-    setCompletedResponses({});
+    const synthesize = broadcast === null;
+    if (synthesize) {
+      setCompletedResponses({});
+      autoSynthesizeTriggered.current = false;
+    }
     broadcastIdRef.current += 1;
-    setBroadcast({ text: question, images, id: broadcastIdRef.current });
+    setBroadcast({ text: question, images, id: broadcastIdRef.current, synthesize });
   };
 
   // 会話履歴と意見まとめのみ消去する。質問文・画像・調査レポートは残す
@@ -128,13 +140,8 @@ export default function Page() {
     setCompletedResponses((prev) => ({ ...prev, [modelId]: response }));
   }, []);
 
-  const handleOnRetry = useCallback((modelId: ModelKey) => {
-    setCompletedResponses((prev) => {
-      const next = { ...prev };
-      delete next[modelId];
-      return next;
-    });
-    autoSynthesizeTriggered.current = false;
+  const handleGeneratingChange = useCallback((modelId: ModelKey, isGenerating: boolean) => {
+    setGeneratingModels((prev) => (prev[modelId] === isGenerating ? prev : { ...prev, [modelId]: isGenerating }));
   }, []);
 
   const handleSynthesizeStart = useCallback(() => {
@@ -151,6 +158,7 @@ export default function Page() {
             setQuestion(value);
           }}
           onBroadcast={handleBroadcast}
+          isBusy={isBusy}
           onReset={handleReset}
           canReset={broadcast !== null}
           onEnhance={handleEnhancePrompt}
@@ -191,7 +199,7 @@ export default function Page() {
               resetId={resetId}
               recon={recon?.summary}
               onCompleted={handleOnCompleted}
-              onRetry={handleOnRetry}
+              onGeneratingChange={handleGeneratingChange}
             />
           ))}
         </Carousel>
@@ -203,6 +211,8 @@ export default function Page() {
           resetId={resetId}
           autoSynthesizeTriggeredRef={autoSynthesizeTriggered}
           onSynthesizeStart={handleSynthesizeStart}
+          onSynthesizingChange={setIsSynthesizing}
+          isBusy={isBusy}
         />
       </Stack>
     </Box>

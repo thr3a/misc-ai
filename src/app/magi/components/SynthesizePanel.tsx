@@ -11,9 +11,13 @@ type SynthesizePanelProps = {
   completedResponses: Partial<Record<ModelKey, string>>;
   // 親でリセットされるたびにインクリメントされる。変化したら統合結果を消去する
   resetId: number;
-  // 自動統合を一度だけ発火させるためのフラグ。リトライ時に親側で false に戻される
+  // 自動統合を一度だけ発火させるためのフラグ。リセット後の最初の一括質問時に親側で false に戻される
   autoSynthesizeTriggeredRef: RefObject<boolean>;
   onSynthesizeStart: () => void;
+  // 統合中かどうかが変わったら親へ通知する（親の操作ボタンの無効化に使う）
+  onSynthesizingChange: (isSynthesizing: boolean) => void;
+  // 各チャットの出力中・統合中はエクスポートを押せなくする
+  isBusy: boolean;
 };
 
 const SECTION_ICONS: Record<OpinionSectionKey, ReactNode> = {
@@ -28,7 +32,9 @@ export const SynthesizePanel = ({
   completedResponses,
   resetId,
   autoSynthesizeTriggeredRef,
-  onSynthesizeStart
+  onSynthesizeStart,
+  onSynthesizingChange,
+  isBusy
 }: SynthesizePanelProps) => {
   const {
     object: synthesizeObject,
@@ -47,6 +53,10 @@ export const SynthesizePanel = ({
     if (resetId === 0) return;
     clearSynthesize();
   }, [resetId]);
+
+  useEffect(() => {
+    onSynthesizingChange(isSynthesizing);
+  }, [isSynthesizing, onSynthesizingChange]);
 
   const allModelsSucceeded = useMemo(
     () => MODEL_DEFINITIONS.every((d) => completedResponses[d.id] !== undefined),
@@ -141,7 +151,13 @@ export const SynthesizePanel = ({
       )}
       {synthesizeObject && !isSynthesizing && (
         <Group justify='center'>
-          <Button size='sm' variant='light' leftSection={<IconDownload size={16} />} onClick={handleExport}>
+          <Button
+            size='sm'
+            variant='light'
+            leftSection={<IconDownload size={16} />}
+            disabled={isBusy}
+            onClick={handleExport}
+          >
             エクスポート
           </Button>
         </Group>

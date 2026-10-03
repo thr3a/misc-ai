@@ -23,6 +23,8 @@ type QuestionInputProps = {
   question: string;
   onQuestionChange: (value: string) => void;
   onBroadcast: () => void;
+  // 各チャットの出力中・意見統合中は画像添付・送信・強化・下調べ・リセットを押せなくする
+  isBusy: boolean;
   onReset: () => void;
   canReset: boolean;
   onEnhance: () => void;
@@ -41,6 +43,7 @@ export const QuestionInput = ({
   question,
   onQuestionChange,
   onBroadcast,
+  isBusy,
   onReset,
   canReset,
   onEnhance,
@@ -80,6 +83,7 @@ export const QuestionInput = ({
                 color='red'
                 variant='filled'
                 style={{ position: 'absolute', top: -6, right: -6 }}
+                disabled={isBusy}
                 onClick={() => onImageRemove(image.id)}
               >
                 <IconX size={12} />
@@ -95,7 +99,7 @@ export const QuestionInput = ({
             size='sm'
             variant='light'
             color='gray'
-            disabled={images.length >= MAX_IMAGES}
+            disabled={isBusy || images.length >= MAX_IMAGES}
             onClick={() => fileInputRef.current?.click()}
           >
             <IconPhotoPlus size={20} stroke={1.5} />
@@ -115,12 +119,18 @@ export const QuestionInput = ({
           }}
         />
         <Tooltip label='送信'>
-          <Button size='sm' disabled={isQuestionEmpty} onClick={onBroadcast}>
+          <Button size='sm' disabled={isBusy || isQuestionEmpty} onClick={onBroadcast}>
             <IconSend2 size={20} stroke={1.5} />
           </Button>
         </Tooltip>
         <Tooltip label='強化'>
-          <Button size='sm' variant='light' loading={isEnhancing} disabled={isQuestionEmpty} onClick={onEnhance}>
+          <Button
+            size='sm'
+            variant='light'
+            loading={isEnhancing}
+            disabled={isBusy || isQuestionEmpty}
+            onClick={onEnhance}
+          >
             <IconSparkles size={20} stroke={1.5} />
           </Button>
         </Tooltip>
@@ -130,14 +140,14 @@ export const QuestionInput = ({
             variant='light'
             color='teal'
             loading={isReconning}
-            disabled={isQuestionEmpty}
+            disabled={isBusy || isQuestionEmpty}
             onClick={onRecon}
           >
             <IconSearch size={20} stroke={1.5} />
           </Button>
         </Tooltip>
         <Tooltip label='会話リセット'>
-          <Button size='sm' variant='light' color='red' disabled={!canReset} onClick={onReset}>
+          <Button size='sm' variant='light' color='red' disabled={isBusy || !canReset} onClick={onReset}>
             <IconRefresh size={20} stroke={1.5} />
           </Button>
         </Tooltip>
