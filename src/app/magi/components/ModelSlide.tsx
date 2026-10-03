@@ -96,6 +96,8 @@ export const ModelSlide = memo(
     const [followUpInput, setFollowUpInput] = useInputState('');
     // 停止ボタンで中断したかどうか。停止はエラー扱いとし、リトライで再生成できるようにする
     const [isStopped, setIsStopped] = useState(false);
+    // 正常終了したがテキストが空だったかどうか（安全フィルタや推論のみの応答など）。エラー扱いとし、リトライできるようにする
+    const [isEmptyResponse, setIsEmptyResponse] = useState(false);
     const lastProcessedBroadcastId = useRef<number>(-1);
     // 現在のリクエストが意見統合の対象（リセット後最初の一括質問、またはそのリトライ）かどうか
     // 個別チャット・追加の一括質問では false にし、完了しても親へ通知しない
@@ -104,9 +106,12 @@ export const ModelSlide = memo(
     // 完了通知は正常終了時のみ行う。エラー・停止ボタンによる中断・切断や空応答は成功として扱わない
     const chat = useModelChat(definition.id, recon, ({ message, isAbort, isDisconnect, isError }) => {
       if (isAbort || isDisconnect || isError) return;
-      if (!notifyOnFinishRef.current) return;
       const response = collectText(message.parts);
-      if (response.length === 0) return;
+      if (response.length === 0) {
+        setIsEmptyResponse(true);
+        return;
+      }
+      if (!notifyOnFinishRef.current) return;
       notifyOnFinishRef.current = false;
       onCompleted(definition.id, response);
     });
@@ -118,6 +123,7 @@ export const ModelSlide = memo(
         lastProcessedBroadcastId.current = broadcast.id;
         notifyOnFinishRef.current = broadcast.synthesize;
         setIsStopped(false);
+        setIsEmptyResponse(false);
         void chat.sendMessage({ parts: buildMessageParts(broadcast.text, broadcast.images) });
       }
     }, [broadcast, chat.sendMessage]);
@@ -132,12 +138,18 @@ export const ModelSlide = memo(
       chat.setMessages([]);
       chat.clearError();
       setIsStopped(false);
+      setIsEmptyResponse(false);
       setFollowUpInput('');
     }, [resetId, chat.stop, chat.setMessages, chat.clearError, setFollowUpInput]);
 
     const hasAssistantReply = chat.messages.some((message) => message.role === 'assistant');
     const isGenerating = chat.status === 'streaming' || chat.status === 'submitted';
-    const hasError = !!chat.error || isStopped;
+    const hasError = !!chat.error || isStopped || isEmptyResponse;
+    const getErrorMessage = () => {
+      if (chat.error) return chat.error.message;
+      if (isEmptyResponse) return '空の応答でした';
+      return '停止しました';
+    };
     const status = getModelStatus(chat.status, hasAssistantReply, hasError);
     const visibleMessages = chat.messages.filter((message) => message.role !== 'system');
     const displayMessages = visibleMessages.filter((_, i) => !(i === 0 && visibleMessages[0]?.role === 'user'));
@@ -157,6 +169,7 @@ export const ModelSlide = memo(
     // 失敗・停止したリクエストだけを再生成する。会話履歴と意見統合の対象かどうかはそのまま引き継ぐ
     const handleRetry = () => {
       setIsStopped(false);
+      setIsEmptyResponse(false);
       void chat.regenerate();
     };
 
@@ -165,6 +178,7 @@ export const ModelSlide = memo(
       const text = followUpInput;
       setFollowUpInput('');
       notifyOnFinishRef.current = false;
+      setIsEmptyResponse(false);
       void chat.sendMessage({ parts: [{ type: 'text', text }] });
     };
 
@@ -187,7 +201,7 @@ export const ModelSlide = memo(
             {hasError && !isGenerating ? (
               <Stack gap='xs'>
                 <Text size='sm' c='red'>
-                  エラー: {chat.error ? chat.error.message : '停止しました'}
+                  エラー: {getErrorMessage()}
                 </Text>
                 {chat.messages.length > 0 && (
                   <Button size='xs' color='orange' onClick={handleRetry}>
