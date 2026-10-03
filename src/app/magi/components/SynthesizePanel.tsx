@@ -6,6 +6,7 @@ import { OPINION_SECTIONS, type OpinionSectionKey, type ReconResult, synthesizeR
 import { MODEL_DEFINITIONS, type ModelKey } from '@/app/magi/util';
 
 type SynthesizePanelProps = {
+  // 意見統合の対象になった一括送信時の質問文（入力欄の現在値ではない）
   question: string;
   recon: ReconResult | null;
   completedResponses: Partial<Record<ModelKey, string>>;

@@ -31,6 +31,8 @@ export default function Page() {
   const [resetId, setResetId] = useState(0);
   const [generatingModels, setGeneratingModels] = useState<Partial<Record<ModelKey, boolean>>>({});
   const [isSynthesizing, setIsSynthesizing] = useState(false);
+  // 意見統合の対象になった一括送信時の質問文。エクスポートの見出しに使う
+  const [synthesizeQuestion, setSynthesizeQuestion] = useState('');
   const autoSynthesizeTriggered = useRef(false);
   // リセットでbroadcastをnullに戻してもidが重複しないよう、ページ単位で連番を管理する
   const broadcastIdRef = useRef(0);
@@ -46,6 +48,7 @@ export default function Page() {
     const synthesize = broadcast === null;
     if (synthesize) {
       setCompletedResponses({});
+      setSynthesizeQuestion(question);
       autoSynthesizeTriggered.current = false;
     }
     broadcastIdRef.current += 1;
@@ -58,6 +61,7 @@ export default function Page() {
     setErrorMessage(null);
     setBroadcast(null);
     setCompletedResponses({});
+    setSynthesizeQuestion('');
     autoSynthesizeTriggered.current = false;
     setResetId((prev) => prev + 1);
   };
@@ -205,7 +209,7 @@ export default function Page() {
         </Carousel>
 
         <SynthesizePanel
-          question={question}
+          question={synthesizeQuestion}
           recon={recon}
           completedResponses={completedResponses}
           resetId={resetId}
