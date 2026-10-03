@@ -32,6 +32,9 @@ export async function resizeAndCompressImage(file: File, maxSize = 1024, quality
         const ctx = canvas.getContext('2d');
         if (!ctx) return reject(new Error('Canvasが利用できません'));
 
+        // JPEGはアルファを持てず透過部分が黒くなるため、先に白で塗りつぶす
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, width, height);
         ctx.drawImage(img, 0, 0, width, height);
 
         // Safari古いバージョン対策: toBlob未対応ならtoDataURLで代替
