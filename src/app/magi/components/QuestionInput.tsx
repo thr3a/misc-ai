@@ -93,65 +93,71 @@ export const QuestionInput = ({
         </Group>
       )}
 
-      <Group justify='center' align='center'>
-        <Tooltip label={`画像を追加（最大${MAX_IMAGES}枚）`}>
-          <Button
-            size='sm'
-            variant='light'
-            color='gray'
-            disabled={isBusy || images.length >= MAX_IMAGES}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <IconPhotoPlus size={20} stroke={1.5} />
-          </Button>
-        </Tooltip>
-        <input
-          ref={fileInputRef}
-          type='file'
-          accept='image/jpeg,image/png,image/webp'
-          multiple
-          hidden
-          onChange={(e) => {
-            if (e.currentTarget.files && e.currentTarget.files.length > 0) {
-              onImagesAdd(e.currentTarget.files);
-            }
-            e.currentTarget.value = '';
-          }}
-        />
-        <Tooltip label='送信'>
-          <Button size='sm' disabled={isBusy || isQuestionEmpty} onClick={onBroadcast}>
-            <IconSend2 size={20} stroke={1.5} />
-          </Button>
-        </Tooltip>
-        <Tooltip label='強化'>
-          <Button
-            size='sm'
-            variant='light'
-            loading={isEnhancing}
-            disabled={isBusy || isQuestionEmpty}
-            onClick={onEnhance}
-          >
-            <IconSparkles size={20} stroke={1.5} />
-          </Button>
-        </Tooltip>
-        <Tooltip label='下調べ'>
-          <Button
-            size='sm'
-            variant='light'
-            color='teal'
-            loading={isReconning}
-            disabled={isBusy || isQuestionEmpty}
-            onClick={onRecon}
-          >
-            <IconSearch size={20} stroke={1.5} />
-          </Button>
-        </Tooltip>
-        <Tooltip label='会話リセット'>
-          <Button size='sm' variant='light' color='red' disabled={isBusy || !canReset} onClick={onReset}>
-            <IconRefresh size={20} stroke={1.5} />
-          </Button>
-        </Tooltip>
-      </Group>
+      <Stack gap='xs' w='fit-content' mx='auto'>
+        <Group justify='center' align='center'>
+          <Tooltip label={`画像を追加（最大${MAX_IMAGES}枚）`}>
+            <Button
+              size='sm'
+              variant='light'
+              color='gray'
+              disabled={isBusy || images.length >= MAX_IMAGES}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <IconPhotoPlus size={20} stroke={1.5} />
+            </Button>
+          </Tooltip>
+          <input
+            ref={fileInputRef}
+            type='file'
+            accept='image/jpeg,image/png,image/webp'
+            multiple
+            hidden
+            onChange={(e) => {
+              if (e.currentTarget.files && e.currentTarget.files.length > 0) {
+                onImagesAdd(e.currentTarget.files);
+              }
+              e.currentTarget.value = '';
+            }}
+          />
+          <Tooltip label='強化'>
+            <Button
+              size='sm'
+              variant='light'
+              loading={isEnhancing}
+              disabled={isBusy || isQuestionEmpty}
+              onClick={onEnhance}
+            >
+              <IconSparkles size={20} stroke={1.5} />
+            </Button>
+          </Tooltip>
+          <Tooltip label='下調べ'>
+            <Button
+              size='sm'
+              variant='light'
+              color='teal'
+              loading={isReconning}
+              disabled={isBusy || isQuestionEmpty}
+              onClick={onRecon}
+            >
+              <IconSearch size={20} stroke={1.5} />
+            </Button>
+          </Tooltip>
+          <Tooltip label='会話リセット'>
+            <Button size='sm' variant='light' color='red' disabled={isBusy || !canReset} onClick={onReset}>
+              <IconRefresh size={20} stroke={1.5} />
+            </Button>
+          </Tooltip>
+        </Group>
+        <Button
+          size='sm'
+          fullWidth
+          leftSection={<IconSend2 size={20} stroke={1.5} />}
+          disabled={isBusy || isQuestionEmpty}
+          onClick={onBroadcast}
+        >
+          送信
+        </Button>
+      </Stack>
 
       {recon && (
         <Paper withBorder p='sm'>
