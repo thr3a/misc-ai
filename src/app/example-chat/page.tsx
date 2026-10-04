@@ -1,16 +1,13 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import { Box, Stack } from '@mantine/core';
-import { useInputState } from '@mantine/hooks';
+import { Alert, Paper, Stack } from '@mantine/core';
 import { DefaultChatTransport } from 'ai';
 import { useMemo } from 'react';
-import { MessageInput, Messages } from './Chat';
+import { ChatHeader, MessageInput, Messages } from './Chat';
 
 // 関数名は変えないこと
 export default function Page() {
-  const [messageInputValue, setMessageInputValue] = useInputState('');
-
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
@@ -19,27 +16,29 @@ export default function Page() {
     []
   );
 
-  const { messages, sendMessage, status, stop } = useChat({ transport });
-
-  const isResponding = status === 'streaming' || status === 'submitted';
+  const { messages, sendMessage, status, stop, error, regenerate, setMessages } = useChat({ transport });
 
   const handleSubmit = (input: string) => {
-    sendMessage({ parts: [{ type: 'text', text: input }] });
-    setMessageInputValue('');
+    sendMessage({ text: input });
+  };
+
+  const handleReset = () => {
+    stop();
+    setMessages([]);
   };
 
   return (
-    <Box bd='1px solid gray.3' p='xs'>
-      <Stack gap='sm'>
-        <Messages messages={messages} />
-        <MessageInput
-          onSendMessage={handleSubmit}
-          onStop={stop}
-          isResponding={isResponding}
-          value={messageInputValue}
-          onChange={(event) => setMessageInputValue(event)}
-        />
+    <Paper withBorder shadow='md' mb='md' style={{ overflow: 'hidden' }}>
+      <Stack gap={0} h='calc(100dvh - 150px)' mih={480}>
+        <ChatHeader messages={messages} status={status} onReset={handleReset} />
+        <Messages messages={messages} status={status} onRegenerate={() => regenerate()} onSuggestion={handleSubmit} />
+        {error && (
+          <Alert color='red' variant='light' title='エラーが発生しました'>
+            {error.message}
+          </Alert>
+        )}
+        <MessageInput onSendMessage={handleSubmit} onStop={stop} status={status} />
       </Stack>
-    </Box>
+    </Paper>
   );
 }

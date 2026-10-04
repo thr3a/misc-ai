@@ -15,6 +15,9 @@
 - Lint: biome v2
 - 日付ライブラリ: Day.js
 - AI SDK by Vercel v6 https://deepwiki.com/vercel/ai
+- チャットUI: mantine-ai-elements https://github.com/gtnao/mantine-ai-elements
+  - npm 公開版は古く、GitHub 版はビルド済み `dist` を含まないため、ソースから `pnpm pack` した tarball を `vendor/mantine-ai-elements-0.3.0.tgz` に置き、`file:vendor/mantine-ai-elements-0.3.0.tgz` で参照している。
+  - スタイルは利用するページの layout で `import 'mantine-ai-elements/styles.css';` する。
 
 # 2. TypeScript / コーディングスタイル
 

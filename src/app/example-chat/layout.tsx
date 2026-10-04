@@ -1,5 +1,6 @@
 import { Title } from '@mantine/core';
 import type { Metadata } from 'next';
+import 'mantine-ai-elements/styles.css';
 
 export const metadata: Metadata = {
   title: 'SOS団スマホチャット',
