@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     const stream = toUIMessageStream({
       stream: result.stream,
-      originalMessages: messages
+      originalMessages: validatedMessages
     });
     return createUIMessageStreamResponse({ stream });
   } catch (error) {
