@@ -12,6 +12,12 @@
       "sourceType": "github",
       "skillPath": "skills/mantine-style-props/SKILL.md",
       "computedHash": "653ec34fb6c5d92f990d4b0e192159f8c176b0b455745154773963768ef0472e"
+    },
+    "playwright-cli": {
+      "source": "microsoft/playwright-cli",
+      "sourceType": "github",
+      "skillPath": "skills/playwright-cli/SKILL.md",
+      "computedHash": "ffbd59a973d4e2c19c6ecc31254a14497069c362f1d1820b6a6cfbe62de34a73"
     }
   }
 }
