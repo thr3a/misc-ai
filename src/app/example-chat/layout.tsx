@@ -4,7 +4,7 @@ import 'mantine-ai-elements/styles.css';
 
 export const metadata: Metadata = {
   title: 'SOS団スマホチャット',
-  description: '涼宮ハルヒのテンションで会話が進みます。メッセージはテキストのみです。'
+  description: '涼宮ハルヒのテンションで会話が進みます。画像も最大4枚まで添付できます。'
 };
 
 // 関数名は変えないこと

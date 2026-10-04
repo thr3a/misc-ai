@@ -2,7 +2,7 @@
 
 import { useChat } from '@ai-sdk/react';
 import { Alert, Paper, Stack } from '@mantine/core';
-import { DefaultChatTransport } from 'ai';
+import { DefaultChatTransport, type FileUIPart } from 'ai';
 import { useMemo } from 'react';
 import { ChatHeader, MessageInput, Messages } from './Chat';
 
@@ -18,8 +18,13 @@ export default function Page() {
 
   const { messages, sendMessage, status, stop, error, regenerate, setMessages } = useChat({ transport });
 
-  const handleSubmit = (input: string) => {
-    sendMessage({ text: input });
+  const handleSubmit = (input: string, files: FileUIPart[] = []) => {
+    // 画像のみ送信時に空のテキストパートを作らないよう、テキストの有無で分岐する
+    if (input.trim() === '') {
+      sendMessage({ files });
+      return;
+    }
+    sendMessage({ text: input, files });
   };
 
   const handleReset = () => {
@@ -31,7 +36,12 @@ export default function Page() {
     <Paper withBorder shadow='md' mb='md' style={{ overflow: 'hidden' }}>
       <Stack gap={0} h='calc(100dvh - 150px)' mih={480}>
         <ChatHeader messages={messages} status={status} onReset={handleReset} />
-        <Messages messages={messages} status={status} onRegenerate={() => regenerate()} onSuggestion={handleSubmit} />
+        <Messages
+          messages={messages}
+          status={status}
+          onRegenerate={() => regenerate()}
+          onSuggestion={(text) => handleSubmit(text)}
+        />
         {error && (
           <Alert color='red' variant='light' title='エラーが発生しました'>
             {error.message}
