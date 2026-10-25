@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { isSpeakableText, toSpeechText } from '@/app/tts-chat/speechText';
 import type { SpeechRequestBody } from '@/app/tts-chat/type';
 
 const TTS_ENDPOINT = 'https://irodori-tts.turai.work/v1/audio/speech';
@@ -22,8 +23,9 @@ const buildTtsBody = ({ input, settings }: SpeechRequestBody) => {
 
 export async function POST(req: NextRequest) {
   const body: SpeechRequestBody = await req.json();
-  const input = body.input.trim().slice(0, MAX_INPUT_LENGTH);
-  if (input === '') {
+  // 表示用テキストのままだと Markdown や絵文字まで読もうとするので、発話用に整形してから送る
+  const input = toSpeechText(body.input).slice(0, MAX_INPUT_LENGTH);
+  if (!isSpeakableText(input)) {
     return Response.json({ error: '読み上げるテキストがありません' }, { status: 400 });
   }
 
