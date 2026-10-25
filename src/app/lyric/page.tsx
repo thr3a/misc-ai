@@ -20,7 +20,7 @@ import { IconMicrophone, IconTrash, IconUser } from '@tabler/icons-react';
 import { DefaultChatTransport } from 'ai';
 import { useMemo, useState } from 'react';
 import { type LyricAnalysis, lyricAnalysisSchema } from '@/app/lyric/type';
-import { MessageInput, Messages } from '../example-chat/Chat';
+import { MessageInput, Messages } from './Chat';
 
 // 関数名は変えないこと
 export default function Page() {
