@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     }
 
     const data = validatedFields.data;
-    const model = data.model === 'openai' ? openai('gpt-5.6-terra') : localOpenAI.chat('main');
+    const model = data.model === 'openai' ? openai('gpt-5.6-terra') : localOpenAI.chat('deep02-reasoning-minimum');
 
     if (data.mode === 'generate') {
       if (!isPresetSize(data.width, data.height)) {

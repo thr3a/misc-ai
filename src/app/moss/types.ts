@@ -105,3 +105,35 @@ export type GeneratedLayout = z.infer<typeof generatedLayoutSchema>;
 export const translationSchema = z.object({
   translations: z.array(z.string())
 });
+
+// 作業ファイル（エディターの途中状態）のスキーマ。ドラフトと違い空欄やはみ出しも許容する
+export const WORK_FILE_FORMAT = 'moss-layout-work';
+
+const editorItemSchema = z.object({
+  uid: z.string().min(1),
+  label: z.enum(ITEM_LABELS),
+  caption: z.string(),
+  text: z.string(),
+  bbox: z.object({ x1: z.number(), y1: z.number(), x2: z.number(), y2: z.number() }),
+  tags: z.array(z.string()),
+  palette: z.array(z.string())
+});
+
+export const workFileSchema = z.object({
+  format: z.literal(WORK_FILE_FORMAT),
+  version: z.literal(1),
+  savedAt: z.string(),
+  layout: z.object({
+    width: z.number().int().positive().multipleOf(16),
+    height: z.number().int().positive().multipleOf(16),
+    summary: z.object({
+      caption: z.string(),
+      meta: z.array(z.string()),
+      canvas: z.enum(CANVAS_MODES).nullable(),
+      palette: z.array(z.string())
+    }),
+    items: z.array(editorItemSchema)
+  })
+});
+
+export type WorkFile = z.infer<typeof workFileSchema>;

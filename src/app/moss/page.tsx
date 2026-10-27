@@ -6,6 +6,7 @@ import {
   Badge,
   Button,
   Divider,
+  FileButton,
   Grid,
   Group,
   List,
@@ -16,9 +17,17 @@ import {
   Tooltip
 } from '@mantine/core';
 import { type HotkeyItem, useDisclosure, useHotkeys } from '@mantine/hooks';
-import { IconArrowBackUp, IconArrowForwardUp, IconLanguage, IconPlus, IconRefresh } from '@tabler/icons-react';
+import {
+  IconArrowBackUp,
+  IconArrowForwardUp,
+  IconDeviceFloppy,
+  IconFolderOpen,
+  IconLanguage,
+  IconPlus,
+  IconRefresh
+} from '@tabler/icons-react';
 import { useCallback, useMemo, useState } from 'react';
-import { translateLayout } from './api';
+import { downloadText, translateLayout } from './api';
 import {
   checkDraft,
   compileDraft,
@@ -47,6 +56,7 @@ import {
   type ModelId
 } from './types';
 import { useHistory } from './useHistory';
+import { parseWorkText, serializeWork } from './work';
 
 const MODELS = [
   { value: 'openai', label: 'OpenAI' },
@@ -63,6 +73,7 @@ export default function Page() {
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState('');
   const [resetOpened, resetModal] = useDisclosure(false);
+  const [workError, setWorkError] = useState('');
 
   const { set: setHistory } = history;
   const updateLayout = useCallback(
@@ -102,6 +113,27 @@ export default function Page() {
     setOutput(null);
     setExportError('');
     resetModal.close();
+  };
+
+  const handleSaveWork = () => {
+    if (!layout) return;
+    const { content, filename } = serializeWork(layout);
+    downloadText(content, filename);
+  };
+
+  // 読み込みも履歴に積むので、誤って開いても Undo で戻せる
+  const handleOpenWork = async (file: File | null) => {
+    if (!file) return;
+    const result = parseWorkText(await file.text());
+    if (!result.ok) {
+      setWorkError(result.error);
+      return;
+    }
+    setHistory(() => result.layout);
+    setSelectedUid(null);
+    setOutput(null);
+    setExportError('');
+    setWorkError('');
   };
 
   const handleAdd = (label: ItemLabel) => {
@@ -223,10 +255,28 @@ export default function Page() {
                 </ActionIcon>
               </Tooltip>
             </Group>
-            <Button variant='default' color='red' leftSection={<IconRefresh size={16} />} onClick={resetModal.open}>
-              新規作成
-            </Button>
+            <Group gap='xs'>
+              <Button variant='default' leftSection={<IconDeviceFloppy size={16} />} onClick={handleSaveWork}>
+                作業を保存
+              </Button>
+              <FileButton onChange={handleOpenWork} accept='application/json,.json'>
+                {(props) => (
+                  <Button {...props} variant='default' leftSection={<IconFolderOpen size={16} />}>
+                    作業を開く
+                  </Button>
+                )}
+              </FileButton>
+              <Button variant='default' color='red' leftSection={<IconRefresh size={16} />} onClick={resetModal.open}>
+                新規作成
+              </Button>
+            </Group>
           </Group>
+
+          {workError && (
+            <Alert color='red' withCloseButton onClose={() => setWorkError('')} style={{ whiteSpace: 'pre-wrap' }}>
+              {workError}
+            </Alert>
+          )}
 
           <Grid>
             <Grid.Col span={{ base: 12, md: 7 }}>

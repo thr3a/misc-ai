@@ -220,7 +220,7 @@ export const compileDraft = (draft: Draft) => {
   });
 };
 
-const formatZodError = (error: z.ZodError) =>
+export const formatZodError = (error: z.ZodError) =>
   error.issues
     .slice(0, 5)
     .map((issue) => `${issue.path.length > 0 ? issue.path.join('.') : '(root)'}: ${issue.message}`)
@@ -250,7 +250,7 @@ const tryParseJson = (text: string): { value: unknown } | null => {
 };
 
 // コードフェンスや前後の文章で囲まれた JSON も寛容に取り出す
-const parseLooseJson = (text: string) => {
+export const parseLooseJson = (text: string) => {
   const trimmed = text.trim();
   const direct = tryParseJson(trimmed);
   if (direct) return direct;

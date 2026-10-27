@@ -11,7 +11,7 @@ import {
   Text,
   Textarea
 } from '@mantine/core';
-import { IconFileImport, IconLayoutBoard, IconSparkles, IconUpload } from '@tabler/icons-react';
+import { IconFileImport, IconFolderOpen, IconLayoutBoard, IconSparkles, IconUpload } from '@tabler/icons-react';
 import { useState } from 'react';
 import { generateLayout, translateLayout } from './api';
 import {
@@ -24,6 +24,7 @@ import {
   sizeLabel
 } from './draft';
 import type { EditorLayout, ModelId } from './types';
+import { looksLikeWorkFile, parseWorkText } from './work';
 
 type Props = {
   model: ModelId;
@@ -78,7 +79,7 @@ const SizeSelector = ({
   );
 };
 
-// 開始画面。AI で生成 / JSON を読み込む / 空のキャンバスから作る
+// 開始画面。AI で生成 / JSON を読み込む / 空のキャンバスから作る / 作業ファイルを開く
 export const StartPanel = ({ model, onStart }: Props) => {
   const [tab, setTab] = useState<string | null>('ai');
   const [ratio, setRatio] = useState<string>(SIZE_PRESETS[0].ratio);
@@ -105,6 +106,10 @@ export const StartPanel = ({ model, onStart }: Props) => {
 
   const handleImport = async () => {
     setError('');
+    if (looksLikeWorkFile(json)) {
+      setError('作業ファイルです。「作業ファイルを開く」タブから読み込んでください');
+      return;
+    }
     const result = parseDraftText(json);
     if (!result.ok) {
       setError(result.error);
@@ -124,6 +129,17 @@ export const StartPanel = ({ model, onStart }: Props) => {
     if (!file) return;
     setJson(await file.text());
     setError('');
+  };
+
+  const handleWorkFile = async (file: File | null) => {
+    if (!file) return;
+    setError('');
+    const result = parseWorkText(await file.text());
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    onStart(result.layout);
   };
 
   const sizeSelector = (
@@ -153,6 +169,9 @@ export const StartPanel = ({ model, onStart }: Props) => {
           </Tabs.Tab>
           <Tabs.Tab value='blank' leftSection={<IconLayoutBoard size={16} />}>
             空のキャンバス
+          </Tabs.Tab>
+          <Tabs.Tab value='work' leftSection={<IconFolderOpen size={16} />}>
+            作業ファイルを開く
           </Tabs.Tab>
         </Tabs.List>
 
@@ -211,6 +230,23 @@ export const StartPanel = ({ model, onStart }: Props) => {
             {sizeSelector}
             <Group justify='flex-end'>
               <Button onClick={() => onStart(emptyLayout(width, height))}>空のキャンバスで始める</Button>
+            </Group>
+          </Stack>
+        </Tabs.Panel>
+
+        <Tabs.Panel value='work'>
+          <Stack>
+            <Text size='sm' c='dimmed'>
+              エディターの「作業を保存」で保存したファイルを開き、途中の状態から編集を再開します。翻訳は行いません。
+            </Text>
+            <Group justify='flex-end'>
+              <FileButton onChange={handleWorkFile} accept='application/json,.json'>
+                {(props) => (
+                  <Button {...props} leftSection={<IconFolderOpen size={16} />}>
+                    作業ファイルを選択
+                  </Button>
+                )}
+              </FileButton>
             </Group>
           </Stack>
         </Tabs.Panel>
