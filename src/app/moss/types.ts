@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export type ModelId = 'openai' | 'local';
+export type ModelId = 'openai' | 'openrouter' | 'local';
 
 export const ITEM_LABELS = ['object', 'character', 'text'] as const;
 export type ItemLabel = (typeof ITEM_LABELS)[number];

@@ -15,14 +15,14 @@ import { generatedLayoutSchema, translationSchema } from '@/app/moss/types';
 const requestSchema = z.discriminatedUnion('mode', [
   z.object({
     mode: z.literal('generate'),
-    model: z.enum(['openai', 'local']),
+    model: z.enum(['openai', 'openrouter', 'local']),
     prompt: z.string().min(1),
     width: z.number().int(),
     height: z.number().int()
   }),
   z.object({
     mode: z.literal('translate'),
-    model: z.enum(['openai', 'local']),
+    model: z.enum(['openai', 'openrouter', 'local']),
     target: z.enum(['en', 'ja']),
     texts: z.array(z.string()).min(1)
   })
@@ -31,6 +31,17 @@ const requestSchema = z.discriminatedUnion('mode', [
 const localOpenAI = createOpenAI({
   baseURL: 'https://chatgpt-api.turai.work/v1'
 });
+
+const openRouter = createOpenAI({
+  baseURL: 'https://openrouter.ai/api/v1',
+  apiKey: process.env.OPENROUTER_API_KEY || 'sk-dummy'
+});
+
+const selectModel = (model: 'openai' | 'openrouter' | 'local') => {
+  if (model === 'openai') return openai('gpt-5.6-terra');
+  if (model === 'openrouter') return openRouter.chat('z-ai/glm-5.2');
+  return localOpenAI.chat('deep02-reasoning-minimum');
+};
 
 export async function POST(req: NextRequest) {
   try {
@@ -49,7 +60,16 @@ export async function POST(req: NextRequest) {
     }
 
     const data = validatedFields.data;
-    const model = data.model === 'openai' ? openai('gpt-5.6-terra') : localOpenAI.chat('deep02-reasoning-minimum');
+    const model = selectModel(data.model);
+    const providerOptions =
+      data.model === 'openrouter'
+        ? {
+            openai: {
+              reasoningEffort: 'none',
+              forceReasoning: false
+            }
+          }
+        : undefined;
 
     if (data.mode === 'generate') {
       if (!isPresetSize(data.width, data.height)) {
@@ -59,7 +79,8 @@ export async function POST(req: NextRequest) {
         model,
         output: Output.object({ schema: generatedLayoutSchema }),
         instructions: buildGenerateSystemPrompt(data.width, data.height),
-        prompt: buildGenerateUserPrompt(data.prompt, data.width, data.height)
+        prompt: buildGenerateUserPrompt(data.prompt, data.width, data.height),
+        providerOptions
       });
       const draft = sanitizeGenerated(result.output, data.width, data.height);
       if (!draft) return Response.json({ error: 'Empty layout' }, { status: 500 });
@@ -72,7 +93,8 @@ export async function POST(req: NextRequest) {
         model,
         output: Output.object({ schema: translationSchema }),
         instructions: data.target === 'en' ? translateToEnglishSystemPrompt : translateToJapaneseSystemPrompt,
-        prompt: JSON.stringify(data.texts)
+        prompt: JSON.stringify(data.texts),
+        providerOptions
       });
       const translations = result.output.translations.map((t) => t.trim());
       if (translations.length === data.texts.length) return Response.json({ translations });
