@@ -304,7 +304,7 @@ export default function Page() {
                   onChangeBbox={handleChangeBbox}
                 />
                 <Text size='xs' c='dimmed'>
-                  ドラッグで移動、四隅で大きさを変更。選択中は矢印キーで 1px（Shift で 10px）移動
+                  ドラッグで移動、四隅で大きさを変更（Shift で正方形）。選択中は矢印キーで 1px（Shift で 10px）移動
                 </Text>
               </Stack>
             </Grid.Col>

@@ -29,10 +29,34 @@ const HANDLE_SIZE = 12;
 const clamp = (v: number, min: number, max: number) => Math.min(Math.max(v, min), max);
 
 // ドラッグ量（キャンバス px）を bbox に反映する。キャンバス内に収め、最小サイズを保つ
-const applyDrag = (origin: Bbox, handle: Handle, dx: number, dy: number, width: number, height: number): Bbox => {
+// square が true のときは、掴んだ角の対角を固定したまま正方形にする
+const applyDrag = (
+  origin: Bbox,
+  handle: Handle,
+  dx: number,
+  dy: number,
+  width: number,
+  height: number,
+  square: boolean
+): Bbox => {
   if (handle === 'move') return moveBbox(origin, Math.round(dx), Math.round(dy), width, height);
   const west = handle === 'nw' || handle === 'sw';
   const north = handle === 'nw' || handle === 'ne';
+  if (square) {
+    const anchorX = west ? origin.x2 : origin.x1;
+    const anchorY = north ? origin.y2 : origin.y1;
+    const w = west ? origin.x2 - (origin.x1 + dx) : origin.x2 + dx - origin.x1;
+    const h = north ? origin.y2 - (origin.y1 + dy) : origin.y2 + dy - origin.y1;
+    // 固定した角からキャンバス端までに収まる最大の辺
+    const maxSide = Math.min(west ? anchorX : width - anchorX, north ? anchorY : height - anchorY);
+    const side = clamp(Math.round(Math.max(w, h)), MIN_SIZE, maxSide);
+    return {
+      x1: west ? anchorX - side : anchorX,
+      x2: west ? anchorX : anchorX + side,
+      y1: north ? anchorY - side : anchorY,
+      y2: north ? anchorY : anchorY + side
+    };
+  }
   return {
     x1: west ? clamp(Math.round(origin.x1 + dx), 0, origin.x2 - MIN_SIZE) : origin.x1,
     x2: west ? origin.x2 : clamp(Math.round(origin.x2 + dx), origin.x1 + MIN_SIZE, width),
@@ -72,12 +96,24 @@ export const LayoutCanvas = ({ layout, selectedUid, onSelect, onChangeBbox }: Pr
 
   useEffect(() => {
     if (!drag) return;
-    const handleMove = (e: PointerEvent) => {
-      const dx = (e.clientX - drag.startX) * drag.scale;
-      const dy = (e.clientY - drag.startY) * drag.scale;
-      const next = applyDrag(drag.origin, drag.handle, dx, dy, width, height);
+    let lastX = drag.startX;
+    let lastY = drag.startY;
+    const update = (clientX: number, clientY: number, square: boolean) => {
+      const dx = (clientX - drag.startX) * drag.scale;
+      const dy = (clientY - drag.startY) * drag.scale;
+      const next = applyDrag(drag.origin, drag.handle, dx, dy, width, height, square);
       latestRef.current = next;
       setPreview(next);
+    };
+    const handleMove = (e: PointerEvent) => {
+      lastX = e.clientX;
+      lastY = e.clientY;
+      update(e.clientX, e.clientY, e.shiftKey);
+    };
+    // マウスを動かさずに Shift を押し離ししても、すぐ正方形化の有無を反映する
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Shift') return;
+      update(lastX, lastY, e.shiftKey);
     };
     const handleUp = () => {
       const latest = latestRef.current;
@@ -89,7 +125,11 @@ export const LayoutCanvas = ({ layout, selectedUid, onSelect, onChangeBbox }: Pr
     window.addEventListener('pointermove', handleMove);
     window.addEventListener('pointerup', handleUp);
     window.addEventListener('pointercancel', handleUp);
+    window.addEventListener('keydown', handleKey);
+    window.addEventListener('keyup', handleKey);
     return () => {
+      window.removeEventListener('keydown', handleKey);
+      window.removeEventListener('keyup', handleKey);
       window.removeEventListener('pointermove', handleMove);
       window.removeEventListener('pointerup', handleUp);
       window.removeEventListener('pointercancel', handleUp);
