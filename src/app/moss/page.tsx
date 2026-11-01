@@ -28,7 +28,7 @@ import {
   IconRefresh
 } from '@tabler/icons-react';
 import { useCallback, useMemo, useState } from 'react';
-import { downloadText, translateLayout } from './api';
+import { downloadText, reviseItem, reviseLayout, translateLayout } from './api';
 import {
   checkDraft,
   compileDraft,
@@ -44,6 +44,7 @@ import {
 import { ItemEditor, ItemList } from './ItemEditor';
 import { LayoutCanvas } from './LayoutCanvas';
 import { OutputPanel } from './OutputPanel';
+import { ReviseBox } from './ReviseBox';
 import { StartPanel } from './StartPanel';
 import { SummaryEditor } from './SummaryEditor';
 import {
@@ -77,6 +78,7 @@ export default function Page() {
   const [exportError, setExportError] = useState('');
   const [resetOpened, resetModal] = useDisclosure(false);
   const [workError, setWorkError] = useState('');
+  const [revising, setRevising] = useState<'whole' | 'item' | null>(null);
 
   const { set: setHistory } = history;
   const updateLayout = useCallback(
@@ -160,6 +162,36 @@ export default function Page() {
     if (!selected) return;
     updateLayout((l) => ({ ...l, items: l.items.filter((i) => i.uid !== selected.uid) }));
     setSelectedUid(null);
+  };
+
+  // 全体リライト。結果は履歴に積むので Undo で戻せる
+  const handleReviseWhole = async (instruction: string) => {
+    if (!layout) return 'レイアウトがありません';
+    setRevising('whole');
+    const next = await reviseLayout(model, layout, instruction);
+    setRevising(null);
+    if (!next) return '書き換えに失敗しました。もう一度試してください';
+    setHistory(() => next);
+    setSelectedUid(null);
+    return null;
+  };
+
+  // 個別リライト。対象の要素だけを置き換え、他の要素と全体の設定には触れない
+  const handleReviseItem = async (instruction: string) => {
+    if (!layout || !selected) return '要素が選択されていません';
+    const uid = selected.uid;
+    setRevising('item');
+    const items = await reviseItem(model, layout, uid, instruction);
+    setRevising(null);
+    if (!items) return '書き換えに失敗しました。もう一度試してください';
+    // 先頭の要素に元の uid を引き継ぎ、書き換え後も同じ要素を選択したままにする（削除時は選択が外れる）
+    const replaced = items.map((item, i) => (i === 0 ? { ...item, uid } : item));
+    updateLayout((l) => {
+      const index = l.items.findIndex((i) => i.uid === uid);
+      if (index === -1) return l;
+      return { ...l, items: [...l.items.slice(0, index), ...replaced, ...l.items.slice(index + 1)] };
+    });
+    return null;
   };
 
   const nudge = (dx: number, dy: number) => {
@@ -313,6 +345,17 @@ export default function Page() {
                   issueUids={issueUids}
                   onSelect={setSelectedUid}
                 />
+                {selected && (
+                  <ReviseBox
+                    key={`revise:${selected.uid}`}
+                    label={`#${selectedIndex + 1} ${LABEL_META[selected.label].name} を AI で書き換え`}
+                    description='この要素だけが変わります。他の要素と画像全体の設定は変わりません'
+                    placeholder='例: 文字をもっと大きく、縁取りを太くして目立たせて'
+                    loading={revising === 'item'}
+                    busy={revising !== null}
+                    onSubmit={handleReviseItem}
+                  />
+                )}
                 {selected ? (
                   <ItemEditor
                     key={selected.uid}
@@ -341,6 +384,15 @@ export default function Page() {
             onChange={(patch: Partial<EditorSummary>, mergeKey) =>
               updateLayout((l) => ({ ...l, summary: { ...l.summary, ...patch } }), mergeKey)
             }
+          />
+
+          <ReviseBox
+            label='全体を AI で書き換え'
+            description='画像全体の設定と、すべての要素（位置・大きさ・要素の追加や削除を含む）が変わります'
+            placeholder='例: 夜の屋台っぽい雰囲気にして、500円をもっと大きく'
+            loading={revising === 'whole'}
+            busy={revising !== null}
+            onSubmit={handleReviseWhole}
           />
 
           {issues.length > 0 && (

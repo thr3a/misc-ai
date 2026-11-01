@@ -79,6 +79,20 @@ export type Draft = z.infer<typeof draftSchema>;
 export type DraftItem = z.infer<typeof draftItemSchema>;
 
 // AI にレイアウトを生成させるときの構造化出力スキーマ。Structured Outputs の制約上、全フィールドを必須にしている
+// AI が生成・書き換えする要素のスキーマ
+export const generatedItemSchema = z.object({
+  label: z.enum(ITEM_LABELS),
+  caption: z.string().describe('要素の見た目の説明（日本語）'),
+  text: z.string().describe('label が text のとき画像に描画する文字列そのもの。それ以外は空文字'),
+  bbox: z
+    .object({ x1: z.number(), y1: z.number(), x2: z.number(), y2: z.number() })
+    .describe('キャンバス左上原点の絶対ピクセル座標'),
+  tags: z.array(z.string()).describe('補助的な意味タグ（日本語）。不要なら空配列'),
+  palette: z.array(z.string()).describe('要素固有の配色 (#RRGGBB)。不要なら空配列')
+});
+
+export type GeneratedItem = z.infer<typeof generatedItemSchema>;
+
 export const generatedLayoutSchema = z.object({
   summary: z.object({
     caption: z.string().describe('画像全体の説明（日本語）'),
@@ -86,18 +100,12 @@ export const generatedLayoutSchema = z.object({
     canvas: z.enum(CANVAS_MODES).describe('single: 1枚絵, multi_panel: 複数コマ, collage: コラージュ'),
     palette: z.array(z.string()).describe('全体の主要な配色 (#RRGGBB)')
   }),
-  items: z.array(
-    z.object({
-      label: z.enum(ITEM_LABELS),
-      caption: z.string().describe('要素の見た目の説明（日本語）'),
-      text: z.string().describe('label が text のとき画像に描画する文字列そのもの。それ以外は空文字'),
-      bbox: z
-        .object({ x1: z.number(), y1: z.number(), x2: z.number(), y2: z.number() })
-        .describe('キャンバス左上原点の絶対ピクセル座標'),
-      tags: z.array(z.string()).describe('補助的な意味タグ（日本語）。不要なら空配列'),
-      palette: z.array(z.string()).describe('要素固有の配色 (#RRGGBB)。不要なら空配列')
-    })
-  )
+  items: z.array(generatedItemSchema)
+});
+
+// 個別リライトの構造化出力。対象の 1 要素を置き換える要素の配列（分割なら複数、削除なら空）
+export const revisedItemsSchema = z.object({
+  items: z.array(generatedItemSchema).describe('対象の要素を置き換える要素。通常は 1 つ')
 });
 
 export type GeneratedLayout = z.infer<typeof generatedLayoutSchema>;
@@ -119,21 +127,23 @@ const editorItemSchema = z.object({
   palette: z.array(z.string())
 });
 
+export const editorLayoutSchema = z.object({
+  width: z.number().int().positive().multipleOf(16),
+  height: z.number().int().positive().multipleOf(16),
+  summary: z.object({
+    caption: z.string(),
+    meta: z.array(z.string()),
+    canvas: z.enum(CANVAS_MODES).nullable(),
+    palette: z.array(z.string())
+  }),
+  items: z.array(editorItemSchema)
+});
+
 export const workFileSchema = z.object({
   format: z.literal(WORK_FILE_FORMAT),
   version: z.literal(1),
   savedAt: z.string(),
-  layout: z.object({
-    width: z.number().int().positive().multipleOf(16),
-    height: z.number().int().positive().multipleOf(16),
-    summary: z.object({
-      caption: z.string(),
-      meta: z.array(z.string()),
-      canvas: z.enum(CANVAS_MODES).nullable(),
-      palette: z.array(z.string())
-    }),
-    items: z.array(editorItemSchema)
-  })
+  layout: editorLayoutSchema
 });
 
 export type WorkFile = z.infer<typeof workFileSchema>;

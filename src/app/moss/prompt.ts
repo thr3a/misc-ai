@@ -1,4 +1,5 @@
 import dedent from 'ts-dedent';
+import type { EditorLayout } from './types';
 
 const example = dedent`
   {
@@ -37,10 +38,8 @@ const example = dedent`
   }
 `;
 
-export const buildGenerateSystemPrompt = (width: number, height: number) => dedent`
-  あなたは画像生成モデル MOSS-Image の Layout プロンプトを設計するアートディレクターです。
-  ユーザーの日本語の依頼から、幅 ${width}px × 高さ ${height}px のキャンバスに対するレイアウトを設計してください。
-
+// 全体の生成と全体リライトで共通のレイアウト設計ルール
+const layoutGuide = (width: number, height: number) => dedent`
   ## 出力の各フィールド
   - summary.caption: 画像全体の説明。被写体と動作、場面、カメラや構図、媒体（写真・イラスト・ポスターなど）、ライティング、素材感、配色、ムード、全体の仕上げを具体的に書く。背景もここで表現する。
   - summary.meta: 媒体やジャンルのタグ（例: ポスター、飲食店の販促、料理写真）。
@@ -77,17 +76,105 @@ export const buildGenerateSystemPrompt = (width: number, height: number) => dede
   - 1 行の文字の高さは bbox の高さのおよそ 0.55 倍（複数行なら行数で割る）。
   - 和文は 1 文字の幅が文字の高さとほぼ同じ。欧文は文字の高さの約 0.55 倍。
   - bbox の幅と高さは、文字数と行数が無理なく収まり、読める大きさになるように決める。文字を削らず bbox を広げるか構図を見直す。
+`;
+
+export const buildGenerateSystemPrompt = (width: number, height: number) => dedent`
+  あなたは画像生成モデル MOSS-Image の Layout プロンプトを設計するアートディレクターです。
+  ユーザーの日本語の依頼から、幅 ${width}px × 高さ ${height}px のキャンバスに対するレイアウトを設計してください。
+
+  ${layoutGuide(width, height)}
 
   ## 出力例（1536×1024 の場合）
   ${example}
 `;
 
+const orientationLabel = (width: number, height: number) =>
+  width === height ? '正方形' : width > height ? '横長' : '縦長';
+
 export const buildGenerateUserPrompt = (prompt: string, width: number, height: number) => dedent`
-  キャンバス: ${width}×${height}px（${width === height ? '正方形' : width > height ? '横長' : '縦長'}）
+  キャンバス: ${width}×${height}px（${orientationLabel(width, height)}）
 
   依頼:
   ${prompt}
 `;
+
+// AI に渡すレイアウト。uid はエディター専用なので除く
+const layoutToPromptJson = (layout: EditorLayout) =>
+  JSON.stringify(
+    {
+      summary: layout.summary,
+      items: layout.items.map(({ uid: _uid, ...item }) => item)
+    },
+    null,
+    2
+  );
+
+export const buildReviseSystemPrompt = (width: number, height: number) => dedent`
+  あなたは画像生成モデル MOSS-Image の Layout プロンプトを設計するアートディレクターです。
+  幅 ${width}px × 高さ ${height}px のキャンバスに対する現在のレイアウトを、ユーザーの修正指示に従って書き換えてください。
+  出力はレイアウト全体（summary と items のすべて）です。
+
+  ## 書き換えの方針
+  - 修正指示に従い、全体説明と各要素をまとめて見直す。指示の内容に合わせて、要素の位置・大きさの変更、要素の追加・削除も行ってよい。
+  - 指示に関係しない部分は、現在のレイアウトの内容をできるだけそのまま残す。
+  - 現在のレイアウトにある text（画像に描画する文字）は、指示がない限り一字一句変えない。
+
+  ${layoutGuide(width, height)}
+`;
+
+export const buildReviseUserPrompt = (layout: EditorLayout, instruction: string) => dedent`
+  キャンバス: ${layout.width}×${layout.height}px（${orientationLabel(layout.width, layout.height)}）
+
+  現在のレイアウト:
+  ${layoutToPromptJson(layout)}
+
+  修正指示:
+  ${instruction}
+`;
+
+export const buildReviseItemSystemPrompt = (width: number, height: number) => dedent`
+  あなたは画像生成モデル MOSS-Image の Layout プロンプトを設計するアートディレクターです。
+  幅 ${width}px × 高さ ${height}px のキャンバスに対するレイアウトのうち、指定された 1 つの要素だけを、ユーザーの修正指示に従って書き換えてください。
+
+  ## 出力
+  - items に、対象の要素を置き換える要素を入れる。通常は 1 つ。
+  - 指示が分割を求めるときだけ複数の要素に分ける。指示が削除を求めるときだけ空配列にする。
+  - 対象以外の要素と summary は出力しない。それらは参考情報であり、変更されない。
+
+  ## 書き換えの方針
+  - 指示に関係しない属性（label、caption、text、bbox、tags、palette）は、対象の要素の現在の値をできるだけそのまま残す。
+  - text（画像に描画する文字）は、指示がない限り一字一句変えない。
+  - 全体の雰囲気や他の要素との配置の関係を踏まえ、意図しない重なりや不自然な配置を避ける。
+
+  ## 各フィールド
+  - label: object（物体・料理・商品・建物・風景の一部など）、character（人物・動物などのキャラクター）、text（画像内に描画する文字）のいずれか。
+  - caption: その要素の見た目の説明。日本語で書く。text の場合は書体、太さ、色、縁取り、文字の載る面などタイポグラフィを説明する。
+  - text: label が text のとき、画像に描画する文字列そのもの。改行は \\n。text 以外の要素では空文字にする。
+  - bbox: キャンバス左上を原点とした絶対ピクセル座標。0 <= x1 < x2 <= ${width}、0 <= y1 < y2 <= ${height}。正規化座標やパーセントは禁止。
+  - tags: 補助的な意味タグ（日本語）。不要なら空配列。
+  - palette: 要素固有の配色を #RRGGBB 形式で。不要なら空配列。
+
+  ## 文字の大きさの目安
+  - 1 行の文字の高さは bbox の高さのおよそ 0.55 倍（複数行なら行数で割る）。
+  - 和文は 1 文字の幅が文字の高さとほぼ同じ。欧文は文字の高さの約 0.55 倍。
+  - bbox の幅と高さは、文字数と行数が無理なく収まり、読める大きさになるように決める。
+`;
+
+export const buildReviseItemUserPrompt = (layout: EditorLayout, index: number, instruction: string) => {
+  const { uid: _uid, ...target } = layout.items[index];
+  return dedent`
+    キャンバス: ${layout.width}×${layout.height}px（${orientationLabel(layout.width, layout.height)}）
+
+    現在のレイアウト（参考。items[${index}] が書き換え対象）:
+    ${layoutToPromptJson(layout)}
+
+    書き換え対象の要素（items[${index}]）:
+    ${JSON.stringify(target, null, 2)}
+
+    修正指示:
+    ${instruction}
+  `;
+};
 
 const translateCommonRules = dedent`
   - translations には入力と同じ数・同じ順序で訳文を入れる。1 つの要素を分割したり、複数の要素をまとめたりしない。

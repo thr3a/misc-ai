@@ -1,6 +1,13 @@
 import { z } from 'zod';
-import { draftToEditor, hasJapanese, mapLayoutTexts } from './draft';
-import { draftSchema, type EditorLayout, type ModelId, translationSchema } from './types';
+import { draftItemToEditor, draftToEditor, hasJapanese, mapLayoutTexts } from './draft';
+import {
+  draftItemSchema,
+  draftSchema,
+  type EditorItem,
+  type EditorLayout,
+  type ModelId,
+  translationSchema
+} from './types';
 
 const postApi = async (body: Record<string, unknown>) => {
   const res = await fetch('/api/moss', {
@@ -26,6 +33,33 @@ export const generateLayout = async (
   const parsed = generateResponseSchema.safeParse(json);
   if (!parsed.success) return null;
   return draftToEditor(parsed.data.draft);
+};
+
+// 指示に従ってレイアウト全体（summary と全要素）を書き換える。失敗時は null
+export const reviseLayout = async (
+  model: ModelId,
+  layout: EditorLayout,
+  instruction: string
+): Promise<EditorLayout | null> => {
+  const json = await postApi({ mode: 'revise', model, layout, instruction });
+  const parsed = generateResponseSchema.safeParse(json);
+  if (!parsed.success) return null;
+  return draftToEditor(parsed.data.draft);
+};
+
+const reviseItemResponseSchema = z.object({ items: z.array(draftItemSchema) });
+
+// 指示に従って 1 要素だけを書き換え、置き換える要素の配列を返す（空なら削除）。失敗時は null
+export const reviseItem = async (
+  model: ModelId,
+  layout: EditorLayout,
+  uid: string,
+  instruction: string
+): Promise<EditorItem[] | null> => {
+  const json = await postApi({ mode: 'reviseItem', model, layout, uid, instruction });
+  const parsed = reviseItemResponseSchema.safeParse(json);
+  if (!parsed.success) return null;
+  return parsed.data.items.map(draftItemToEditor);
 };
 
 // 英訳時は日本語を含む文字列だけ、和訳時は英字が主体の文字列だけを翻訳対象にする

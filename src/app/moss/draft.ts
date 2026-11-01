@@ -6,6 +6,7 @@ import {
   draftSchema,
   type EditorItem,
   type EditorLayout,
+  type GeneratedItem,
   type GeneratedLayout,
   type ItemLabel
 } from './types';
@@ -166,6 +167,16 @@ export const editorToDraft = (layout: EditorLayout): Draft => {
   };
 };
 
+export const draftItemToEditor = (item: DraftItem): EditorItem => ({
+  uid: createUid(),
+  label: item.label,
+  caption: item.caption,
+  text: item.text ?? '',
+  bbox: { x1: item.bbox[0], y1: item.bbox[1], x2: item.bbox[2], y2: item.bbox[3] },
+  tags: item.tags ?? [],
+  palette: item.palette ?? []
+});
+
 export const draftToEditor = (draft: Draft): EditorLayout => ({
   width: draft.width,
   height: draft.height,
@@ -175,15 +186,7 @@ export const draftToEditor = (draft: Draft): EditorLayout => ({
     canvas: draft.summary.canvas ?? null,
     palette: draft.summary.palette ?? []
   },
-  items: draft.items.map((item) => ({
-    uid: createUid(),
-    label: item.label,
-    caption: item.caption,
-    text: item.text ?? '',
-    bbox: { x1: item.bbox[0], y1: item.bbox[1], x2: item.bbox[2], y2: item.bbox[3] },
-    tags: item.tags ?? [],
-    palette: item.palette ?? []
-  }))
+  items: draft.items.map(draftItemToEditor)
 });
 
 // 浮動小数点誤差対策。公式コンパイラの round(v, 9) 相当
@@ -301,19 +304,16 @@ export const parseDraftText = (text: string): ParseResult => {
 const cleanStrings = (values: string[]) => nonEmptyStrings(values);
 const cleanPalette = (values: string[]) => nonEmptyStrings(values).filter((v) => HEX_COLOR.test(v));
 
-// AI の生成結果を公式ドラフトに整える。bbox はキャンバス内に収め、壊れた要素は捨てる
-export const sanitizeGenerated = (generated: GeneratedLayout, width: number, height: number): Draft | null => {
-  const caption = generated.summary.caption.trim();
-  if (!caption) return null;
-
+// AI が返した要素をドラフトの要素に整える。全体の生成と個別リライトで共用する
+export const sanitizeItems = (generatedItems: GeneratedItem[], width: number, height: number): DraftItem[] => {
   // 0〜1 の正規化座標で返してきた場合はピクセルに直す
-  const normalized = generated.items.every((item) =>
+  const normalized = generatedItems.every((item) =>
     [item.bbox.x1, item.bbox.y1, item.bbox.x2, item.bbox.y2].every((v) => v >= 0 && v <= 1)
   );
   const scaleX = normalized ? width : 1;
   const scaleY = normalized ? height : 1;
 
-  const items = generated.items.flatMap((item): DraftItem[] => {
+  return generatedItems.flatMap((item): DraftItem[] => {
     const itemCaption = item.caption.trim();
     if (!itemCaption) return [];
     const xs = [item.bbox.x1 * scaleX, item.bbox.x2 * scaleX];
@@ -340,6 +340,13 @@ export const sanitizeGenerated = (generated: GeneratedLayout, width: number, hei
       }
     ];
   });
+};
+
+// AI の生成結果を公式ドラフトに整える。bbox はキャンバス内に収め、壊れた要素は捨てる
+export const sanitizeGenerated = (generated: GeneratedLayout, width: number, height: number): Draft | null => {
+  const caption = generated.summary.caption.trim();
+  if (!caption) return null;
+  const items = sanitizeItems(generated.items, width, height);
   if (items.length === 0) return null;
 
   const meta = cleanStrings(generated.summary.meta);
