@@ -10,7 +10,8 @@ const requestSchema = z.discriminatedUnion('mode', [
     mode: z.literal('expand'),
     model: z.enum(['openai', 'local']),
     prompt: z.string().min(1),
-    systemPrompt: z.string().min(1)
+    systemPrompt: z.string().min(1),
+    standalone: z.boolean().optional()
   }),
   z.object({
     mode: z.literal('revise'),
@@ -50,7 +51,11 @@ export async function POST(req: NextRequest) {
 
     const { text } = await generateText(
       data.mode === 'expand'
-        ? { model, instructions: buildExpandSystemPrompt(data.systemPrompt), prompt: data.prompt }
+        ? {
+            model,
+            instructions: data.standalone ? data.systemPrompt : buildExpandSystemPrompt(data.systemPrompt),
+            prompt: data.prompt
+          }
         : data.mode === 'revise'
           ? {
               model,

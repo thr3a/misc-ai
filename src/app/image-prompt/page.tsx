@@ -1,6 +1,18 @@
 'use client';
 
-import { Alert, Box, Button, Divider, Group, Radio, Select, SimpleGrid, Stack, Textarea } from '@mantine/core';
+import {
+  Alert,
+  Box,
+  Button,
+  Divider,
+  Group,
+  Radio,
+  SegmentedControl,
+  Select,
+  SimpleGrid,
+  Stack,
+  Textarea
+} from '@mantine/core';
 import { useState } from 'react';
 import { z } from 'zod';
 import { ButtonCopy } from '@/app/html-ui/ButtonCopy';
@@ -17,10 +29,16 @@ const MODELS = [
   { value: 'local', label: 'ローカルLLM' }
 ];
 
+const ASPECTS = [
+  { value: '正方形', label: '正方形' },
+  { value: '縦長', label: '縦長' },
+  { value: '横長', label: '横長' }
+];
+
 const responseSchema = z.object({ text: z.string() });
 
 // APIを呼び出して結果テキストを返す。失敗時は null
-const callApi = async (body: Record<string, string>) => {
+const callApi = async (body: Record<string, string | boolean>) => {
   const res = await fetch('/api/image-prompt', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -35,6 +53,7 @@ const callApi = async (body: Record<string, string>) => {
 export default function Page() {
   const [prompt, setPrompt] = useState('カフェで飲んでる少女');
   const [systemPromptId, setSystemPromptId] = useState(SYSTEM_PROMPTS[0].value);
+  const [aspect, setAspect] = useState(ASPECTS[0].value);
   const [model, setModel] = useState<ModelId>('openai');
   const [versions, setVersions] = useState<Version[]>([]);
   const [current, setCurrent] = useState(0);
@@ -59,7 +78,13 @@ export default function Page() {
     if (!prompt.trim()) return;
     setLoading(true);
     setError('');
-    const text = await callApi({ mode: 'expand', model, prompt, systemPrompt: systemPrompt.prompt });
+    const text = await callApi({
+      mode: 'expand',
+      model,
+      prompt: `${prompt}\n\n【画像の縦横比】${aspect}の画像`,
+      systemPrompt: systemPrompt.prompt,
+      standalone: systemPrompt.standalone ?? false
+    });
     if (!text) {
       setError('拡張に失敗しました');
       setLoading(false);
@@ -127,7 +152,8 @@ export default function Page() {
         value={prompt}
         onChange={(e) => setPrompt(e.currentTarget.value)}
       />
-      <Group justify='flex-end'>
+      <Group justify='space-between'>
+        <SegmentedControl data={ASPECTS} value={aspect} onChange={setAspect} />
         <Button onClick={handleExpand} loading={loading} disabled={!prompt.trim()}>
           拡張
         </Button>
