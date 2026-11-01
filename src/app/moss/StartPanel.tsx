@@ -82,8 +82,8 @@ const SizeSelector = ({
 // 開始画面。AI で生成 / JSON を読み込む / 空のキャンバスから作る / 作業ファイルを開く
 export const StartPanel = ({ model, onStart }: Props) => {
   const [tab, setTab] = useState<string | null>('ai');
-  const [ratio, setRatio] = useState<string>(SIZE_PRESETS[0].ratio);
-  const [orientation, setOrientation] = useState<Orientation>('landscape');
+  const [ratio, setRatio] = useState<string>('3:2');
+  const [orientation, setOrientation] = useState<Orientation>('portrait');
   const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
   const [json, setJson] = useState('');
   const [loading, setLoading] = useState(false);

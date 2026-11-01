@@ -60,6 +60,7 @@ import { parseWorkText, serializeWork } from './work';
 
 const MODELS = [
   { value: 'openai', label: 'OpenAI' },
+  { value: 'openai-sol', label: 'GPT-6.1-sol' },
   { value: 'openrouter', label: 'GLM-5.2' },
   { value: 'local', label: 'ローカルLLM' }
 ];
@@ -226,7 +227,7 @@ export default function Page() {
         label='AIモデル'
         value={model}
         onChange={(v) => {
-          if (v === 'openai' || v === 'openrouter' || v === 'local') setModel(v);
+          if (v === 'openai' || v === 'openai-sol' || v === 'openrouter' || v === 'local') setModel(v);
         }}
       >
         <Group mt='xs'>

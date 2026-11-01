@@ -15,14 +15,14 @@ import { generatedLayoutSchema, translationSchema } from '@/app/moss/types';
 const requestSchema = z.discriminatedUnion('mode', [
   z.object({
     mode: z.literal('generate'),
-    model: z.enum(['openai', 'openrouter', 'local']),
+    model: z.enum(['openai', 'openai-sol', 'openrouter', 'local']),
     prompt: z.string().min(1),
     width: z.number().int(),
     height: z.number().int()
   }),
   z.object({
     mode: z.literal('translate'),
-    model: z.enum(['openai', 'openrouter', 'local']),
+    model: z.enum(['openai', 'openai-sol', 'openrouter', 'local']),
     target: z.enum(['en', 'ja']),
     texts: z.array(z.string()).min(1)
   })
@@ -37,8 +37,9 @@ const openRouter = createOpenAI({
   apiKey: process.env.OPENROUTER_API_KEY || 'sk-dummy'
 });
 
-const selectModel = (model: 'openai' | 'openrouter' | 'local') => {
+const selectModel = (model: 'openai' | 'openai-sol' | 'openrouter' | 'local') => {
   if (model === 'openai') return openai('gpt-5.6-terra');
+  if (model === 'openai-sol') return openai('gpt-6.1-sol');
   if (model === 'openrouter') return openRouter.chat('z-ai/glm-5.2');
   return localOpenAI.chat('deep02-reasoning-minimum');
 };
@@ -62,14 +63,20 @@ export async function POST(req: NextRequest) {
     const data = validatedFields.data;
     const model = selectModel(data.model);
     const providerOptions =
-      data.model === 'openrouter'
+      data.model === 'openai' || data.model === 'openai-sol'
         ? {
             openai: {
-              reasoningEffort: 'none',
-              forceReasoning: false
+              reasoningEffort: 'medium'
             }
           }
-        : undefined;
+        : data.model === 'openrouter'
+          ? {
+              openai: {
+                reasoningEffort: 'none',
+                forceReasoning: false
+              }
+            }
+          : undefined;
 
     if (data.mode === 'generate') {
       if (!isPresetSize(data.width, data.height)) {
