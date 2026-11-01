@@ -8,8 +8,10 @@ const nextConfig = {
   poweredByHeader: false,
   output: 'standalone',
   allowedDevOrigins: ['192.168.16.12', 'ubuntu02.local'],
-  cacheComponents: true,
-  partialPrefetching: true
+  cacheComponents: false,
+  partialPrefetching: false,
+  agentRules: false,
+  reactCompiler: false
 };
 
 module.exports = nextConfig;
