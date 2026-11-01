@@ -7,7 +7,9 @@ const nextConfig = {
   },
   poweredByHeader: false,
   output: 'standalone',
-  allowedDevOrigins: ['192.168.16.12', 'ubuntu02.local']
+  allowedDevOrigins: ['192.168.16.12', 'ubuntu02.local'],
+  cacheComponents: true,
+  partialPrefetching: true
 };
 
 module.exports = nextConfig;
