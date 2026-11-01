@@ -9,9 +9,10 @@ import {
   FileButton,
   Grid,
   Group,
+  Input,
   List,
   Modal,
-  Radio,
+  SegmentedControl,
   Stack,
   Text,
   Tooltip
@@ -223,19 +224,15 @@ export default function Page() {
 
   return (
     <Stack>
-      <Radio.Group
-        label='AIモデル'
-        value={model}
-        onChange={(v) => {
-          if (v === 'openai' || v === 'openai-sol' || v === 'openrouter' || v === 'local') setModel(v);
-        }}
-      >
-        <Group mt='xs'>
-          {MODELS.map((m) => (
-            <Radio key={m.value} value={m.value} label={m.label} />
-          ))}
-        </Group>
-      </Radio.Group>
+      <Input.Wrapper label='AIモデル'>
+        <SegmentedControl
+          data={MODELS}
+          value={model}
+          onChange={(v) => {
+            if (v === 'openai' || v === 'openai-sol' || v === 'openrouter' || v === 'local') setModel(v);
+          }}
+        />
+      </Input.Wrapper>
 
       {!layout && <StartPanel model={model} onStart={handleStart} />}
 
