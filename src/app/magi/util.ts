@@ -38,8 +38,7 @@ export const MODEL_PROVIDER_MAP: Record<ModelKey, ProviderBinding> = {
   gemini: {
     provider: 'google',
     cheapModel: 'gemini-3.8-flash' satisfies GoogleResponsesModelId,
-    // 最新モデルが出ないのでしゃーない
-    productionModel: 'gemini-3.8-flash' satisfies GoogleResponsesModelId
+    productionModel: 'gemini-4-argon' satisfies GoogleResponsesModelId
   },
   gpt5: {
     provider: 'openai',
@@ -48,8 +47,8 @@ export const MODEL_PROVIDER_MAP: Record<ModelKey, ProviderBinding> = {
   },
   claude: {
     provider: 'anthropic',
-    cheapModel: 'claude-haiku-4.5',
-    productionModel: 'claude-opus-5'
+    cheapModel: 'claude-haiku-5.5',
+    productionModel: 'claude-opus-5.5'
   }
 };
 
