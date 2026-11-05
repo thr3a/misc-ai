@@ -54,6 +54,7 @@ builder:
 env:
   clear:
     API_KEY_PUBLIC: hogehoge
+    COMFY_BASE_URL: http://172.17.0.1:8189
   secret:
     - OPENAI_API_KEY
     - GOOGLE_GENERATIVE_AI_API_KEY
