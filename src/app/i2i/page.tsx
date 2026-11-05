@@ -19,6 +19,7 @@ import { useListState } from '@mantine/hooks';
 import { IconArrowLeft, IconArrowRight, IconPhotoPlus, IconTrash, IconWand } from '@tabler/icons-react';
 import { useEffect, useRef, useState } from 'react';
 import { resizeAndCompressImage } from '@/app/lib/resizeAndCompressImage';
+import { ReferenceLinks } from './ReferenceLinks';
 import { type I2iResponse, isAspectRatio, MAX_IMAGES, RESOLUTIONS, responseSchema } from './type';
 
 type InputItem = {
@@ -126,6 +127,10 @@ const Page = () => {
 
   return (
     <Stack gap='md'>
+      <Group justify='flex-end'>
+        <ReferenceLinks />
+      </Group>
+
       <Stack gap='xs'>
         <Group>
           <FileButton onChange={handleAdd} accept='image/*' multiple>
