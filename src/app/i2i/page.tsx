@@ -197,7 +197,7 @@ const Page = () => {
         withAsterisk
         autosize
         minRows={3}
-        placeholder='Picture 1の女性がPicture 2と同じポーズをする'
+        placeholder='Picture 1の女性がPicture 2と全く同じポーズをする。顔、髪型、服装はPicture 1のまま'
         value={prompt}
         onChange={(event) => setPrompt(event.currentTarget.value)}
       />
