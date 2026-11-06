@@ -8,6 +8,7 @@ import {
   FileButton,
   Group,
   Image,
+  NumberInput,
   Select,
   SimpleGrid,
   Stack,
@@ -48,6 +49,8 @@ const Page = () => {
   const [aspectRatio, setAspectRatio] = useState<string>('2:3');
   const [megapixels, setMegapixels] = useState<string>('4');
   const [upsample, setUpsample] = useState(true);
+  // 空文字のときはランダムシード
+  const [seed, setSeed] = useState<string | number>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<I2iResponse | null>(null);
@@ -105,6 +108,7 @@ const Page = () => {
       form.append('aspectRatio', aspectRatio);
       form.append('megapixels', megapixels);
       form.append('upsample', String(upsample));
+      if (seed !== '') form.append('seed', String(seed));
 
       const response = await fetch('/api/i2i', { method: 'POST', body: form });
       const payload: unknown = await response.json().catch(() => null);
@@ -126,7 +130,7 @@ const Page = () => {
   };
 
   return (
-    <Stack gap='md'>
+    <Stack gap='md' mb={'lg'}>
       <Group justify='flex-end'>
         <ReferenceLinks />
       </Group>
@@ -149,9 +153,6 @@ const Page = () => {
             {items.length} / {MAX_IMAGES} 枚
           </Text>
         </Group>
-        <Text size='sm' c='dimmed'>
-          Picture 1 が編集対象、Picture 2 以降は参照画像です。指示文の中で「Picture 2」のように画像を指定できます。
-        </Text>
       </Stack>
 
       {items.length > 0 && (
@@ -218,8 +219,19 @@ const Page = () => {
           allowDeselect={false}
           w={120}
         />
+        <NumberInput
+          label='シード'
+          placeholder='ランダム'
+          value={seed}
+          onChange={setSeed}
+          min={0}
+          max={Number.MAX_SAFE_INTEGER}
+          allowDecimal={false}
+          allowNegative={false}
+          w={200}
+        />
         <Switch
-          label='プロンプトアップサンプラーを使う'
+          label='プロンプトアップサンプラー'
           checked={upsample}
           onChange={(event) => setUpsample(event.currentTarget.checked)}
           mb='xs'
@@ -238,15 +250,17 @@ const Page = () => {
 
       {result && (
         <Stack gap='xs'>
-          <Text size='sm' c='dimmed'>
-            {result.width}×{result.height} / seed: {result.seed}
-          </Text>
+          <Group gap='xs'>
+            <Text size='sm' c='dimmed'>
+              seed: {result.seed}
+            </Text>
+            <Button size='compact-xs' variant='subtle' onClick={() => setSeed(result.seed)}>
+              このシードを使う
+            </Button>
+          </Group>
           {result.images.map((src, index) => (
             <Stack key={src.slice(-32)} gap='xs'>
               <Image src={src} fit='contain' mah={800} />
-              <Anchor href={src} download={`i2i_${result.seed}_${index}.png`} size='sm'>
-                ダウンロード
-              </Anchor>
             </Stack>
           ))}
         </Stack>

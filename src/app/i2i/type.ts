@@ -30,7 +30,9 @@ export const requestSchema = z.object({
     message: '未対応のアスペクト比です'
   }),
   megapixels: z.coerce.number().positive().max(MAX_MEGAPIXELS),
-  upsample: z.enum(['true', 'false']).transform((value) => value === 'true')
+  upsample: z.enum(['true', 'false']).transform((value) => value === 'true'),
+  // 未指定ならサーバー側でランダムに決める
+  seed: z.coerce.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional()
 });
 
 export const responseSchema = z.object({

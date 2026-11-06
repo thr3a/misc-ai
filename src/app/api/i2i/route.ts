@@ -41,7 +41,9 @@ export const POST = async (req: NextRequest) => {
     prompt: form.get('prompt'),
     aspectRatio: form.get('aspectRatio'),
     megapixels: form.get('megapixels'),
-    upsample: form.get('upsample')
+    upsample: form.get('upsample'),
+    // 空文字・未送信はシード未指定として扱う
+    seed: form.get('seed') || undefined
   });
   if (!parsed.success) {
     return Response.json(
@@ -52,7 +54,7 @@ export const POST = async (req: NextRequest) => {
 
   const { prompt, aspectRatio, megapixels, upsample } = parsed.data;
   const resolution = toResolution(aspectRatio, megapixels);
-  const seed = Math.floor(Math.random() * 2 ** 40);
+  const seed = parsed.data.seed ?? Math.floor(Math.random() * 2 ** 40);
   const images = await Promise.all(files.map(toInputImage));
 
   const client = createClient();
