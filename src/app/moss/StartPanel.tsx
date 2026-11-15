@@ -199,7 +199,7 @@ export const StartPanel = ({ model, onStart }: Props) => {
           <Stack>
             <Text size='sm' c='dimmed'>
               width / height 付きのドラフト JSON（bbox_coord_space: abs）を読み込みます。解像度は JSON
-              の値を使います。説明文は日本語に翻訳して読み込みます。
+              の値を使います（2MP の JSON は 1MP に縮小して読み込みます）。説明文は日本語に翻訳して読み込みます。
             </Text>
             <JsonInput
               label='ドラフト JSON'

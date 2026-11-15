@@ -31,11 +31,9 @@ import { useCallback, useMemo, useState } from 'react';
 import { downloadText, reviseItem, reviseLayout, translateLayout } from './api';
 import {
   checkDraft,
-  compileDraft,
   createItem,
   duplicateItem,
   editorToDraft,
-  formatDraft,
   LABEL_META,
   moveBbox,
   sizeLabel,
@@ -246,12 +244,7 @@ export default function Page() {
       setExportError(`ドラフトの検証に失敗しました\n${error}`);
       return;
     }
-    setOutput({
-      prompt: compileDraft(draft),
-      draftJson: formatDraft(draft),
-      width: draft.width,
-      height: draft.height
-    });
+    setOutput({ draft });
   };
 
   return (

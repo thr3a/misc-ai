@@ -12,12 +12,60 @@ import {
 } from './types';
 
 // 解像度プリセット（横長基準）。縦長は width と height を入れ替える
+// 編集は 1MP（width / height）で行い、出力時のみ 2MP（large）へ拡大できる
 export const SIZE_PRESETS = [
-  { ratio: '1:1', width: 1024, height: 1024 },
-  { ratio: '4:3', width: 1184, height: 880 },
-  { ratio: '3:2', width: 1248, height: 832 },
-  { ratio: '16:9', width: 1360, height: 768 }
+  { ratio: '1:1', width: 1024, height: 1024, large: { width: 1440, height: 1440 } },
+  { ratio: '4:3', width: 1184, height: 880, large: { width: 1680, height: 1248 } },
+  { ratio: '3:2', width: 1248, height: 832, large: { width: 1776, height: 1184 } },
+  { ratio: '16:9', width: 1360, height: 768, large: { width: 1920, height: 1088 } }
 ] as const;
+
+export type OutputScale = '1mp' | '2mp';
+
+export const isOutputScale = (v: string): v is OutputScale => v === '1mp' || v === '2mp';
+
+type Size = { width: number; height: number };
+
+// 向きを合わせたプリセットの 1MP / 2MP サイズを返す。width / height はどちらの解像度でもよい
+const findPresetPair = (width: number, height: number): { base: Size; large: Size } | null => {
+  for (const p of SIZE_PRESETS) {
+    if (p.width === width && p.height === height) return { base: { width, height }, large: p.large };
+    if (p.width === height && p.height === width)
+      return { base: { width, height }, large: { width: p.large.height, height: p.large.width } };
+    if (p.large.width === width && p.large.height === height)
+      return { base: { width: p.width, height: p.height }, large: { width, height } };
+    if (p.large.width === height && p.large.height === width)
+      return { base: { width: p.height, height: p.width }, large: { width, height } };
+  }
+  return null;
+};
+
+// 1MP のサイズに対応する出力サイズ
+export const outputSize = (width: number, height: number, scale: OutputScale): Size => {
+  const pair = findPresetPair(width, height);
+  if (!pair || scale === '1mp') return { width, height };
+  return pair.large;
+};
+
+// ドラフトの bbox を別の解像度へ拡大・縮小する。縦横は別々の倍率で変換し、キャンバス内に収める
+export const scaleDraft = (draft: Draft, width: number, height: number): Draft => {
+  if (draft.width === width && draft.height === height) return draft;
+  const sx = width / draft.width;
+  const sy = height / draft.height;
+  return {
+    ...draft,
+    width,
+    height,
+    items: draft.items.map((item) => {
+      const [x1, y1, x2, y2] = item.bbox;
+      const nx1 = clamp(Math.round(x1 * sx), 0, width - 1);
+      const ny1 = clamp(Math.round(y1 * sy), 0, height - 1);
+      const nx2 = clamp(Math.round(x2 * sx), nx1 + 1, width);
+      const ny2 = clamp(Math.round(y2 * sy), ny1 + 1, height);
+      return { ...item, bbox: [nx1, ny1, nx2, ny2] };
+    })
+  };
+};
 
 export type Orientation = 'landscape' | 'portrait';
 
@@ -29,6 +77,9 @@ export const resolveSize = (ratio: string, orientation: Orientation) => {
 
 export const isPresetSize = (width: number, height: number) =>
   SIZE_PRESETS.some((p) => (p.width === width && p.height === height) || (p.width === height && p.height === width));
+
+// 読み込み用。1MP に加えて 2MP のプリセットも受け付ける
+const isLoadableSize = (width: number, height: number) => findPresetPair(width, height) !== null;
 
 // 例: 1360×768 → 16:9（横長）、768×1360 → 9:16（縦長）
 export const sizeLabel = (width: number, height: number) => {
@@ -270,7 +321,7 @@ export const parseLooseJson = (text: string) => {
 
 export type ParseResult = { ok: true; draft: Draft } | { ok: false; error: string };
 
-// 読み込み用。width / height 付きのドラフトのみ受け付け、解像度はプリセットに限る
+// 読み込み用。width / height 付きのドラフトのみ受け付け、解像度はプリセットに限る。2MP は 1MP に縮小して返す
 export const parseDraftText = (text: string): ParseResult => {
   const parsed = parseLooseJson(text);
   if (!parsed) return { ok: false, error: 'JSON として解釈できません' };
@@ -286,8 +337,11 @@ export const parseDraftText = (text: string): ParseResult => {
     return { ok: false, error: 'caption だけのプロンプトです。Layout のドラフト JSON を貼り付けてください' };
   }
   if (isRecord(value) && typeof value.width === 'number' && typeof value.height === 'number') {
-    if (!isPresetSize(value.width, value.height)) {
-      const supported = SIZE_PRESETS.map((p) => `${p.width}×${p.height}`).join(', ');
+    if (!isLoadableSize(value.width, value.height)) {
+      const supported = SIZE_PRESETS.flatMap((p) => [
+        `${p.width}×${p.height}`,
+        `${p.large.width}×${p.large.height}`
+      ]).join(', ');
       return {
         ok: false,
         error: `${value.width}×${value.height} は対応していない解像度です（対応: ${supported} とその縦長）`
@@ -298,7 +352,9 @@ export const parseDraftText = (text: string): ParseResult => {
   if (error) return { ok: false, error: `ドラフトの形式が正しくありません\n${error}` };
   const result = draftSchema.safeParse(value);
   if (!result.success) return { ok: false, error: formatZodError(result.error) };
-  return { ok: true, draft: result.data };
+  const pair = findPresetPair(result.data.width, result.data.height);
+  if (!pair) return { ok: true, draft: result.data };
+  return { ok: true, draft: scaleDraft(result.data, pair.base.width, pair.base.height) };
 };
 
 const cleanStrings = (values: string[]) => nonEmptyStrings(values);

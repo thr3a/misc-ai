@@ -36,12 +36,9 @@ export type EditorLayout = {
   items: EditorItem[];
 };
 
-// 英訳・コンパイル後の出力
+// 英訳後の出力。1MP のドラフトを保持し、コンパイルは出力解像度に合わせて表示時に行う
 export type LayoutOutput = {
-  prompt: string;
-  draftJson: string;
-  width: number;
-  height: number;
+  draft: Draft;
 };
 
 const nonEmpty = z.string().refine((s) => s.trim() !== '', { message: '空文字は使えません' });
