@@ -1,12 +1,18 @@
 'use client';
 import { useObject } from '@ai-sdk/react';
-import { Button, Group, Select, Stack, Textarea, Title } from '@mantine/core';
+import { Button, Group, Input, SegmentedControl, Stack, Textarea, Title } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
 import { useState } from 'react';
 import dedent from 'ts-dedent';
 import { ButtonCopy } from '@/app/html-ui/ButtonCopy';
-import { scenarioPromptSchema } from './type';
+import { type Provider, providerSchema, scenarioPromptSchema } from './type';
 import { buildSystemPromptFromScenario } from './util';
+
+const PROVIDERS: { value: Provider; label: string }[] = [
+  { value: 'openai', label: 'OpenAI' },
+  { value: 'openrouter', label: 'GLM-5.2' },
+  { value: 'local', label: 'ローカルLLM' }
+];
 
 const DEFAULT_SITUATION = dedent`
   中世ヨーロッパ風のファンタジー世界 魔法学校の入学式の直後
@@ -21,7 +27,7 @@ export default function Page() {
     key: 'rp-prompt-situation',
     defaultValue: DEFAULT_SITUATION
   });
-  const [provider, setProvider] = useState<'local' | 'openrouter'>('openrouter');
+  const [provider, setProvider] = useState<Provider>('openrouter');
   const { object, submit, isLoading } = useObject({
     api: '/api/rp-prompt',
     schema: scenarioPromptSchema
@@ -39,15 +45,16 @@ export default function Page() {
 
   return (
     <Stack gap='lg'>
-      <Select
-        label='プロバイダー'
-        data={[
-          { value: 'local', label: 'ローカルLLM' },
-          { value: 'openrouter', label: 'OpenRouter' }
-        ]}
-        value={provider}
-        onChange={(value) => setProvider(value as 'local' | 'openrouter')}
-      />
+      <Input.Wrapper label='プロバイダー'>
+        <SegmentedControl
+          data={PROVIDERS}
+          value={provider}
+          onChange={(value) => {
+            const parsed = providerSchema.safeParse(value);
+            if (parsed.success) setProvider(parsed.data);
+          }}
+        />
+      </Input.Wrapper>
       <Textarea
         label='シチュエーションを記述してください'
         withAsterisk

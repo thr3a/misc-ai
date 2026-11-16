@@ -36,3 +36,6 @@ export type WorldSetting = z.infer<typeof worldSettingSchema>;
 export type HumanCharacterSetting = z.infer<typeof humanCharacterSchema>;
 export type AiCharacterSetting = z.infer<typeof aiCharacterSchema>;
 export type ScenarioPrompt = z.infer<typeof scenarioPromptSchema>;
+
+export const providerSchema = z.enum(['openai', 'openrouter', 'local']);
+export type Provider = z.infer<typeof providerSchema>;

@@ -1,14 +1,14 @@
-import { createOpenAI } from '@ai-sdk/openai';
+import { createOpenAI, openai } from '@ai-sdk/openai';
 import { createTextStreamResponse, Output, streamText, toTextStream } from 'ai';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { scenarioPromptSchema } from '@/app/rp-prompt/type';
+import { type Provider, providerSchema, scenarioPromptSchema } from '@/app/rp-prompt/type';
 import { systemPrompt } from '@/app/rp-prompt/util';
 
 // リクエストボディのスキーマ定義
 const requestSchema = z.object({
   situation: z.string().min(1, 'situation is required'),
-  provider: z.enum(['openrouter', 'local'])
+  provider: providerSchema
 });
 
 const localOpenAI = createOpenAI({
@@ -19,6 +19,12 @@ const openRouter = createOpenAI({
   baseURL: 'https://openrouter.ai/api/v1',
   apiKey: process.env.OPENROUTER_API_KEY || 'sk-dummy'
 });
+
+const selectModel = (provider: Provider) => {
+  if (provider === 'openai') return openai('gpt-5.6-terra');
+  if (provider === 'openrouter') return openRouter.chat('z-ai/glm-5.2');
+  return localOpenAI.chat('main');
+};
 
 export async function POST(req: NextRequest) {
   try {
@@ -42,7 +48,7 @@ export async function POST(req: NextRequest) {
 
     const isOpenRouter = provider === 'openrouter';
 
-    const model = isOpenRouter ? openRouter.chat('z-ai/glm-5.2') : localOpenAI.chat('main');
+    const model = selectModel(provider);
 
     const result = streamText({
       model,
@@ -53,7 +59,8 @@ export async function POST(req: NextRequest) {
       providerOptions: isOpenRouter
         ? {
             openai: {
-              reasoningEffort: 'none',
+              temperature: 1,
+              reasoningEffort: 'medium',
               forceReasoning: false
             }
           }
